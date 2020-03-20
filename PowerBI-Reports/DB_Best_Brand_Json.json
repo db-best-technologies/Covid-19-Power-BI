@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "name": "DBBest Logo Colors",
     "dataColors": ["#004da5", "#ff6016", "#7030A0", "#0073d6"],
@@ -5,3 +6,12 @@
     "foreground": "#000000",
     "tableAccent":"#002060"
 }
+=======
+{
+    "name": "DBBest Logo Colors",
+    "dataColors": ["#004da5", "#ff6016", "#7030A0", "0073d6"],
+    "background":"#FFFFFF",
+    "foreground": "#000000",
+    "tableAccent": "#002060"
+}
+>>>>>>> d1728c23480447460052448f1a0a2f03473ffdff
