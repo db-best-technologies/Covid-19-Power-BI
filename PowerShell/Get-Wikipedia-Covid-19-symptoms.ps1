@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/2019%E2%80%9320_coronavirus_pandemic
 Author: Bill Ramos, DB Best Technologies
 #>
 $OutputPathData = ".\Data-Files\WikiSymptoms.csv"
-$OutputPathMetadata = ".\Data-Files\WikiSymptomsMetadata.csv"
+$OutputPathMetadata = ".\Data-Files\WikiSymptomsMetadata.json"
 
 # Grab the Wikipedia page and load it into memory
 $WikiURL = "https://en.wikipedia.org/wiki/2019%E2%80%9320_coronavirus_pandemic"
@@ -26,19 +26,33 @@ foreach ($T in $Tables) {
     }
 }
 
+
 # If there was a match for the table, grab the metadata for the page and table to output as a CSV file
 if ($null -ne $SymTable) {
-    $metadata = @{
-        Caption            = $SymTable.caption.Trim()
-        WikiRef            = $SymTable.tbody.tr.th.sup.a.href.Trim()
-        WikiCite           = $SymTable.tbody.tr.th.sup.a.'#text'.Trim()
-        "Page URL"         = $WikiURL.Trim()
-        "Page Updated PST" = $HTML.BaseResponse.Headers.Date.LocalDateTime
-        "Page Updated UTC" = $HTML.BaseResponse.Headers.Date.UtcDateTime
+
+    # Gather the meta-data for the data source
+    <div role="region" aria-label="Signs and symptoms by percentage of cases" style="float:right; margin:0 0 0.5em 1em;">
+    <table class="wikitable" style="font-size:95%; margin:0;">
+ 
+    $Metadata = [ordered] @{
+        "Data File DB Best Git Relative Path" = $OutputPathData
+        "Data File DB Best Git Raw File URL"  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.csv"
+        "Metadata DB Best Git Raw File URL"   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.json"
+        "Source Web Site"                     = $HTML.BaseResponse.RequestMessage.RequestUri.AbsoluteUri
+        "Source Data URL"                     = $HTML.BaseResponse.RequestMessage.RequestUri.AbsoluteUri
+        "Source Authority"                    = $HTML.BaseResponse.RequestMessage.RequestUri.Authority
+        "Source Summary"                      = "WHO–China Joint Mission (16–24 February 2020). Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19) (PDF). World Health Organization. Retrieved 8 March 2020."
+        "Source Metadata Info"                = "https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf"
+        "Retrieved On UTC"                    = $HTML.BaseResponse.Headers.Date.UtcDateTime
+        "Retrieved On PST"                    = $HTML.BaseResponse.Headers.Date.LocalDateTime
+        "Wikipedia Page Reference"            = $SymTable.tbody.tr.th.sup.a.href.Trim()
+        "Wikipedia Page Cite"                 = $SymTable.tbody.tr.th.sup.a.'#text'.Trim()
+        "Wikipedia Page Div Role"             = "region"
+        "Wikipedia Page Div Label"            = "Signs and symptoms by percentage of cases"
     }
-    # Export the hash table as a Csv file. Need to cast the hash table as a [psCustomObject] to format the CSV file correctly
-    [psCustomObject]$metadata | Export-Csv -Path $OutputPathMetadata -NoTypeInformation
-    
+    # Write the Metadata out as a Json file
+    $Metadata | ConvertTo-Json | Out-File -FilePath $OutputPathMetadata
+
     # Look through all of the rows to get the column names with the <th> tag and the data rows with the <td> tag
     $Rows = @()
     foreach ($row in $SymTable.tbody.tr) {

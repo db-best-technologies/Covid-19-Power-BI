@@ -15,7 +15,7 @@ $HTML = Invoke-WebRequest -URI $HIFLDHospitalsURL
 $HTML.Content | Out-File -FilePath $OutputPathData
 
 # Gather the meta-data for the data source
-$Metadata = @{
+$Metadata = [ordered] @{
     "Data File DB Best Git Relative Path" = $OutputPathData
     "Data File DB Best Git Raw File URL" = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.csv"
     "Metadata DB Best Git Raw File URL" = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.json"

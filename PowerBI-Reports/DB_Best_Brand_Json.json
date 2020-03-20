@@ -1,0 +1,7 @@
+{
+    "name": "DBBest Logo Colors",
+    "dataColors": ["#004da5", "#ff6016", "#7030A0", "#0073d6"],
+    "background":"#FFFFFF",
+    "foreground": "#000000",
+    "tableAccent":"#002060"
+}
