@@ -1,0 +1,16 @@
+{
+  "Data File DB Best Git Relative Path": ".\\Data-Files\\Time_Series_19-Covid-Union.csv",
+  "Data File DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/Time_Series_19-Covid-Union.csv",
+  "Metadata DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/Time_Series_19-Covid-Union.json",
+  "Source Web Site": "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data",
+  "Source Data URL": {
+    "Recovered": "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv",
+    "Confirmed": "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv",
+    "Deaths": "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
+  },
+  "Source Authority": "raw.githubusercontent.com",
+  "Source Summary": "Combines the three time series files for Confirmed, Deaths, and Recovered into a single Csv file. Uses is the data repository for the 2019 Novel Coronavirus Visual Dashboard operated by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE). Also, Supported by ESRI Living Atlas Team and the Johns Hopkins University Applied Physics Lab (JHU APL)",
+  "Source Metadata Info": "https://github.com/CSSEGISandData/COVID-19",
+  "Retrieved On UTC": "2020-03-22T02:11:39Z",
+  "Retrieved On PST": "2020-03-21T19:11:39-07:00"
+}

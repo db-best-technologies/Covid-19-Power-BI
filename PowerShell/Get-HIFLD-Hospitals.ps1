@@ -14,6 +14,9 @@ $HIFLDHospitalsURL = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f
 $HTML = Invoke-WebRequest -URI $HIFLDHospitalsURL
 $HTML.Content | Out-File -FilePath $OutputPathData
 
+# Data source uses -999 as null value, so replace the string of ,-999 with ,
+((Get-Content -path $OutputPathData -Raw) -replace ',-999',',') | Set-Content -Path $OutputPathData
+
 # Gather the meta-data for the data source
 $Metadata = [ordered] @{
     "Data File DB Best Git Relative Path" = $OutputPathData
