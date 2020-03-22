@@ -16,6 +16,8 @@ $HTML.Content | Out-File -FilePath $OutputPathData
 
 # Data source uses -999 as null value, so replace the string of ,-999 with ,
 ((Get-Content -path $OutputPathData -Raw) -replace ',-999',',') | Set-Content -Path $OutputPathData
+# Data source also uses ,NOT AVAILABLE, as null string as well
+((Get-Content -path $OutputPathData -Raw) -replace ',NOT AVAILABLE',',') | Set-Content -Path $OutputPathData
 
 # Gather the meta-data for the data source
 $Metadata = [ordered] @{
