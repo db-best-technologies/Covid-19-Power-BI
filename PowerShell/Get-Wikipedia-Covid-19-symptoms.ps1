@@ -31,8 +31,8 @@ foreach ($T in $Tables) {
 if ($null -ne $SymTable) {
 
     # Gather the meta-data for the data source
-    <div role="region" aria-label="Signs and symptoms by percentage of cases" style="float:right; margin:0 0 0.5em 1em;">
-    <table class="wikitable" style="font-size:95%; margin:0;">
+    #<  div role="region" aria-label="Signs and symptoms by percentage of cases" style="float:right; margin:0 0 0.5em 1em;">
+    #   <table class="wikitable" style="font-size:95%; margin:0;">
  
     $Metadata = [ordered] @{
         "Data File DB Best Git Relative Path" = $OutputPathData

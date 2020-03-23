@@ -1,0 +1,12 @@
+{
+  "Data File DB Best Git Relative Path": ".\\Data-Files\\USPSTwoLetterStateAbbreviations.csv",
+  "Data File DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USPSTwoLetterStateAbbreviations.csv",
+  "Metadata DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USPSTwoLetterStateAbbreviationsMetadata.json",
+  "Source Web Site": "https://pe.usps.com/text/pub28/28apb.htm",
+  "Source Data URL": "https://pe.usps.com/text/pub28/28apb.htm",
+  "Source Authority": "pe.usps.com",
+  "Source Summary": "USPS Publication 28 - Postal Addressing Standards - Appendix B - Two–Letter State and Possession Abbreviations",
+  "Source Metadata Info": "https://pe.usps.com/text/pub28/28apb.htm",
+  "Retrieved On UTC": "2020-03-23T00:00:03Z",
+  "Retrieved On PST": "2020-03-22T17:00:03-07:00"
+}

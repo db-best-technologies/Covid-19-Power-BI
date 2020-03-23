@@ -57,4 +57,6 @@ $Metadata.'Source Summary' = "Combines the three time series files for Confirmed
 $Metadata.'Source Data URL' = $TimeSeries
 $Metadata | ConvertTo-Json | Out-File -FilePath $OutputUnionMetadataPath
 
-# $CsvData | Add=-MemberType -MemberType NoteProperty -Name "Case_Type" -Value $_.'Pro'
+$CsvData | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
+ 
+$CsvData | Add=-MemberType -MemberType NoteProperty -Name "Case_Type" -Value $_.'Pro'

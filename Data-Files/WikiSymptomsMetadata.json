@@ -2,11 +2,15 @@
   "Data File DB Best Git Relative Path": ".\\Data-Files\\WikiSymptoms.csv",
   "Data File DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.csv",
   "Metadata DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/HIFLDHospitals.json",
-  "Source Web Site": "https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals",
+  "Source Web Site": "https://en.wikipedia.org/wiki/2019%E2%80%9320_coronavirus_pandemic",
   "Source Data URL": "https://en.wikipedia.org/wiki/2019%E2%80%9320_coronavirus_pandemic",
   "Source Authority": "en.wikipedia.org",
-  "Source Summary": "This feature class/shapefile contains locations of Hospitals for 50 US states, Washington D.C., US territories of Puerto Rico, Guam, American Samoa, Northern Mariana Islands, Palau, and Virgin Islands. The dataset only includes hospital facilities based on data acquired from various state departments or federal sources which has been referenced in the SOURCE field.",
-  "Source Metadata Info": "https://services1.arcgis.com/Hp6G80Pky0om7QvQ/arcgis/rest/services/Hospitals_1/FeatureServer/0",
-  "Retrieved On UTC": "2020-03-20T21:02:52Z",
-  "Retrieved On PST": "2020-03-20T14:02:52-07:00"
+  "Source Summary": "WHO–China Joint Mission (16–24 February 2020). Report of the WHO-China Joint Mission on Coronavirus Disease 2019 (COVID-19) (PDF). World Health Organization. Retrieved 8 March 2020.",
+  "Source Metadata Info": "https://www.who.int/docs/default-source/coronaviruse/who-china-joint-mission-on-covid-19-final-report.pdf",
+  "Retrieved On UTC": "2020-03-23T00:48:37Z",
+  "Retrieved On PST": "2020-03-22T17:48:37-07:00",
+  "Wikipedia Page Reference": "#cite_note-WHO_report_28_February_2020-270",
+  "Wikipedia Page Cite": "[245]",
+  "Wikipedia Page Div Role": "region",
+  "Wikipedia Page Div Label": "Signs and symptoms by percentage of cases"
 }
