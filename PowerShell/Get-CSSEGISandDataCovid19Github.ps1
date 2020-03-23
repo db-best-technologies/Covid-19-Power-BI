@@ -58,7 +58,7 @@ $Metadata.'Source Data URL' = $TimeSeries
 $Metadata | ConvertTo-Json | Out-File -FilePath $OutputUnionMetadataPath
 
 
-$CsvData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+# Add new properties for splitting Provence/State
 $CsvData | Add-Member -MemberType NoteProperty -Name "US State Abbreviation" -Value $null
 $CsvData | Add-Member -MemberType NoteProperty -Name "State/Province/County" -Value $null
 
@@ -67,14 +67,26 @@ $HTMLStates = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/db-best-
 $HTMLStates.Content | Out-File -FilePath "C:\Temp\States.csv"
 $StatesCsv = Import-Csv -Path "C:\Temp\States.csv"
 
+$OutputUnionPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot.csv" -join ""
+$OutputUnionMetadataPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot-Metadata.json" -join ""
+$Metadata.'Data File DB Best Git Relative Path' = $OutputUnionPath
+$Metadata.'Data File DB Best Git Raw File URL' = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $OutputUnionPath -Leaf) -join ""
+$Metadata.'Metadata DB Best Git Raw File URL' = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $OutputUnionMetadataPath -Leaf) -join ""
+$Metadata.'Source Summary' = "Combines the three time series files for Confirmed, Deaths, and Recovered into a single Csv file. Uses is the data repository for the 2019 Novel Coronavirus Visual Dashboard operated by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE). Also, Supported by ESRI Living Atlas Team and the Johns Hopkins University Applied Physics Lab (JHU APL)"
+$Metadata.'Source Data URL' = $TimeSeries
+
+$Metadata | ConvertTo-Json | Out-File -FilePath $OutputUnionMetadataPath
+
 $Dates = @()
 $Columns= $CsvData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name |Where-Object { $_.ToString() -like "*/20"}
 foreach ( $column in $Columns){
-    $Dates += Get-Date -Date $column -Format "MM/dd/yyyy"
+    $Dates += Get-Date -Date $column -Format "MM/dd/yy"
 }
 $Dates = $Dates | Sort
+$DatesCount = $Dates.Count
 
-$UnionCsv = @()
+
+# $UnionCsv = @()
 $FlatUnionCsv = @()
 foreach ( $row in $CsvData) {
 
@@ -89,7 +101,6 @@ foreach ( $row in $CsvData) {
                 if ( $item.'State or Possession' -eq $State1) {
                     $State2 = $item.'Abbreviation'.Trim()
                 }
-                
             }
         } 
         else {
@@ -106,11 +117,40 @@ foreach ( $row in $CsvData) {
     
     $Row.'State/Province/County' = $State1
     $Row.'US State Abbreviation' = $State2
-    $UnionCsv += [PSCustomObject]$Row
+#    $UnionCsv += [PSCustomObject]$Row
 
-    
+    for( $Day=0; $Day -lt $DatesCount; $Day++){
+        $DateCol = [string]$Dates[$Day]
+        $DateKey = Get-Date -Date $DateCol -Format "M/d/yy"
+        $CumulativeValue = $Row.$DateKey
+        if ($null -eq $CumulativeValue){ $CumulativeValue = 0}  #Convert values to 0
+        if ( $Day -eq 0) { 
+            $CasesValue = $CumulativeValue
+        }
+        else {
+            $PriorDateCol = [string]$Dates[$Day-1]
+            $PriorDateKey = Get-Date -Date $PriorDateCol -Format "M/d/yy"
+            $CasesValue = $Row.$DateKey - $Row.$PriorDateKey
+        }
+        $DaysData = [PSCustomObject]@{
+            'Case_Type' = $Row.Case_Type
+            'Country/Region' = $Row.'Country/Region'
+            'State/Province/County' = $Row.'State/Province/County'
+            'US State Abbreviation' = $Row.'US State Abbreviation'
+            'Original Province/State' = $Row.'Province/State'
+            'Latitude' = $Row.Lat
+            'Longitude' = $Row.Long
+            'Recorded Date at 0000 GMT' = $DateCol
+            'Cumulative Cases' = $CumulativeValue
+            'Cases Reported for Day' = $CasesValue            
+        }
+        $FlatUnionCsv += $DaysData    
+    }
+    # Write out the day's total
+    $FlatUnionCsv | Export-Csv -Path $OutputUnionPath  -NoTypeInformation -Append
+    $FlatUnionCsv | Format-Table
+    $FlatUnionCsv = @()
 }
 
-$UnionCsv | Export-Csv -Path $OutputUnionPath  -NoTypeInformation 
-
+# $UnionCsv | Export-Csv -Path $OutputUnionPath  -NoTypeInformation
 

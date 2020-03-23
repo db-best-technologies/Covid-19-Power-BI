@@ -30,3 +30,5 @@ $Csv = $HTML.Content                                        # $Csv is now a long
 
 $Csv | Out-File -FilePath $OutputPathData                   # Writing out the file as a CSV file
 
+
+https://data.census.gov/cedsci/table?q=Populations%20and%20People&tid=ACSST1Y2018.S0101&hidePreview=true&g=0400000US01_0100000US.050000&t=Populations%20and%20People
