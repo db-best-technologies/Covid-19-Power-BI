@@ -4,8 +4,8 @@ Description: Downloads latest TimeLine file
 Author: Bill Ramos, DB Best Technologies
 #>
 $OutputPathRoot = ".\Data-Files\"
-$OutputUnionPath = $OutputPathRoot,"Time_Series_19-Covid-Union.csv" -join ""
-$OutputUnionMetadataPath =  $OutputPathRoot,"Time_Series_19-Covid-Union.json" -join ""
+$OutputUnionPath = $OutputPathRoot, "Time_Series_19-Covid-Union.csv" -join ""
+$OutputUnionMetadataPath = $OutputPathRoot, "Time_Series_19-Covid-Union.json" -join ""
 
 $TimeSeries = @{
     Confirmed = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
@@ -33,7 +33,7 @@ foreach ( $key in $TimeSeries.Keys) {
     $Metadata = [ordered] @{
         "Data File DB Best Git Relative Path" = $OutputPathData
         "Data File DB Best Git Raw File URL"  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $TimeSeries[$key] -Leaf) -join ""
-        "Metadata DB Best Git Raw File URL"   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/",(Split-Path -Path $TimeSeries[$key]  -LeafBase), ".json" -join ""
+        "Metadata DB Best Git Raw File URL"   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $TimeSeries[$key]  -LeafBase), ".json" -join ""
         "Source Web Site"                     = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
         "Source Data URL"                     = $HTML.BaseResponse.RequestMessage.RequestUri.AbsoluteUri
         "Source Authority"                    = $HTML.BaseResponse.RequestMessage.RequestUri.Authority
@@ -57,6 +57,60 @@ $Metadata.'Source Summary' = "Combines the three time series files for Confirmed
 $Metadata.'Source Data URL' = $TimeSeries
 $Metadata | ConvertTo-Json | Out-File -FilePath $OutputUnionMetadataPath
 
-$CsvData | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
- 
-$CsvData | Add=-MemberType -MemberType NoteProperty -Name "Case_Type" -Value $_.'Pro'
+
+$CsvData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+$CsvData | Add-Member -MemberType NoteProperty -Name "US State Abbreviation" -Value $null
+$CsvData | Add-Member -MemberType NoteProperty -Name "State/Province/County" -Value $null
+
+$HTMLStates = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USPSTwoLetterStateAbbreviations.csv"
+
+$HTMLStates.Content | Out-File -FilePath "C:\Temp\States.csv"
+$StatesCsv = Import-Csv -Path "C:\Temp\States.csv"
+
+$Dates = @()
+$Columns= $CsvData | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name |Where-Object { $_.ToString() -like "*/20"}
+foreach ( $column in $Columns){
+    $Dates += Get-Date -Date $column -Format "MM/dd/yyyy"
+}
+$Dates = $Dates | Sort
+
+$UnionCsv = @()
+$FlatUnionCsv = @()
+foreach ( $row in $CsvData) {
+
+    $State1 = $null
+    $State2 = $null
+    if ( $row.'Country/Region' -eq "US") {
+        $State1, $State2 = $row.'Province/State'.Split(",")
+        if ($null -ne $State1) {$State1 = $State1.Trim()}
+        if ($null -ne $State2) {$State2 = $State2.Trim()}
+        if ( $null -eq $State2 ) {
+            foreach ( $item in $StatesCsv) {
+                if ( $item.'State or Possession' -eq $State1) {
+                    $State2 = $item.'Abbreviation'.Trim()
+                }
+                
+            }
+        } 
+        else {
+            if ( $State2 -like "*D.C.*") {
+                $State1 = "District of Columbia"
+                $State2 = "DC"
+            }
+        }
+    }
+    else {
+        $State1 = $row.'Province/State'
+        $State2 = $null
+    }
+    
+    $Row.'State/Province/County' = $State1
+    $Row.'US State Abbreviation' = $State2
+    $UnionCsv += [PSCustomObject]$Row
+
+    
+}
+
+$UnionCsv | Export-Csv -Path $OutputUnionPath  -NoTypeInformation 
+
+
