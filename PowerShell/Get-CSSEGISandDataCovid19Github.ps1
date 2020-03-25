@@ -4,13 +4,12 @@ Description: Downloads latest TimeLine file
 Author: Bill Ramos, DB Best Technologies
 #>
 $OutputPathRoot = ".\Data-Files\"
-$OutputUnionPath = $OutputPathRoot, "Time_Series_19-Covid-Union.csv" -join ""
-$OutputUnionMetadataPath = $OutputPathRoot, "Time_Series_19-Covid-Union.json" -join ""
+$OutputUnionPath = $OutputPathRoot, "time_series_covid19_union_global.csv" -join ""
+$OutputUnionMetadataPath = $OutputPathRoot, "time_series_covid19_union_global.json" -join ""
 
 $TimeSeries = @{
-    Confirmed = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv"
-    Deaths    = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv"
-    Recovered = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv"
+    Confirmed = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
+    Deaths = "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv"
 }
 # Create and empty array for adding each of the three files as they are processed
 $CsvData = @()
@@ -67,8 +66,8 @@ $HTMLStates = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/db-best-
 $HTMLStates.Content | Out-File -FilePath "C:\Temp\States.csv"
 $StatesCsv = Import-Csv -Path "C:\Temp\States.csv"
 
-$OutputUnionPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot.csv" -join ""
-$OutputUnionMetadataPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot-Metadata.json" -join ""
+$OutputUnionPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot-global.csv" -join ""
+$OutputUnionMetadataPath = $OutputPathRoot, "Time_Series_19-Covid-Union-Unpivot-global.json" -join ""
 $Metadata.'Data File DB Best Git Relative Path' = $OutputUnionPath
 $Metadata.'Data File DB Best Git Raw File URL' = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $OutputUnionPath -Leaf) -join ""
 $Metadata.'Metadata DB Best Git Raw File URL' = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/", (Split-Path -Path $OutputUnionMetadataPath -Leaf) -join ""
