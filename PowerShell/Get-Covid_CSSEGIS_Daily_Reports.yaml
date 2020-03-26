@@ -6,7 +6,7 @@ Format:
     Attribute:                  Contains values of Confirmed,Deaths,Recovered,Active
     "Cumulative Value":         Uses the reported cumulative value for Confirmed,Deaths,Recovered,Active Note: Active values of 0 not computed correctly
     "Change Since Prior Day"    Uses difference of the prior day's Cumulative Value with today's Cumulative Value
-    "Period Ending Date GMT":   Uses date from files as a period ending 11:59:00 PM GMT
+    "Period Ending Date UTC":   Uses date from files as a period ending 11:59:00 PM GMT
     "FIPS county code":         Uses FIPS. Full list can be found at https://www.nrcs.usda.gov/wps/portal/nrcs/detail/national/home/?cid=nrcs143_013697. 
     "City or County":           Uses Admin2. County name doesn't directly match FIPS country code
     "Province or State":        Uses Province_State
