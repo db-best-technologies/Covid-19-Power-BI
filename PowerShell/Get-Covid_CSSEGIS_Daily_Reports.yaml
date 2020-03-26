@@ -1,0 +1,54 @@
+Title:          Get-Covid_CSSEGIS_Daily_Reports.ps1
+Description:    Create an CSV file based on all of the daily reports from https://github.com/CSSEGISandData/COVID-19 in the https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports folder.
+Author:         Bill Ramos, DB Best Technologies
+Result:         Union of all the data that is unpivoted for the measures in the report
+Format:
+    Attribute:                  Contains values of Confirmed,Deaths,Recovered,Active
+    "Cumulative Value":         Uses the reported cumulative value for Confirmed,Deaths,Recovered,Active Note: Active values of 0 not computed correctly
+    "Change Since Prior Day"    Uses difference of the prior day's Cumulative Value with today's Cumulative Value
+    "Period Ending Date GMT":   Uses date from files as a period ending 11:59:00 PM GMT
+    "FIPS county code":         Uses FIPS. Full list can be found at https://www.nrcs.usda.gov/wps/portal/nrcs/detail/national/home/?cid=nrcs143_013697. 
+    "City or County":           Uses Admin2. County name doesn't directly match FIPS country code
+    "Province or State":        Uses Province_State
+    "Country or Region":        Uses Country_Region
+    "Last Updated UTC":         Uses Last_Update. This doesn't always align to the file date due to updates/
+    Latitude:                   Uses Latitude or Lat columns.
+    Longitude:                  Uses Longitude or Long_ columns.
+    "Location Name Key":        Uses Combined_Key. Derived as non-blank values as Admin2,Province_State,Country_Region with embedded commas - for example "New York City, New York, US"
+RowLayout:      For each reporting line in the file, the unpivoted result includes lines for each attribute of Confirmed,Deaths,Recovered,Active
+    PriorRow:       36061,New York City,New York,US,3/24/20 23:45,40.7672726,-73.97152637,12305,99,0,0,"New York City, New York, US"
+    CurrentRow:     36061,New York City,New York,US,3/24/20 23:45,40.7672726,-73.97152637,14904,131,0,0,"New York City, New York, US"
+    Header:         Attribute,Cumulative Value,Change Since Prior Day,Period Ending Date GMT,FIPS county code,City or County,Province or State,Country or Region,Last Updated GMT,Latitude,Location Name Key
+    RowConfirmed:   Confirmed,14904,2599,3/22/2020,36061,New York City,New York,US,3/22/20 23:45,40.7672726,-73.97152637,9654,63,0,0,"New York City, New York, US"
+    RowDeaths:      Deaths,131,32,3/22/2020,36061,New York City,New York,US,3/22/20 23:45,40.7672726,-73.97152637,9654,63,0,0,"New York City, New York, US"
+    RowRecovered:   Recovered,0,0,3/22/2020,36061,New York City,New York,US,3/22/20 23:45,40.7672726,-73.97152637,9654,63,0,0,"New York City, New York, US"
+    RowActive:      Active,14773,2567,3/22/2020,36061,New York City,New York,US,3/22/20 23:45,40.7672726,-73.97152637,9654,63,0,0,"New York City, New York, US"
+RowNote:        If Attribute is not in the source file, a row is not included for the missing attribute. 
+Approach: 
+---
+- step: $id01
+    ParseHTML:  https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports
+    Reason:     Daily updates are made to the files
+    Challenge: 
+        - Zero:     Files prior to 03-10-2020 did not conclude Lat and Long columns. Also, the Last Update value time stamp has different formats. Assuming the times are UMT.
+          Header:   Province/State,Country/Region,Last Update,Confirmed,Deaths,Recovered
+          Example:  Hubei,Mainland China,2020-02-29T12:13:10,66337,2727,28993
+
+        - First:    Reports up earlier than 03-10-2020 inconsistently used Province/State to report US County name, State abbreviation. The word County followed the county name.
+          Header:   Province/State,Country/Region,Last Update,Confirmed,Deaths,Recovered,Latitude,Longitude
+          Example:  "New York County, NY",US,2020-03-09T17:13:16,19,0,0,40.7128,-74.0060
+
+        - Second:   Reports between 03-10-2020 and 03-21-2020 inclusive used Province/State to report just the US State name - no more county information
+          Header:   Province/State,Country/Region,Last Update,Confirmed,Deaths,Recovered,Latitude,Longitude
+          Example:  New York,US,2020-03-10T17:13:27,173,0,0,42.1657,-74.9481
+
+        - Third:    Reports after 03-21-202 now include new columns. The Admin2 column when available is just the name of the county. Also, column headers for Lat,Long_ changed
+          Header:   FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths,Recovered,Active,Combined_Key
+          Example:  36061,New York City,New York,US,3/22/20 23:45,40.7672726,-73.97152637,9654,63,0,0,"New York City, New York, US"
+    Meaning:    For the period of 03-10-2020 and 03-21-2020, data from CDC for counties in the US are missing.
+    Method:
+        - GetFiles:     Scrape table of files
+          Look for:     <table class="files js-navigation-container js-active-navigation-container " data-pjax>
+
+- step: $id02
+    - Parse
