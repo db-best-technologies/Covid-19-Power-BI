@@ -67,39 +67,39 @@ $CountryReplacements = [PSCustomObject]@{
     'US'             = "USA"
 }
 $CountyReplacements = [PSCustomObject]@{
-    'New York City' = "New York"
-    'Brockton' = "Plymonth"
+    'New York City'       = "New York"
+    'Brockton'            = "Plymonth"
     'Dukes and Nantucket' = "Nantucket"
-    'Unknown' = ""
-    'Soldotna' = "Kenai Peninsula"
-    'LeSeur' = "Le Sueur"
-    'Unassigned' = "Riverside"
+    'Unknown'             = ""
+    'Soldotna'            = "Kenai Peninsula"
+    'LeSeur'              = "Le Sueur"
+    'Unassigned'          = "Riverside"
 }
 $StateReplacements = [PSCustomObject]@{
-    'Chicago'                      = "Cook, IL"
-    '(From Diamond Princess)'      = "Diamond Princess Japan, TX"
-    'Grand Princess Cruise Ship'   = "Grand Princess Oakland, CA"
-    'Grand Princess'               = "Grand Princess Oakland, CA"
-    'Diamond Princess'             = "Diamond Princess Japan, TX"
-    'United States Virgin Islands' = "St. Croix, PR"
+    'Chicago'                                     = "Cook, IL"
+    '(From Diamond Princess)'                     = "Diamond Princess Japan, TX"
+    'Grand Princess Cruise Ship'                  = "Grand Princess Oakland, CA"
+    'Grand Princess'                              = "Grand Princess Oakland, CA"
+    'Diamond Princess'                            = "Diamond Princess Japan, TX"
+    'United States Virgin Islands'                = "St. Croix, PR"
     'Unassigned Location (From Diamond Princess)' = "Diamond Princess Japan, TX"
-    'Chicago, IL' = "Cook, IL"
-    'Lackland, TX' = "Bexar, TX"
-    'None' = ""
-    'US' = ""
-    'Recovered' = ""
-    'Wuhan Evacuee' = 'California'
+    'Chicago, IL'                                 = "Cook, IL"
+    'Lackland, TX'                                = "Bexar, TX"
+    'None'                                        = ""
+    'US'                                          = ""
+    'Recovered'                                   = ""
+    'Wuhan Evacuee'                               = 'California'
 }
 #Debug values
-# $f, $RowNumber = @(11, 52)
-# $f, $RowNumber = @( 30,60 )
-# $f, $RowNumber = @( 60, 296 )
-# $f, $RowNumber = @( 60, 298 )
-# $f, $RowNumber = @( 60, 486 )
-# $f, $RowNumber = @( 60, 1148 )
-# $f, $RowNumber = @( 60, 872 )
- # $f, $RowNumber = @( 63, 3230 )   # Recovered USA
- # $f, $RowNumber = @( 63, 3230 ) 
+# $file, $RowNumber = @(11, 52)
+# $file, $RowNumber = @( 30,60 )
+# $file, $RowNumber = @( 60, 296 )
+# $file, $RowNumber = @( 60, 298 )
+# $file, $RowNumber = @( 60, 486 )
+# $file, $RowNumber = @( 60, 1148 )
+# $file, $RowNumber = @( 60, 872 )
+# $file, $RowNumber = @( 63, 3230 )   # Recovered USA
+# $file, $RowNumber = @( 63, 3230 ) 
 
 
 $StatesCsv = Import-Csv -Path ($GitLocalRoot, $DataDir, "USPSTwoLetterStateAbbreviations.csv" -join "\")
@@ -174,10 +174,11 @@ Remove-Variable 'CSVLinks'
 
 $ErrorLog = @()
 $UnpivotedRows = @()
+$LocationTableRows = @()
 # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
-for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
-    $Csv = $SortedCSVs[$f]
-    Write-Host ("File # = ", $f, " of ", $SortedCSVs.count, " CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
+for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
+    $Csv = $SortedCSVs[$file]
+    Write-Host ("File # = ", $file, " of ", $SortedCSVs.count, " CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
     $Columns = $null
     $PriorDayColumns = $null
     if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
@@ -205,7 +206,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
         }
     }
     
-    $ActualColumns = $Csv.CSVData[$f].psobject.properties.name
+    $ActualColumns = $Csv.CSVData[$file].psobject.properties.name
 
     for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ ) {
         $Row = $Csv.CSVData[$RowNumber]
@@ -226,7 +227,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
             }            
             $Mapping.Add( $Key, $Value )
         }
-        Write-Host ("File # = ", $f, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
+        Write-Host ("File # = ", $file, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
         # Add Lat and long to mapping if missing
         if ( $null -eq $Mapping.Latitude ) { $Mapping.Add( 'Latitude', "") }
         if ( $null -eq $Mapping.Longitude ) { $Mapping.Add( 'Longitude', "") }
@@ -239,7 +240,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
                 $Mapping.'USA State County' = $Value   # Replace the old value with the new one
             }
             else { $Value = $Mapping.'USA State County' }
-            if ( $Value.Length -gt 0){ $Values += $Value }
+            if ( $Value.Length -gt 0) { $Values += $Value }
         }
             
         if ( $null -ne $Mapping.'Province or State' -and ($Mapping.'Province or State').Length -gt 0) {
@@ -276,7 +277,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
                             Message     = "Could not locate value: [$($Mapping.'Province or State')]"
                             Correction  = "Using original value"
                             CsvFileName = $Row.'CSV File Name'
-                            FileNumber  = $f
+                            FileNumber  = $file
                             RowNumber   = $RowNumber 
                             RowData     = $Row
                             Mapping     = [PSCustomObject]$Mapping
@@ -285,7 +286,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
                     }
                 }
             }
-            if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State'){
+            if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State') {
                 $Values += $Mapping.'Province or State'
             }
         }
@@ -311,11 +312,11 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
                 CsvFileName = $Row.'CSV File Name'
                 RowData     = $Row
                 Mapping     = [PSCustomObject]$Mapping
-                FileNumber  = $f
+                FileNumber  = $file
                 RowNumber   = $RowNumber 
             }
             $ErrorLog += $RowError
-            $Value = "Unknown row in file # $f and row number $RowNumber"
+            $Value = "Unknown row in file # $file and row number $RowNumber"
         }
 
         if ( $null -eq $Mapping.'Location Name Key' ) {
@@ -325,19 +326,72 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
         if ( $null -eq $Mapping.'FIPS USA State County code') { $Mapping.Add( 'FIPS USA State County code', "") }
         if ( $null -eq $Mapping.'USA State County') { $Mapping.Add( 'USA State County', "") }
 
-        $Mapping.Add("File Number", $f)
+        $Mapping.Add("File Number", $file)
         $Mapping.Add("Row Number", $RowNumber)
 
         # Now we have the base information for the location. We should really create a lookup file from this data as step 1
+        #       $LocationTableRows += [PSCustomObject]$Mapping
+
+        # Now unpivot attributes
+        $Mapping.Add("Attribute", "")
+        $Mapping.Add("Cumulative Value", "")
+
+        $Active = 0
+        $Mapping.Attribute = "Confirmed"
+        if ($Row.Confirmed -eq "" -and $null -ne $Row.Confirmed) {
+            $Mapping.'Cumulative Value' = 0    
+        }
+        else { $Mapping.'Cumulative Value' = $Row.Confirmed }
+        $UnpivotedRows += [PSCustomObject]$Mapping
+        $Active = $Mapping.'Cumulative Value'
+        
+        $Mapping.Attribute = "Deaths"
+        if ($Row.Deaths -eq "" -and $null -ne $Row.Deaths) {
+            $Mapping.'Cumulative Value' = 0    
+        }
+        else { $Mapping.'Cumulative Value' = $Row.Deaths }
+        $UnpivotedRows += [PSCustomObject]$Mapping
+        $Active -= $Mapping.'Cumulative Value'
+
+        $Mapping.Attribute = "Recovered"
+        if ($Row.Recovered -eq "" -and $null -ne $Row.Recovered) {
+            $Mapping.'Cumulative Value' = 0    
+        }
+        else { $Mapping.'Cumulative Value' = $Row.Recovered }
+        $UnpivotedRows += [PSCustomObject]$Mapping
+        $Active -= $Mapping.'Cumulative Value'
+
+        $Mapping.Attribute = "Active"
+        $Mapping.'Cumulative Value' = $Active
         $UnpivotedRows += [PSCustomObject]$Mapping
 
-        $RowNumber++
+    }
+    # Write the file based on chunking
+    if ($File -eq 0) {
+        $Part = "01.csv"
+        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") 
+    }
+    elseif ( $File -lt 61) {
+        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
+    }
+    elseif ($File -eq 61) {
+        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
+        $UnpivotedRows = @()
+    }
+    elseif ($File -eq 62) {
+        $Part = "02.csv"
+        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") 
+    }
+    elseif ( $File -gt 62) {
+        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
     }
 }
-$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
+
+
+# $LocationTableRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
 $ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
 
-
+<#
 
 
 $i = $SortedCSVs.Count - 1
@@ -362,3 +416,4 @@ $StatesCsv = Import-Csv -Path "C:\Temp\States.csv"
 
 
 
+#>
