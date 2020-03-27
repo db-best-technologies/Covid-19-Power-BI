@@ -1,0 +1,896 @@
+[
+  {
+    "Message": "Could not locate value: Chicago",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "01-24-2020.csv",
+    "RowData": {
+      "Province/State": "Chicago",
+      "Country/Region": "US",
+      "Last Update": "1/24/20 17:00",
+      "Confirmed": "1",
+      "Deaths": "",
+      "Recovered": "",
+      "CSV File Name": "01-24-2020.csv"
+    },
+    "Mapping": {
+      "Province or State": "Chicago",
+      "Country or Region": "US",
+      "CSV File Name": "01-24-2020.csv",
+      "Last Updated UTC": "2020-01-24T17:00:00"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "02-24-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-02-24T23:33:02",
+      "Confirmed": "36",
+      "Deaths": "0",
+      "Recovered": "0",
+      "CSV File Name": "02-24-2020.csv"
+    },
+    "Mapping": {
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Country or Region": "US",
+      "CSV File Name": "02-24-2020.csv",
+      "Last Updated UTC": "2020-02-24T23:33:02"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "02-26-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-02-26T20:03:06",
+      "Confirmed": "42",
+      "Deaths": "0",
+      "Recovered": "0",
+      "CSV File Name": "02-26-2020.csv"
+    },
+    "Mapping": {
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Country or Region": "US",
+      "CSV File Name": "02-26-2020.csv",
+      "Last Updated UTC": "2020-02-26T20:03:06"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "02-27-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-02-26T20:03:06",
+      "Confirmed": "42",
+      "Deaths": "0",
+      "Recovered": "0",
+      "CSV File Name": "02-27-2020.csv"
+    },
+    "Mapping": {
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Country or Region": "US",
+      "CSV File Name": "02-27-2020.csv",
+      "Last Updated UTC": "2020-02-26T20:03:06"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "02-29-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-02-28T20:03:03",
+      "Confirmed": "44",
+      "Deaths": "0",
+      "Recovered": "0",
+      "CSV File Name": "02-29-2020.csv"
+    },
+    "Mapping": {
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Country or Region": "US",
+      "CSV File Name": "02-29-2020.csv",
+      "Last Updated UTC": "2020-02-28T20:03:03"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-05-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-03-02T19:53:03",
+      "Confirmed": "45",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-05-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-02T19:53:03",
+      "Longitude": "139.6380",
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-05-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Unassigned Location (From Diamond Princess)",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-07-2020.csv",
+    "RowData": {
+      "Province/State": "Unassigned Location (From Diamond Princess)",
+      "Country/Region": "US",
+      "Last Update": "2020-03-02T19:53:03",
+      "Confirmed": "45",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-07-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-02T19:53:03",
+      "Longitude": "139.6380",
+      "Province or State": "Unassigned Location (From Diamond Princess)",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-07-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess Cruise Ship",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-09-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess Cruise Ship",
+      "Country/Region": "US",
+      "Last Update": "2020-03-07T01:33:02",
+      "Confirmed": "21",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-09-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-07T01:33:02",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess Cruise Ship",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-09-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-10-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "21",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-10-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-10-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-11-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "46",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-11-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "139.6380",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-11-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-11-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "21",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-11-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-11-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-12-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "46",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-12-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "139.6380",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-12-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-13-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-11T20:00:00",
+      "Confirmed": "46",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.638",
+      "CSV File Name": "03-13-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-11T20:00:00",
+      "Longitude": "139.638",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-13-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-14-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "46",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-14-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "139.6380",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-14-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-15-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "46",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.638",
+      "CSV File Name": "03-15-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "139.638",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-15-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-15-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-10T02:33:04",
+      "Confirmed": "21",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-15-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-10T02:33:04",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-15-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-17-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-17T20:53:02",
+      "Confirmed": "21",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-17-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-17T20:53:02",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-17-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-18-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-16T16:53:06",
+      "Confirmed": "47",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-18-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-16T16:53:06",
+      "Longitude": "139.6380",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-18-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: United States Virgin Islands",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-18-2020.csv",
+    "RowData": {
+      "Province/State": "United States Virgin Islands",
+      "Country/Region": "US",
+      "Last Update": "2020-03-18T00:13:13",
+      "Confirmed": "2",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "18.3500",
+      "Longitude": "-64.9330",
+      "CSV File Name": "03-18-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-18T00:13:13",
+      "Longitude": "-64.9330",
+      "Province or State": "United States Virgin Islands",
+      "Latitude": "18.3500",
+      "CSV File Name": "03-18-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-20-2020.csv",
+    "RowData": {
+      "Province/State": "Diamond Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-20T19:43:03",
+      "Confirmed": "49",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "35.4437",
+      "Longitude": "139.6380",
+      "CSV File Name": "03-20-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-20T19:43:03",
+      "Longitude": "139.6380",
+      "Province or State": "Diamond Princess",
+      "Latitude": "35.4437",
+      "CSV File Name": "03-20-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-20-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-20T19:43:03",
+      "Confirmed": "23",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-20-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-20T19:43:03",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-20-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: United States Virgin Islands",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-20-2020.csv",
+    "RowData": {
+      "Province/State": "United States Virgin Islands",
+      "Country/Region": "US",
+      "Last Update": "2020-03-20T00:43:02",
+      "Confirmed": "3",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "18.3358",
+      "Longitude": "-64.8963",
+      "CSV File Name": "03-20-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-20T00:43:02",
+      "Longitude": "-64.8963",
+      "Province or State": "United States Virgin Islands",
+      "Latitude": "18.3358",
+      "CSV File Name": "03-20-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: US",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-20-2020.csv",
+    "RowData": {
+      "Province/State": "US",
+      "Country/Region": "US",
+      "Last Update": "2020-03-20T22:43:03",
+      "Confirmed": "1",
+      "Deaths": "0",
+      "Recovered": "147",
+      "Latitude": "37.0902",
+      "Longitude": "-95.7129",
+      "CSV File Name": "03-20-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-20T22:43:03",
+      "Longitude": "-95.7129",
+      "Province or State": "US",
+      "Latitude": "37.0902",
+      "CSV File Name": "03-20-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-21-2020.csv",
+    "RowData": {
+      "Province/State": "Grand Princess",
+      "Country/Region": "US",
+      "Last Update": "2020-03-20T19:43:03",
+      "Confirmed": "23",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "37.6489",
+      "Longitude": "-122.6655",
+      "CSV File Name": "03-21-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-20T19:43:03",
+      "Longitude": "-122.6655",
+      "Province or State": "Grand Princess",
+      "Latitude": "37.6489",
+      "CSV File Name": "03-21-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: United States Virgin Islands",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-21-2020.csv",
+    "RowData": {
+      "Province/State": "United States Virgin Islands",
+      "Country/Region": "US",
+      "Last Update": "2020-03-21T17:43:03",
+      "Confirmed": "6",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Latitude": "18.3358",
+      "Longitude": "-64.8963",
+      "CSV File Name": "03-21-2020.csv"
+    },
+    "Mapping": {
+      "Last Updated UTC": "2020-03-21T17:43:03",
+      "Longitude": "-64.8963",
+      "Province or State": "United States Virgin Islands",
+      "Latitude": "18.3358",
+      "CSV File Name": "03-21-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-22-2020.csv",
+    "RowData": {
+      "FIPS": "99999",
+      "Admin2": "",
+      "Province_State": "Grand Princess",
+      "Country_Region": "US",
+      "Last_Update": "3/22/20 23:45",
+      "Lat": "0",
+      "Long_": "0",
+      "Confirmed": "30",
+      "Deaths": "1",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Grand Princess, US",
+      "CSV File Name": "03-22-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0",
+      "Last Updated UTC": "2020-03-22T23:45:00",
+      "USA State County": "",
+      "Province or State": "Grand Princess",
+      "Latitude": "0",
+      "Location Name Key": "Grand Princess, US",
+      "FIPS USA State County code": "99999",
+      "CSV File Name": "03-22-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-23-2020.csv",
+    "RowData": {
+      "FIPS": "88888",
+      "Admin2": "",
+      "Province_State": "Diamond Princess",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-23 23:19:34",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "49",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Diamond Princess, US",
+      "CSV File Name": "03-23-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-23T23:19:34",
+      "USA State County": "",
+      "Province or State": "Diamond Princess",
+      "Latitude": "0.0",
+      "Location Name Key": "Diamond Princess, US",
+      "FIPS USA State County code": "88888",
+      "CSV File Name": "03-23-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-23-2020.csv",
+    "RowData": {
+      "FIPS": "99999",
+      "Admin2": "",
+      "Province_State": "Grand Princess",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-23 23:19:34",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "28",
+      "Deaths": "1",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Grand Princess, US",
+      "CSV File Name": "03-23-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-23T23:19:34",
+      "USA State County": "",
+      "Province or State": "Grand Princess",
+      "Latitude": "0.0",
+      "Location Name Key": "Grand Princess, US",
+      "FIPS USA State County code": "99999",
+      "CSV File Name": "03-23-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Wuhan Evacuee",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-24-2020.csv",
+    "RowData": {
+      "FIPS": "",
+      "Admin2": "Unassigned",
+      "Province_State": "Wuhan Evacuee",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-24 23:37:31",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "4",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Unassigned, Wuhan Evacuee, US",
+      "CSV File Name": "03-24-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-24T23:37:31",
+      "USA State County": "Unassigned",
+      "Province or State": "Wuhan Evacuee",
+      "Latitude": "0.0",
+      "Location Name Key": "Unassigned, Wuhan Evacuee, US",
+      "FIPS USA State County code": "",
+      "CSV File Name": "03-24-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Diamond Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-25-2020.csv",
+    "RowData": {
+      "FIPS": "88888",
+      "Admin2": "",
+      "Province_State": "Diamond Princess",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-25 23:33:19",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "49",
+      "Deaths": "0",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Diamond Princess, US",
+      "CSV File Name": "03-25-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-25T23:33:19",
+      "USA State County": "",
+      "Province or State": "Diamond Princess",
+      "Latitude": "0.0",
+      "Location Name Key": "Diamond Princess, US",
+      "FIPS USA State County code": "88888",
+      "CSV File Name": "03-25-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Grand Princess",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-25-2020.csv",
+    "RowData": {
+      "FIPS": "99999",
+      "Admin2": "",
+      "Province_State": "Grand Princess",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-25 23:33:19",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "28",
+      "Deaths": "1",
+      "Recovered": "0",
+      "Active": "0",
+      "Combined_Key": "Grand Princess, US",
+      "CSV File Name": "03-25-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-25T23:33:19",
+      "USA State County": "",
+      "Province or State": "Grand Princess",
+      "Latitude": "0.0",
+      "Location Name Key": "Grand Princess, US",
+      "FIPS USA State County code": "99999",
+      "CSV File Name": "03-25-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Recovered",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-25-2020.csv",
+    "RowData": {
+      "FIPS": "",
+      "Admin2": "",
+      "Province_State": "Recovered",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-25 23:33:19",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "0",
+      "Deaths": "0",
+      "Recovered": "361",
+      "Active": "0",
+      "Combined_Key": "Recovered, US",
+      "CSV File Name": "03-25-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-25T23:33:19",
+      "USA State County": "",
+      "Province or State": "Recovered",
+      "Latitude": "0.0",
+      "Location Name Key": "Recovered, US",
+      "FIPS USA State County code": "",
+      "CSV File Name": "03-25-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  },
+  {
+    "Message": "Could not locate value: Recovered",
+    "Severity": "Lookup Failed",
+    "Correction": "Using original value",
+    "CsvFileName": "03-26-2020.csv",
+    "RowData": {
+      "FIPS": "",
+      "Admin2": "",
+      "Province_State": "Recovered",
+      "Country_Region": "US",
+      "Last_Update": "2020-03-26 23:48:35",
+      "Lat": "0.0",
+      "Long_": "0.0",
+      "Confirmed": "0",
+      "Deaths": "0",
+      "Recovered": "681",
+      "Active": "0",
+      "Combined_Key": "Recovered, US",
+      "CSV File Name": "03-26-2020.csv"
+    },
+    "Mapping": {
+      "Longitude": "0.0",
+      "Last Updated UTC": "2020-03-26T23:48:35",
+      "USA State County": "",
+      "Province or State": "Recovered",
+      "Latitude": "0.0",
+      "Location Name Key": "Recovered, US",
+      "FIPS USA State County code": "",
+      "CSV File Name": "03-26-2020.csv",
+      "Country or Region": "US"
+    },
+    "Process": "Looking up State name in StateLook table"
+  }
+]

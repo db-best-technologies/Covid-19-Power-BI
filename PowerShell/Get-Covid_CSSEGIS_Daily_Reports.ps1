@@ -1,3 +1,5 @@
+Import-Module powershell-yaml
+
 <#
 Title:       Get-Covid_CSSEGIS_Daily_Reports.ps1
 Description: Create an CSV file based on daily reports from in the https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports folder.
@@ -40,8 +42,8 @@ $ColumnHeaders = @{
     "03-22-2020" = @('FIPS', 'Admin2', 'Province_State', 'Country_Region', 'Last_Update', 'Lat', 'Long_', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'Combined_Key')
 }
 $NewColumnsMapping = [PSCustomObject]@{
-    'FIPS'           = "FIPS county code"
-    'Admin2'         = "County"
+    'FIPS'           = "FIPS USA State County code"
+    'Admin2'         = "USA State County"
     'Province_State' = "Province or State"
     'Country_Region' = "Country or Region"
     'Last_Update'    = "Last Updated UTC"
@@ -59,6 +61,45 @@ $NewColumnsMapping = [PSCustomObject]@{
     'Longitude'      = "Longitude"
     'CSV File Name'  = 'CSV File Name'
 }
+$CountryReplacements = [PSCustomObject]@{
+    'Mainland China' = "China"
+    'Korea, South'   = "South Korea"
+    'US'             = "USA"
+}
+$CountyReplacements = [PSCustomObject]@{
+    'New York City' = "New York"
+    'Brockton' = "Plymonth"
+    'Dukes and Nantucket' = "Nantucket"
+    'Unknown' = ""
+    'Soldotna' = "Kenai Peninsula"
+}
+$StateReplacements = [PSCustomObject]@{
+    'Chicago'                      = "Cook, IL"
+    '(From Diamond Princess)'      = "Diamond Princess Japan, TX"
+    'Grand Princess Cruise Ship'   = "Grand Princess Oakland, CA"
+    'Grand Princess'               = "Grand Princess Oakland, CA"
+    'Diamond Princess'             = "Diamond Princess Japan, TX"
+    'United States Virgin Islands' = "St. Croix, PR"
+    'Unassigned Location (From Diamond Princess)' = "Diamond Princess Japan, TX"
+    'Chicago, IL' = "Cook, IL"
+    'Lackland, TX' = "Bexar, TX"
+}
+#Debug values
+# $f, $RowNumber = @(11, 52)
+# $f, $RowNumber = @( 30,60 )
+# $f, $RowNumber = @( 60, 296 )
+# $f, $RowNumber = @( 60, 298 )
+# $f, $RowNumber = @( 60, 486 )
+# $f, $RowNumber = @( 60, 1148 )
+
+$StatesCsv = Import-Csv -Path ($GitLocalRoot, $DataDir, "USPSTwoLetterStateAbbreviations.csv" -join "\")
+$StateHash = @{ }
+for ($s = 0; $s -lt $StatesCsv.Length; $s++ ) {
+    $StateHash.Add( ($StatesCsv[$s]).'State or Possession', ($StatesCsv[$s]).'Abbreviation' )
+}
+$StateLook = [PSCustomObject]$StateHash
+
+
 $CSVLinks = @()
 $FilesInfo = @()
 foreach ( $Link in $WR.Links) {
@@ -120,44 +161,176 @@ $SortedCSVs[1].CsvData[0].'Country/Region', $SortedCSVs[1].CsvData[0].'CSV File 
 #Clear out the old array to release memory
 Remove-Variable 'CSVLinks'
 
+
+$ErrorLog = @()
+$UnpivotedRows = @()
 # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
-for ( $f = 0; $f -lt $SortedCSVs.count ) {
+for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
     $Csv = $SortedCSVs[$f]
-    Write-Host "CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime()
+    Write-Host ("File # = ", $f, " of ", $SortedCSVs.count, " CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
     $Columns = $null
-    if ( $Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
+    $PriorDayColumns = $null
+    if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
         $Columns = $ColumnHeaders.'01-22-2020'
+        if (  $Csv.PeriodEnding -ne '01-22-2020' ) {
+            $PriorDayColumns = $Columns
+        }
     }
-    elseif ( $Csv.PeriodEnding -gt [datetime]'03-10-2020' -and $Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
+    elseif ( [datetime]$Csv.PeriodEnding -gt [datetime]'03-10-2020' -and [datetime]$Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
         $Columns = $ColumnHeaders.'03-11-2020'
+        if ( $Csv.PeriodEnding -eq '03-11-2020' ) {
+            $PriorDayColumns = $ColumnHeaders.'01-22-2020'
+        }
+        else {
+            $PriorDayColumns = $Columns
+        }
     }
     else {
         $Columns = $ColumnHeaders.'03-22-2020'
+        if ($Csv.PeriodEnding -eq '03-22-2020') {
+            $PriorDayColumns = $ColumnHeaders.'03-11-2020'
+        }
+        else {
+            $PriorDayColumns = $ColumnHeaders.'03-22-2020'
+        }
     }
-    $ActualColumns = $Csv.CSVData[0].psobject.properties.name
-    foreach ( $Row in $Csv.CSVData ) {
+    
+    $ActualColumns = $Csv.CSVData[$f].psobject.properties.name
+
+    for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ ) {
+        $Row = $Csv.CSVData[$RowNumber]
         $Mapping = @{ }
+        #Map the base columns to the new column names for the row
         for ($i = 0; $i -lt $ActualColumns.Count; $i++ ) {
 
-            $Key =  $NewColumnsMapping.($ActualColumns[$i])
-            if ( $Key -eq "Last Updated UTC"){
+            $Key = $NewColumnsMapping.($ActualColumns[$i])
+            if ( "Confirmed,Deaths,Recovered,Active" -like "*$($Key)*" ) {
+                #Skip these for now
+                continue
+            }
+            if ( $Key -eq "Last Updated UTC") {
                 $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ss"
             }
-            else{
-                $Value =  $Row.($ActualColumns[$i])
-            }
-            
+            else {
+                $Value = $Row.($ActualColumns[$i])
+            }            
             $Mapping.Add( $Key, $Value )
         }
+        Write-Host ("File # = ", $f, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
+        # Add Lat and long to mapping if missing
+        if ( $null -eq $Mapping.Latitude ) { $Mapping.Add( 'Latitude', "") }
+        if ( $null -eq $Mapping.Longitude ) { $Mapping.Add( 'Longitude', "") }
         
+        # Create the Location Key Name
+        $Values = @()
+        if ( $null -ne $Mapping.'USA State County' -and ($Mapping.'USA State County').Length -gt 0 ) { 
+            if ( $null -ne $CountyReplacements.($Mapping.'USA State County') ) {
+                $Value = $CountyReplacements.($Mapping.'USA State County')
+                $Mapping.'USA State County' = $Value   # Replace the old value with the new one
+            }
+            else { $Value = $Mapping.'USA State County' }
+            if ( $Value.Length -gt 0){ $Values += $Value }
+        }
+            
+        if ( $null -ne $Mapping.'Province or State' -and ($Mapping.'Province or State').Length -gt 0) {
+            # First look for replacement in $StateReplacements
+            if ( $null -ne $StateReplacements.($Mapping.'Province or State')) {
+                $Value = $StateReplacements.($Mapping.'Province or State')
+                $Mapping.'Province or State' = $Value
+            }
+            if ( $Mapping.'Province or State' -like "*, *" ) {
+                # Looking at older file format. New format as the full state name
+                $County, $StateCode = ($Mapping.'Province or State').Split(", ")
+                if ($County -like "*County") { 
+                    $CountyValue = $County.Split(" County")[0]
+                }
+                else { $CountyValue = $County }
+                if ($null -eq $Mapping.'USA State County') {
+                    $Mapping.Add( 'USA State County', $CountyValue )  # Test $RowNumber = 1120
+                }
+                else { $Mapping.'USA State County' = $CountyValue }
+                $Values += $CountyValue
+                $Mapping.'Province or State' = $StateCode
+            }
+            else {
+                #Looks like an actual Province or State value, but for the US, need to use abbreviation
+                if ( $Mapping.'Country or Region' -eq "US" ) {
+                    $StateCode = $StateLook.($Mapping.'Province or State')
+                    if ( $null -ne $StateCode) {
+                        $Mapping.'Province or State' = $StateCode
+                    }
+                    else {
+                        $RowError = @{
+                            Severity    = "Lookup Failed"
+                            Process     = "Looking up State name in StateLook table"
+                            Message     = "Could not locate value: [$($Mapping.'Province or State')]"
+                            Correction  = "Using original value"
+                            CsvFileName = $Row.'CSV File Name'
+                            FileNumber  = $f
+                            RowNumber   = $RowNumber 
+                            RowData     = $Row
+                            Mapping     = [PSCustomObject]$Mapping
+                        }
+                        $ErrorLog += $RowError
+                    }
+                }
+            }
+            $Values += $Mapping.'Province or State'
+        }
+        if ( $null -eq $Mapping.'Country or Region') { $Mapping.Add( 'Country or Region', "") }
+        if ( $null -ne $Mapping.'Country or Region' -and ($Mapping.'Country or Region').Length -gt 0 ) {
+            if ( $null -ne $CountryReplacements.($Mapping.'Country or Region')) {
+                $Value = $CountryReplacements.($Mapping.'Country or Region')
+                $Mapping.'Country or Region' = $Value
+            }
+            else { $Value = $Mapping.'Country or Region' }
+            $Values += $Value
+        }
 
+        if ( $null -ne $Values) {
+            $Value = if ($Values.Count -gt 1 ) { $Values -join ", " }else { $Values[0] }
+        } 
+        else {
+            $RowError = @{
+                Severity    = "Empty Value"
+                Process     = "Create Location Key Name"
+                Message     = "No values for country, state, country"
+                Correction  = "Assigning null value to the row's [Location Name Key] value"
+                CsvFileName = $Row.'CSV File Name'
+                RowData     = $Row
+                Mapping     = [PSCustomObject]$Mapping
+                FileNumber  = $f
+                RowNumber   = $RowNumber 
+            }
+            $ErrorLog += $RowError
+            $Value = "Unknown row in file # $f and row number $RowNumber"
+        }
+
+        if ( $null -eq $Mapping.'Location Name Key' ) {
+            $Mapping.Add( 'Location Name Key', $Value )
+        }
+        else { $Mapping.'Location Name Key' = $Value }
+        if ( $null -eq $Mapping.'FIPS USA State County code') { $Mapping.Add( 'FIPS USA State County code', "") }
+        if ( $null -eq $Mapping.'USA State County') { $Mapping.Add( 'USA State County', "") }
+
+        $Mapping.Add("File Number", $f)
+        $Mapping.Add("Row Number", $RowNumber)
+
+        # Now we have the base information for the location. We should really create a lookup file from this data as step 1
+        $UnpivotedRows += [PSCustomObject]$Mapping
+
+        $RowNumber++
     }
-    break
 }
+$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
+$ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
+
+
+
 
 $i = $SortedCSVs.Count - 1
-$Today = $SortedCSVs[$i].CSVData | Where-Object { $_.Combined_Key -eq "Clark, Nevada, US" }
-$Yesterday = $SortedCSVs[$i - 1].CSVData | Where-Object { $_.Combined_Key -eq "Clark, Nevada, US" }
+$Today = $SortedCSVs[63].CSVData | Where-Object { $_.Combined_Key -eq "Korea, South" }
+$Yesterday = $SortedCSVs[62].CSVData | Where-Object { $_.Combined_Key -eq "Korea, South" }
 $Today.Active = $Today.Confirmed - $Today.Deaths - $Today.Recovered
 $Today.Confirmed, $Today.Deaths, $Today.Recovered, $Today.Active
 $Yesterday.Confirmed, $Yesterday.Deaths, $Yesterday.Recovered, $Yesterday.Active
