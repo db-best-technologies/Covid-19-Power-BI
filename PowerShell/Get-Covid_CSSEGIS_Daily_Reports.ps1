@@ -72,6 +72,8 @@ $CountyReplacements = [PSCustomObject]@{
     'Dukes and Nantucket' = "Nantucket"
     'Unknown' = ""
     'Soldotna' = "Kenai Peninsula"
+    'LeSeur' = "Le Sueur"
+    'Unassigned' = "Riverside"
 }
 $StateReplacements = [PSCustomObject]@{
     'Chicago'                      = "Cook, IL"
@@ -83,6 +85,10 @@ $StateReplacements = [PSCustomObject]@{
     'Unassigned Location (From Diamond Princess)' = "Diamond Princess Japan, TX"
     'Chicago, IL' = "Cook, IL"
     'Lackland, TX' = "Bexar, TX"
+    'None' = ""
+    'US' = ""
+    'Recovered' = ""
+    'Wuhan Evacuee' = 'California'
 }
 #Debug values
 # $f, $RowNumber = @(11, 52)
@@ -91,6 +97,10 @@ $StateReplacements = [PSCustomObject]@{
 # $f, $RowNumber = @( 60, 298 )
 # $f, $RowNumber = @( 60, 486 )
 # $f, $RowNumber = @( 60, 1148 )
+# $f, $RowNumber = @( 60, 872 )
+ # $f, $RowNumber = @( 63, 3230 )   # Recovered USA
+ # $f, $RowNumber = @( 63, 3230 ) 
+
 
 $StatesCsv = Import-Csv -Path ($GitLocalRoot, $DataDir, "USPSTwoLetterStateAbbreviations.csv" -join "\")
 $StateHash = @{ }
@@ -254,7 +264,7 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
             }
             else {
                 #Looks like an actual Province or State value, but for the US, need to use abbreviation
-                if ( $Mapping.'Country or Region' -eq "US" ) {
+                if ( $Mapping.'Country or Region' -eq "US" -and $Mapping.'Province or State' -ne "") {
                     $StateCode = $StateLook.($Mapping.'Province or State')
                     if ( $null -ne $StateCode) {
                         $Mapping.'Province or State' = $StateCode
@@ -275,7 +285,9 @@ for ( $f = 0; $f -lt $SortedCSVs.count; $f++) {
                     }
                 }
             }
-            $Values += $Mapping.'Province or State'
+            if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State'){
+                $Values += $Mapping.'Province or State'
+            }
         }
         if ( $null -eq $Mapping.'Country or Region') { $Mapping.Add( 'Country or Region', "") }
         if ( $null -ne $Mapping.'Country or Region' -and ($Mapping.'Country or Region').Length -gt 0 ) {
