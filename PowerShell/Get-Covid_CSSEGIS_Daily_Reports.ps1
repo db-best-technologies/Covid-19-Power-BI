@@ -112,6 +112,7 @@ $StateLook = [PSCustomObject]$StateHash
 
 $CSVLinks = @()
 $FilesInfo = @()
+$ErrorLog = @()
 foreach ( $Link in $WR.Links) {
     if ( $Link.href -like "*2020.csv" ) {
 
@@ -132,8 +133,35 @@ foreach ( $Link in $WR.Links) {
 
         # Retrieve the GitHub page for the CSV file to pull out the date for the last check-in
         $WR_Page = Invoke-WebRequest -Uri $CSVPageURL
-        $DateLastModifiedUTC = $WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=")[0]
-        if ($DateLastModifiedUTC -like '"*') { $DateLastModifiedUTC = $DateLastModifiedUTC.Split('"')[1] }
+        
+        if ( $null -eq ($WR_Page.Content.split("<relative-time datetime=")[1]) ) {
+            $RowError = @{
+                Severity    = "Table not found"
+                Process     = "Retrieving CSV web page URL [$($CSVPageURL)]"
+                Message     = "Could not find table for [$($CSVFileName)]"
+                Correction  = "Using the CSV File as the date"
+                CsvFileName = $CSVFileName
+                CSVPageURL  = $CSVPageURL
+            }
+            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format ""yyyy-MM-ddTHH:mm:ss""
+            $ErrorLog += $RowError
+        }
+        elseif ( $null -eq ($WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=") ) ) {
+            $RowError = @{
+                Severity    = "Table not found"
+                Process     = "Retrieving CSV web page URL [$($CSVPageURL)]"
+                Message     = "Could not find table for [$($CSVFileName)]"
+                Correction  = "Using the CSV File as the date"
+                CsvFileName = $CSVFileName
+                CSVPageURL  = $CSVPageURL
+            }
+            $ErrorLog += $RowError
+            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format ""yyyy-MM-ddTHH:mm:ss""            
+        }
+        else {
+            $DateLastModifiedUTC = $WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=")[0]
+            if ($DateLastModifiedUTC -like '"*') { $DateLastModifiedUTC = $DateLastModifiedUTC.Split('"')[1] }
+        }
 
         # Add all the file name to the records so they can be related to new Daily-Files-Metadata.csv for data lineage
         $PeriodEnding = $CSVFileName.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
@@ -171,8 +199,7 @@ $SortedCSVs[1].CsvData[0].'Country/Region', $SortedCSVs[1].CsvData[0].'CSV File 
 #Clear out the old array to release memory
 Remove-Variable 'CSVLinks'
 
-
-$ErrorLog = @()
+# Start the process of reading each of the file records and the rows within them
 $UnpivotedRows = @()
 $LocationTableRows = @()
 # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
@@ -330,18 +357,18 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
         $Mapping.Add("Row Number", $RowNumber)
 
         # Now we have the base information for the location. We should really create a lookup file from this data as step 1
-        #       $LocationTableRows += [PSCustomObject]$Mapping
+        $LocationTableRows += [PSCustomObject]$Mapping
 
         # Now unpivot attributes
         $Mapping.Add("Attribute", "")
         $Mapping.Add("Cumulative Value", "")
+        $Mapping.Add("Change Since Prior Day", "")
 
         $Active = 0
         $Mapping.Attribute = "Confirmed"
         if ($Row.Confirmed -eq "" -and $null -ne $Row.Confirmed) {
             $Mapping.'Cumulative Value' = 0    
         }
-        else { $Mapping.'Cumulative Value' = $Row.Confirmed }
         $UnpivotedRows += [PSCustomObject]$Mapping
         $Active = $Mapping.'Cumulative Value'
         
@@ -366,29 +393,10 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
         $UnpivotedRows += [PSCustomObject]$Mapping
 
     }
-    # Write the file based on chunking
-    if ($File -eq 0) {
-        $Part = "01.csv"
-        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") 
-    }
-    elseif ( $File -lt 61) {
-        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
-    }
-    elseif ($File -eq 61) {
-        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
-        $UnpivotedRows = @()
-    }
-    elseif ($File -eq 62) {
-        $Part = "02.csv"
-        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") 
-    }
-    elseif ( $File -gt 62) {
-        $UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, "-", $Part -join "") -Append
-    }
 }
 
-
-# $LocationTableRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
+$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile,".csv" -join "") 
+$LocationTableRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
 $ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
 
 <#
