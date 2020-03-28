@@ -143,7 +143,7 @@ foreach ( $Link in $WR.Links) {
                 CsvFileName = $CSVFileName
                 CSVPageURL  = $CSVPageURL
             }
-            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format ""yyyy-MM-ddTHH:mm:ss""
+            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format "yyyy-MM-ddTHH:mm:ssZ"
             $ErrorLog += $RowError
         }
         elseif ( $null -eq ($WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=") ) ) {
@@ -156,7 +156,7 @@ foreach ( $Link in $WR.Links) {
                 CSVPageURL  = $CSVPageURL
             }
             $ErrorLog += $RowError
-            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format ""yyyy-MM-ddTHH:mm:ss""            
+            $DateLastModifiedUTC = Get-Date -Date $CSVFileName.Split(".")[0] -Format "yyyy-MM-ddTHH:mm:ssZ"            
         }
         else {
             $DateLastModifiedUTC = $WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=")[0]
@@ -202,8 +202,11 @@ Remove-Variable 'CSVLinks'
 # Start the process of reading each of the file records and the rows within them
 $UnpivotedRows = @()
 $LocationTableRows = @()
+
+$File, $RowNumber = 65, 527
 # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
 for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
+
     $Csv = $SortedCSVs[$file]
     Write-Host ("File # = ", $file, " of ", $SortedCSVs.count, " CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
     $Columns = $null
@@ -247,7 +250,7 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
                 continue
             }
             if ( $Key -eq "Last Updated UTC") {
-                $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ss"
+                $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ssZ"
             }
             else {
                 $Value = $Row.($ActualColumns[$i])
@@ -369,7 +372,10 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
         if ($Row.Confirmed -eq "" -and $null -ne $Row.Confirmed) {
             $Mapping.'Cumulative Value' = 0    
         }
+        else { $Mapping.'Cumulative Value' = $Row.Confirmed }
+        
         $UnpivotedRows += [PSCustomObject]$Mapping
+
         $Active = $Mapping.'Cumulative Value'
         
         $Mapping.Attribute = "Deaths"
@@ -378,6 +384,7 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
         }
         else { $Mapping.'Cumulative Value' = $Row.Deaths }
         $UnpivotedRows += [PSCustomObject]$Mapping
+
         $Active -= $Mapping.'Cumulative Value'
 
         $Mapping.Attribute = "Recovered"
@@ -386,6 +393,7 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
         }
         else { $Mapping.'Cumulative Value' = $Row.Recovered }
         $UnpivotedRows += [PSCustomObject]$Mapping
+
         $Active -= $Mapping.'Cumulative Value'
 
         $Mapping.Attribute = "Active"
@@ -395,7 +403,7 @@ for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
     }
 }
 
-$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile,".csv" -join "") 
+$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile,".csv" -join "") -NoTypeInformation
 $LocationTableRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
 $ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
 
