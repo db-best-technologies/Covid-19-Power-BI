@@ -15,19 +15,16 @@ $GitSourceProject = "COVID-19"
 $GitBranch = "master"
 $GitRawRoot = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/"
 $TempDataLocation = $GitLocalRoot, "\", 'Working Files\' -join ""
-
-
-
 $LocalDataFile = $GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, ".csv" -join ""
-$LocalMetadataFile = $GitLocalRoot, "\", $DataDir, "\", $LeafDataFile, ".csv" -join ""
 
 $URLs = @{
-    URLReports            = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports"
-    SourceWebSite         = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
-    SourceMetadataInfo    = "https://github.com/CSSEGISandData/COVID-19"
-    DBBestDerivedData     = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
-    DBBestDerivedMetadata = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
-    GitHubRoot            = "https://github"
+    URLReports              = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports"
+    SourceWebSite           = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
+    SourceMetadataInfo      = "https://github.com/CSSEGISandData/COVID-19"
+    DBBestDerivedData       = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
+    DBBestDerivedMetadata   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
+    GitHubRoot              = "https://github"
+    GitRawDataFilesMetadata = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", "Daily-Files-Metadata.csv" -join ""
 }
 
 $WR = Invoke-WebRequest -Uri $URLs.URLReports
@@ -70,10 +67,10 @@ $CountyReplacements = [PSCustomObject]@{
     'New York City'       = "New York"
     'Brockton'            = "Plymonth"
     'Dukes and Nantucket' = "Nantucket"
-    'Unknown'             = ""
+#    'Unknown'             = ""
     'Soldotna'            = "Kenai Peninsula"
     'LeSeur'              = "Le Sueur"
-    'Unassigned'          = "Riverside"
+#    'Unassigned'          = ""
 }
 $StateReplacements = [PSCustomObject]@{
     'Chicago'                                     = "Cook, IL"
@@ -101,6 +98,7 @@ $StateReplacements = [PSCustomObject]@{
 # $file, $RowNumber = @( 63, 3230 )   # Recovered USA
 # $file, $RowNumber = @( 63, 3230 ) 
 
+$ErrorLog = @()
 
 $StatesCsv = Import-Csv -Path ($GitLocalRoot, $DataDir, "USPSTwoLetterStateAbbreviations.csv" -join "\")
 $StateHash = @{ }
@@ -110,30 +108,125 @@ for ($s = 0; $s -lt $StatesCsv.Length; $s++ ) {
 $StateLook = [PSCustomObject]$StateHash
 
 
-$CSVLinks = @()
-$FilesInfo = @()
-$ErrorLog = @()
+#Check to see files have changes since the last download
+$LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join ""
+#$TempDataFilesMetadata = $GitLocalRoot, "\", $TempDataLocation, "Daily-Files-Metadata.csv" -join ""
+$WebRequest = $null
+$WebRequest = Invoke-WebRequest -Uri $URLs.GitRawDataFilesMetadata
+if ( $null -ne $WebRequest ) {
+    #Download the Metadata file from our GitHob project
+    $WebRequest.Content | Out-File -FilePath $LocalDataFilesMetadata
+    $FilesInfo = Import-Csv -Path $LocalDataFilesMetadata | Sort-Object  PeriodEnding
+}
+else {
+    $RowError = @{
+        Severity   = "Metadata File not found"
+        Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
+        Message    = "File not dound"
+        Correction = "Download all files"
+    }
+    $ErrorLog += $RowError
+    $RowError
+}
+
+$FilesLookupHash = @{ }
+
+if ( $null -ne $FilesInfo ) {
+    $CSVFileCount = $FilesInfo.count
+
+    if ( $null -eq $FilesInfo[0].NeedsUpdating) {
+        $FilesInfo | Add-Member -MemberType NoteProperty -Name 'NeedsUpdating' -Value $False
+        $FilesInfo | Add-Member -MemberType NoteProperty -Name 'FileNumber' -Value -1
+        
+    }
+    $FileNumber = 0
+    foreach ($FileRef in $FilesInfo) {
+        if ( $FileRef.FileNumber -eq -1) {
+            $FileRef.FileNumber = $FileNumber
+        }
+        $FilesLookupHash.Add($FileRef.CsvFileName, $FileRef)
+        $FileNumber ++
+    }
+
+    $NewestFile = $FilesInfo | Sort-Object FileNumber -Bottom 1
+    $NextFileNumber = $NewestFile.FileNumber + 1
+    # $FilesLookupHash.'03-27-2020.csv'.DateLastModifiedUTC
+}
+else {
+    $NextFileNumber = 0
+}
+$FilesLookupHash.Keys | sort -bottom 1
+
+# Load in the local or web version of the last data file if it exists
+$PriorDataRows = @()
+$WebRequest = $null
+$WebRequest = Invoke-WebRequest -Uri $URLs.DBBestDerivedData
+if ( $null -ne $WebRequest.Content ) {
+    $WebRequest.Content | Out-File -FilePath "$($GitLocalRoot)\Working Files\CheckedInDerivedFiles.csv"
+    $PriorDataRows = Import-Csv -Path $LocalDataFile | Sort-Object  -Property @{Expression = "CSV File Name"; Descending = $False }, @{Expression = "Row Number"; Descending = $False }
+    if ($null -eq $PriorDataRows[0].psobject.properties.Match( 'Date Reported') ) {
+        $PriorDataRows | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value ""
+    }
+}
+else {
+    $RowError = @{
+        Severity   = "Derived data file not found"
+        Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
+        Message    = "File not dound"
+        Correction = "Download all files"
+    }
+    $ErrorLog += $RowError
+    $RowError
+}
+$MissingLatLong = @()
+$ZeroForLatLong = @()
+# Recreate the hash table of file and their data
+$timer = [Diagnostics.Stopwatch]::StartNew()
+$GroupedFileRows = @{ }
+if ( $null -ne $PriorDataRows) {
+    $FileRows = $null
+    $FileNumber = 0
+    $FileRows = @()
+    $CurrentFile = $PriorDataRows[0].'CSV File Name'
+    for ( $Element = 0; $Element -lt $PriorDataRows.Count; $Element ++ ) {
+        if ( $PriorDataRows[$Element].'Latitude' -eq "") { $MissingLatLong += $PriorDataRows[$Element]}
+        if ( $PriorDataRows[$Element].'Latitude' -eq "0" -and $PriorDataRows[$Element].'Longitude' -eq "0") { $ZeroForLatLong += $PriorDataRows[$Element]}    
+        if ( $PriorDataRows[$Element].'Csv File Name' -eq $CurrentFile) {
+            $DateReported = $CurrentFile.Split('.csv')[0]
+            $PriorDataRows[$Element].'Date Reported' = $DateReported
+            $FileRows += $PriorDataRows[$Element]
+        }
+        else {
+            Write-Host ("Capturing FileNumber = ", $FileNumber, "Current file name = ", $CurrentFile, " Elapsed time so for = ", $timer.Elapsed.TotalSeconds -join "") 
+            $GroupedFileRows.Add( $CurrentFile, $FileRows)
+            $FileRows = @()
+            $CurrentFile = $PriorDataRows[$Element].'CSV File Name'
+            $DateReported = $CurrentFile.Split('.csv')[0]
+            $PriorDataRows[$Element].'Date Reported' = $DateReported
+            $FileRows += $PriorDataRows[$Element]
+        }
+    }
+}
+Write-Host $timer.Elapsed.TotalSeconds
+$timer = $null
+Write-Host "Count of missing lat/long: ", $MissingLatLong.Count, " and  count of zeros for lat/long: ", $ZeroForLatLong.Count
+$GroupedFileRows.'03-26-2020.csv' | Where-Object { ($_.'Location Name Key' -eq "Clark, NV, USA" -and $_.Attribute -eq "Deaths") }
+$GroupedFileRows.'02-18-2020.csv'[0]
+$MissingLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$ChangeInGitHubFiles = $False
+$arrayNewCSVData = @()
 foreach ( $Link in $WR.Links) {
     if ( $Link.href -like "*2020.csv" ) {
-
         # Using the data in the $Link.href string, parse out the file name to use to grab the actual csv data from the GitHub
         $CSVFileName = Split-Path -Path $Link.href -Leaf
-        $CSVRawURL = $GitRawRoot, $CSVFileName -join "/"
+        $CSVRawURL = $GitRawRoot, $CSVFileName -join ""
         $CSVPageURL = $URLs.URLReports, $CSVFileName -join "/"
-
-        # Get the daily CSV file using the $CSVRawURL
-        $WR_CSV = Invoke-WebRequest -Uri $CSVRawURL
-
-        # To load the CSV correctly into memory, we need to write it out to a file and read it back in. 
-        $WR_CSV.Content | Out-File -FilePath ($TempDataLocation, $CSVFileName -join "")
-
-        # The end result is each record is added as a PSCustomObject to the $CSVData array.
-        $CSVData = Import-Csv -Path ($TempDataLocation, $CSVFileName -join "")
-
 
         # Retrieve the GitHub page for the CSV file to pull out the date for the last check-in
         $WR_Page = Invoke-WebRequest -Uri $CSVPageURL
-        
+        Write-Host "Processing file $CSVFileName"
         if ( $null -eq ($WR_Page.Content.split("<relative-time datetime=")[1]) ) {
             $RowError = @{
                 Severity    = "Table not found"
@@ -162,274 +255,382 @@ foreach ( $Link in $WR.Links) {
             $DateLastModifiedUTC = $WR_Page.Content.split("<relative-time datetime=")[1].Split(" class=")[0]
             if ($DateLastModifiedUTC -like '"*') { $DateLastModifiedUTC = $DateLastModifiedUTC.Split('"')[1] }
         }
-
-        # Add all the file name to the records so they can be related to new Daily-Files-Metadata.csv for data lineage
-        $PeriodEnding = $CSVFileName.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
-        $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
-
-
-        $FileMetadata = @{
-            CsvFileName         = $CSVFileName
-            PeriodEnding        = $PeriodEnding
-            CSVRawURL           = $CSVRawURL
-            CSVPageURL          = $CSVPageURL
-            DateLastModifiedUTC = $DateLastModifiedUTC
-        } 
-        $FilesInfo += [PSCustomObject]$FileMetadata
-
-        $FileMetadata.Add('CSVData', $CSVData)
-
-        $CsvLinks += $FileMetadata
-
-        # Write back out the CSV files to Temp location for debugging
-        $CSVData | Export-Csv -path ($TempDataLocation, $CSVFileName -join "") -NoTypeInformation
-    }
-}
-
-$FilesInfo | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "") -NoTypeInformation
-
-# Work the data in the $CSVLinks array by the CsvTodayKey (report date)
-$SortedCSVs = $CSVLinks | Sort-Object -Property CsvFileName 
-
-#Check to make sure the array is sorted
-$SortedCSVs[0].CsvData[0].'Country/Region', $SortedCSVs[0].CsvData[0].'CSV File Name' -join " - "
-$SortedCSVs[1].CsvData[0].'Country/Region', $SortedCSVs[1].CsvData[0].'CSV File Name' -join " - "
-
-
-#Clear out the old array to release memory
-Remove-Variable 'CSVLinks'
-
-# Start the process of reading each of the file records and the rows within them
-$UnpivotedRows = @()
-$LocationTableRows = @()
-
-$File, $RowNumber = 65, 527
-# Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
-for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
-
-    $Csv = $SortedCSVs[$file]
-    Write-Host ("File # = ", $file, " of ", $SortedCSVs.count, " CsvFileName=", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
-    $Columns = $null
-    $PriorDayColumns = $null
-    if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
-        $Columns = $ColumnHeaders.'01-22-2020'
-        if (  $Csv.PeriodEnding -ne '01-22-2020' ) {
-            $PriorDayColumns = $Columns
-        }
-    }
-    elseif ( [datetime]$Csv.PeriodEnding -gt [datetime]'03-10-2020' -and [datetime]$Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
-        $Columns = $ColumnHeaders.'03-11-2020'
-        if ( $Csv.PeriodEnding -eq '03-11-2020' ) {
-            $PriorDayColumns = $ColumnHeaders.'01-22-2020'
-        }
-        else {
-            $PriorDayColumns = $Columns
-        }
-    }
-    else {
-        $Columns = $ColumnHeaders.'03-22-2020'
-        if ($Csv.PeriodEnding -eq '03-22-2020') {
-            $PriorDayColumns = $ColumnHeaders.'03-11-2020'
-        }
-        else {
-            $PriorDayColumns = $ColumnHeaders.'03-22-2020'
-        }
-    }
-    
-    $ActualColumns = $Csv.CSVData[$file].psobject.properties.name
-
-    for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ ) {
-        $Row = $Csv.CSVData[$RowNumber]
-        $Mapping = @{ }
-        #Map the base columns to the new column names for the row
-        for ($i = 0; $i -lt $ActualColumns.Count; $i++ ) {
-
-            $Key = $NewColumnsMapping.($ActualColumns[$i])
-            if ( "Confirmed,Deaths,Recovered,Active" -like "*$($Key)*" ) {
-                #Skip these for now
-                continue
-            }
-            if ( $Key -eq "Last Updated UTC") {
-                $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ssZ"
-            }
-            else {
-                $Value = $Row.($ActualColumns[$i])
-            }            
-            $Mapping.Add( $Key, $Value )
-        }
-        Write-Host ("File # = ", $file, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
-        # Add Lat and long to mapping if missing
-        if ( $null -eq $Mapping.Latitude ) { $Mapping.Add( 'Latitude', "") }
-        if ( $null -eq $Mapping.Longitude ) { $Mapping.Add( 'Longitude', "") }
         
-        # Create the Location Key Name
-        $Values = @()
-        if ( $null -ne $Mapping.'USA State County' -and ($Mapping.'USA State County').Length -gt 0 ) { 
-            if ( $null -ne $CountyReplacements.($Mapping.'USA State County') ) {
-                $Value = $CountyReplacements.($Mapping.'USA State County')
-                $Mapping.'USA State County' = $Value   # Replace the old value with the new one
-            }
-            else { $Value = $Mapping.'USA State County' }
-            if ( $Value.Length -gt 0) { $Values += $Value }
-        }
-            
-        if ( $null -ne $Mapping.'Province or State' -and ($Mapping.'Province or State').Length -gt 0) {
-            # First look for replacement in $StateReplacements
-            if ( $null -ne $StateReplacements.($Mapping.'Province or State')) {
-                $Value = $StateReplacements.($Mapping.'Province or State')
-                $Mapping.'Province or State' = $Value
-            }
-            if ( $Mapping.'Province or State' -like "*, *" ) {
-                # Looking at older file format. New format as the full state name
-                $County, $StateCode = ($Mapping.'Province or State').Split(", ")
-                if ($County -like "*County") { 
-                    $CountyValue = $County.Split(" County")[0]
-                }
-                else { $CountyValue = $County }
-                if ($null -eq $Mapping.'USA State County') {
-                    $Mapping.Add( 'USA State County', $CountyValue )  # Test $RowNumber = 1120
-                }
-                else { $Mapping.'USA State County' = $CountyValue }
-                $Values += $CountyValue
-                $Mapping.'Province or State' = $StateCode
-            }
-            else {
-                #Looks like an actual Province or State value, but for the US, need to use abbreviation
-                if ( $Mapping.'Country or Region' -eq "US" -and $Mapping.'Province or State' -ne "") {
-                    $StateCode = $StateLook.($Mapping.'Province or State')
-                    if ( $null -ne $StateCode) {
-                        $Mapping.'Province or State' = $StateCode
-                    }
-                    else {
-                        $RowError = @{
-                            Severity    = "Lookup Failed"
-                            Process     = "Looking up State name in StateLook table"
-                            Message     = "Could not locate value: [$($Mapping.'Province or State')]"
-                            Correction  = "Using original value"
-                            CsvFileName = $Row.'CSV File Name'
-                            FileNumber  = $file
-                            RowNumber   = $RowNumber 
-                            RowData     = $Row
-                            Mapping     = [PSCustomObject]$Mapping
-                        }
-                        $ErrorLog += $RowError
-                    }
-                }
-            }
-            if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State') {
-                $Values += $Mapping.'Province or State'
-            }
-        }
-        if ( $null -eq $Mapping.'Country or Region') { $Mapping.Add( 'Country or Region', "") }
-        if ( $null -ne $Mapping.'Country or Region' -and ($Mapping.'Country or Region').Length -gt 0 ) {
-            if ( $null -ne $CountryReplacements.($Mapping.'Country or Region')) {
-                $Value = $CountryReplacements.($Mapping.'Country or Region')
-                $Mapping.'Country or Region' = $Value
-            }
-            else { $Value = $Mapping.'Country or Region' }
-            $Values += $Value
-        }
 
-        if ( $null -ne $Values) {
-            $Value = if ($Values.Count -gt 1 ) { $Values -join ", " }else { $Values[0] }
-        } 
+        # If the file was loaded before, check to see if the current modified date is > than the one processed
+        if ($null -ne $FilesLookupHash.$CsvFileName ) {
+            #File was previously loaded
+            if ( $DateLastModifiedUTC -gt $FilesLookupHash.$CsvFileName.DateLastModifiedUTC ) {
+                # Data was changed since the last download
+                $RowError = @{
+                    Severity    = "File changes"
+                    Process     = "Retrieving CSV web page URL [$($CSVPageURL)]"
+                    Message     = "Previous date: $($FilesLookupHash.$CsvFileName.DateLastModifiedUTC) and the revised date:$DateLastModifiedUTC"
+                    Correction  = "Setting needs updating flag to true and updating changed date to the new date"
+                    CsvFileName = $CSVFileName
+                    CSVPageURL  = $CSVPageURL
+                }
+                $ErrorLog += $RowError
+                $ChangeInGitHubFiles = $true
+                $FilesLookupHash.$CSVFileName.NeedsUpdating = $true
+                $FilesLookupHash.$CSVFileName.DateLastModifiedUTC = $DateLastModifiedUTC
+                $FilesLookupHash.$CSVFileName.CSVRawURL = $CSVRawURL
+                $RowError
+
+                # Get the updated daily CSV file using the $CSVRawURL
+                $WR_CSV = Invoke-WebRequest -Uri $CSVRawURL
+                $WR_CSV.Content | Out-File -FilePath ($TempDataLocation, $CSVFileName -join "")
+                # Write back out the CSV files to Temp location for debugging
+                $CSVData = Import-Csv -Path ($TempDataLocation, $CSVFileName -join "")
+                $PeriodEnding = $CSVFileName.Split('.csv')[0]
+                $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
+                $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
+                $FileMetadata = $FilesLookupHash.$CSVFileName
+                
+                $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
+                $arrayNewCSVData += $FileMetadata
+            }
+        }
         else {
             $RowError = @{
-                Severity    = "Empty Value"
-                Process     = "Create Location Key Name"
-                Message     = "No values for country, state, country"
-                Correction  = "Assigning null value to the row's [Location Name Key] value"
-                CsvFileName = $Row.'CSV File Name'
-                RowData     = $Row
-                Mapping     = [PSCustomObject]$Mapping
-                FileNumber  = $file
-                RowNumber   = $RowNumber 
+                Severity    = "New file"
+                Process     = "Retrieving new CSV web page URL [$($CSVPageURL)]"
+                Message     = "Revised date:$DateLastModifiedUTC"
+                Correction  = "Setting needs updating flag to true and updating changed date to the new date"
+                CsvFileName = $CSVFileName
+                CSVPageURL  = $CSVPageURL
             }
             $ErrorLog += $RowError
-            $Value = "Unknown row in file # $file and row number $RowNumber"
-        }
+            $RowError 
 
-        if ( $null -eq $Mapping.'Location Name Key' ) {
-            $Mapping.Add( 'Location Name Key', $Value )
-        }
-        else { $Mapping.'Location Name Key' = $Value }
-        if ( $null -eq $Mapping.'FIPS USA State County code') { $Mapping.Add( 'FIPS USA State County code', "") }
-        if ( $null -eq $Mapping.'USA State County') { $Mapping.Add( 'USA State County', "") }
+            $ChangeInGitHubFiles = $true
+            # New file  - The end result is each record is added as a PSCustomObject to the $CSVData array.
+            # To load the CSV correctly into memory, we need to write it out to a file and read it back in. 
+            # Get the daily CSV file using the $CSVRawURL
+            $WR_CSV = Invoke-WebRequest -Uri $CSVRawURL
+            $WR_CSV.Content | Out-File -FilePath ($TempDataLocation, $CSVFileName -join "")
+            # Write back out the CSV files to Temp location for debugging
+            $CSVData = Import-Csv -Path ($TempDataLocation, $CSVFileName -join "")
+            # Remove-Item -LiteralPath ($TempDataLocation, $CSVFileName -join "")
 
-        $Mapping.Add("File Number", $file)
-        $Mapping.Add("Row Number", $RowNumber)
-
-        # Now we have the base information for the location. We should really create a lookup file from this data as step 1
-        $LocationTableRows += [PSCustomObject]$Mapping
-
-        # Now unpivot attributes
-        $Mapping.Add("Attribute", "")
-        $Mapping.Add("Cumulative Value", "")
-        $Mapping.Add("Change Since Prior Day", "")
-
-        $Active = 0
-        $Mapping.Attribute = "Confirmed"
-        if ($Row.Confirmed -eq "" -and $null -ne $Row.Confirmed) {
-            $Mapping.'Cumulative Value' = 0    
-        }
-        else { $Mapping.'Cumulative Value' = $Row.Confirmed }
+            # Add all the file name to the records so they can be related to new Daily-Files-Metadata.csv for data lineage
+            $PeriodEnding = $CSVFileName.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
         
-        $UnpivotedRows += [PSCustomObject]$Mapping
-
-        $Active = $Mapping.'Cumulative Value'
-        
-        $Mapping.Attribute = "Deaths"
-        if ($Row.Deaths -eq "" -and $null -ne $Row.Deaths) {
-            $Mapping.'Cumulative Value' = 0    
-        }
-        else { $Mapping.'Cumulative Value' = $Row.Deaths }
-        $UnpivotedRows += [PSCustomObject]$Mapping
-
-        $Active -= $Mapping.'Cumulative Value'
-
-        $Mapping.Attribute = "Recovered"
-        if ($Row.Recovered -eq "" -and $null -ne $Row.Recovered) {
-            $Mapping.'Cumulative Value' = 0    
-        }
-        else { $Mapping.'Cumulative Value' = $Row.Recovered }
-        $UnpivotedRows += [PSCustomObject]$Mapping
-
-        $Active -= $Mapping.'Cumulative Value'
-
-        $Mapping.Attribute = "Active"
-        $Mapping.'Cumulative Value' = $Active
-        $UnpivotedRows += [PSCustomObject]$Mapping
-
+            $FileMetadata = [PSCustomObject]@{
+                CsvFileName         = $CSVFileName
+                PeriodEnding        = $PeriodEnding
+                CSVRawURL           = $CSVRawURL
+                CSVPageURL          = $CSVPageURL
+                DateLastModifiedUTC = $DateLastModifiedUTC
+                FileNumber          = $NextFileNumber
+                NeedsUpdating       = $true
+            } 
+            $FilesInfo += $FileMetadata
+            $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
+            $arrayNewCSVData += $FileMetadata
+            $NextFileNumber ++
+        }        
     }
 }
-
-$UnpivotedRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\", $LeafDataFile,".csv" -join "") -NoTypeInformation
-$LocationTableRows | Export-Csv -path ($GitLocalRoot, "\", $DataDir, "\Location-Table.csv" -join "") -NoTypeInformation
-$ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
-
-<#
-
-
-$i = $SortedCSVs.Count - 1
-$Today = $SortedCSVs[63].CSVData | Where-Object { $_.Combined_Key -eq "Korea, South" }
-$Yesterday = $SortedCSVs[62].CSVData | Where-Object { $_.Combined_Key -eq "Korea, South" }
-$Today.Active = $Today.Confirmed - $Today.Deaths - $Today.Recovered
-$Today.Confirmed, $Today.Deaths, $Today.Recovered, $Today.Active
-$Yesterday.Confirmed, $Yesterday.Deaths, $Yesterday.Recovered, $Yesterday.Active
-
-$Today.Lat
-$RenameColumn = = @{
-    TypeName   = 'My.Object'
-    MemberType = 'ScriptProperty'
-    MemberName = 'UpperCaseName'
-    Value      = { $this.Name.toUpper() }
+$ErrorLog
+$arrayNewCSVData
+if ($null -eq $arrayNewCSVData ) {
+    #Nothing more to process
+    $RowError = @{
+        Severity   = "No new files"
+        Process    = "Checking for changed data"
+        Message    = "Revised date:$DateLastModifiedUTC"
+        Correction = "Noting to process"
+    }
+    $ErrorLog += $RowError
+    $RowError 
+    $ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
 }
-Update-TypeData @TypeData
+else {
 
-$HTMLStates.Content | Out-File -FilePath "C:\Temp\States.csv"
-$StatesCsv = Import-Csv -Path "C:\Temp\States.csv"
+    # Work the data in the $CSVLinks array by the CsvTodayKey (report date)
+    $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
+
+    #Check to make sure the array is sorted
+    $SortedCSVs[0].CsvData[0]
+    $SortedCSVs[1].CsvData[0]
 
 
+    #Clear out the old array to release memory
+    Remove-Variable 'arrayNewCSVData'
+
+    # Start the process of reading each of the file records and the rows within them
+    $UnpivotedRows = @()
+
+    # Debeg: $File, $RowNumber = 65, 527
+    # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
+    for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
+        $UnpivotedRows = @()
+        $Csv = $SortedCSVs[$file]
+        $FileNumber = $Csv.FileNumber
+        $CurrentFile = $Csv.CsvFileName
+        $DateReported = $CurrentFile.Split('.csv')[0]
+        Write-Host ("File # = ", $file, " mapped to ", $FileNumber, " of ", $SortedCSVs.count, " CsvFileName= ", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
+        $Columns = $null
+        $PriorDayColumns = $null
+        if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
+            $Columns = $ColumnHeaders.'01-22-2020'
+            if (  $Csv.PeriodEnding -ne '01-22-2020' ) {
+                $PriorDayColumns = $Columns
+            }
+        }
+        elseif ( [datetime]$Csv.PeriodEnding -gt [datetime]'03-10-2020' -and [datetime]$Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
+            $Columns = $ColumnHeaders.'03-11-2020'
+            if ( $Csv.PeriodEnding -eq '03-11-2020' ) {
+                $PriorDayColumns = $ColumnHeaders.'01-22-2020'
+            }
+            else {
+                $PriorDayColumns = $Columns
+            }
+        }
+        else {
+            $Columns = $ColumnHeaders.'03-22-2020'
+            if ($Csv.PeriodEnding -eq '03-22-2020') {
+                $PriorDayColumns = $ColumnHeaders.'03-11-2020'
+            }
+            else {
+                $PriorDayColumns = $ColumnHeaders.'03-22-2020'
+            }
+        }
+    
+        $ActualColumns = $Csv.CSVData[$file].psobject.properties.name
+
+        for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ ) {
+            $Row = $Csv.CSVData[$RowNumber]
+            $Mapping = @{ }
+            #Map the base columns to the new column names for the row
+            for ($i = 0; $i -lt $ActualColumns.Count; $i++ ) {
+
+                $Key = $NewColumnsMapping.($ActualColumns[$i])
+                if ( "Confirmed,Deaths,Recovered,Active" -like "*$($Key)*" ) {
+                    #Skip these for now
+                    continue
+                }
+                if ( $Key -eq "Last Updated UTC") {
+                    $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ssZ"
+                }
+                else {
+                    $Value = $Row.($ActualColumns[$i])
+                }            
+                $Mapping.Add( $Key, $Value )
+            }
+            Write-Host ("File # = ", $FileNumber, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
+            # Add Lat and long to mapping if missing
+            if ( $null -eq $Mapping.Latitude ) { $Mapping.Add( 'Latitude', "") }
+            if ( $null -eq $Mapping.Longitude ) { $Mapping.Add( 'Longitude', "") }
+            $Mapping.Add( 'Date Reported', $DateReported )
+
+            if ($Debug -eq $true) { $Mapping }
+            # Create the Location Key Name
+            $Values = @()
+            if ( $null -ne $Mapping.'USA State County' -and ($Mapping.'USA State County').Length -gt 0 ) { 
+                if ( $null -ne $CountyReplacements.($Mapping.'USA State County') ) {
+                    $Value = $CountyReplacements.($Mapping.'USA State County')
+                    $Mapping.'USA State County' = $Value   # Replace the old value with the new one
+                }
+                else { $Value = $Mapping.'USA State County' }
+                if ( $Value.Length -gt 0) { $Values += $Value }
+            }
+            
+            if ( $null -ne $Mapping.'Province or State' -and ($Mapping.'Province or State').Length -gt 0) {
+                # First look for replacement in $StateReplacements
+                if ( $null -ne $StateReplacements.($Mapping.'Province or State')) {
+                    $Value = $StateReplacements.($Mapping.'Province or State')
+                    $Mapping.'Province or State' = $Value
+                }
+                if ( $Mapping.'Province or State' -like "*, *" ) {
+                    # Looking at older file format. New format as the full state name
+                    $County, $StateCode = ($Mapping.'Province or State').Split(", ")
+                    if ($County -like "*County") { 
+                        $CountyValue = $County.Split(" County")[0]
+                    }
+                    else { $CountyValue = $County }
+                    if ($null -eq $Mapping.'USA State County') {
+                        $Mapping.Add( 'USA State County', $CountyValue )  # Test $RowNumber = 1120
+                    }
+                    else { $Mapping.'USA State County' = $CountyValue }
+                    $Values += $CountyValue
+                    $Mapping.'Province or State' = $StateCode
+                }
+                else {
+                    #Looks like an actual Province or State value, but for the US, need to use abbreviation
+                    if ( $Mapping.'Country or Region' -eq "US" -and $Mapping.'Province or State' -ne "") {
+                        $StateCode = $StateLook.($Mapping.'Province or State')
+                        if ( $null -ne $StateCode) {
+                            $Mapping.'Province or State' = $StateCode
+                        }
+                        else {
+                            $RowError = @{
+                                Severity    = "Lookup Failed"
+                                Process     = "Looking up State name in StateLook table"
+                                Message     = "Could not locate value: [$($Mapping.'Province or State')]"
+                                Correction  = "Using original value"
+                                CsvFileName = $Row.'CSV File Name'
+                                FileNumber  = $FileNumber
+                                RowNumber   = $RowNumber 
+                                RowData     = $Row
+                                Mapping     = [PSCustomObject]$Mapping
+                            }
+                            $ErrorLog += $RowError
+                        }
+                    }
+                }
+                if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State') {
+                    $Values += $Mapping.'Province or State'
+                }
+            
+            }
+            if ( $null -eq $Mapping.'Country or Region') { $Mapping.Add( 'Country or Region', "") }
+            if ( $null -ne $Mapping.'Country or Region' -and ($Mapping.'Country or Region').Length -gt 0 ) {
+                if ( $null -ne $CountryReplacements.($Mapping.'Country or Region')) {
+                    $Value = $CountryReplacements.($Mapping.'Country or Region')
+                    $Mapping.'Country or Region' = $Value
+                }
+                else { $Value = $Mapping.'Country or Region' }
+                $Values += $Value
+            }
+
+            if ( $null -ne $Values) {
+                $Value = if ($Values.Count -gt 1 ) { $Values -join ", " }else { $Values[0] }
+            } 
+            else {
+                $RowError = @{
+                    Severity    = "Empty Value"
+                    Process     = "Create Location Key Name"
+                    Message     = "No values for country, state, country"
+                    Correction  = "Assigning null value to the row's [Location Name Key] value"
+                    CsvFileName = $Row.'CSV File Name'
+                    RowData     = $Row
+                    Mapping     = [PSCustomObject]$Mapping
+                    FileNumber  = $FileNumber
+                    RowNumber   = $RowNumber 
+                }
+                $ErrorLog += $RowError
+                $Value = "Unknown row in file # $FileNumber and row number $RowNumber"
+            }
+
+            if ( $null -eq $Mapping.'Location Name Key' ) {
+                $Mapping.Add( 'Location Name Key', $Value )
+            }
+            else { $Mapping.'Location Name Key' = $Value }
+            if ( $null -eq $Mapping.'FIPS USA State County code') { $Mapping.Add( 'FIPS USA State County code', "") }
+            if ( $null -eq $Mapping.'USA State County') { $Mapping.Add( 'USA State County', "") }
+
+            $Mapping.Add("File Number", $FileNumber)
+            $Mapping.Add("Row Number", $RowNumber)
+
+            # Now unpivot attributes
+            $Mapping.Add("Attribute", "")
+            $Mapping.Add("Cumulative Value", "")
+            $Mapping.Add("Change Since Prior Day", "")
+
+            $Active = 0
+            $Mapping.Attribute = "Confirmed"
+            if ($Row.Confirmed -eq "" -and $null -ne $Row.Confirmed) {
+                $Mapping.'Cumulative Value' = 0    
+            }
+            else { $Mapping.'Cumulative Value' = $Row.Confirmed }
+        
+            $UnpivotedRows += [PSCustomObject]$Mapping
+            if ($Debug -eq $true) { "Mapping: "; $Mapping }
+            $Active = $Mapping.'Cumulative Value'
+        
+            $Mapping.Attribute = "Deaths"
+            if ($Row.Deaths -eq "" -and $null -ne $Row.Deaths) {
+                $Mapping.'Cumulative Value' = 0    
+            }
+            else { $Mapping.'Cumulative Value' = $Row.Deaths }
+            $UnpivotedRows += [PSCustomObject]$Mapping
+            if ($Debug -eq $true) { "Mapping: "; $Mapping }
+
+            $Active -= $Mapping.'Cumulative Value'
+
+            $Mapping.Attribute = "Recovered"
+            if ($Row.Recovered -eq "" -and $null -ne $Row.Recovered) {
+                $Mapping.'Cumulative Value' = 0    
+            }
+            else { $Mapping.'Cumulative Value' = $Row.Recovered }
+
+            $UnpivotedRows += [PSCustomObject]$Mapping
+            if ($Debug -eq $true) { "Mapping: "; $Mapping }
+            $Active -= $Mapping.'Cumulative Value'
+
+            $Mapping.Attribute = "Active"
+            $Mapping.'Cumulative Value' = $Active
+            $UnpivotedRows += [PSCustomObject]$Mapping
+            if ($Debug -eq $true) { "Mapping: "; $Mapping }
+       
+    
+        }
+        #Add files unpivoted items to $GroupedFileRows
+        if ( $null -ne $GroupedFileRows.$CurrentFile ) {
+            # This is a file that was modified
+            $GroupedFileRows.$CurrentFile = $UnpivotedRows
+            Write-Host ("Updated Current file: ", $CurrentFile, " a total of ", $GroupedFileRows.$CurrentFile.Count, " Rows" -join "")
+            if ( $null -ne $FilesLookupHash.$CurrentFile.CSVData) { 
+                $FilesLookupHash.$CurrentFile.psobject.Properties.remove('CSVData')
+                $FilesLookupHash.$CurrentFile.NeedsUpdating = $False
+            }
+        }
+        else {
+            Write-Host ("Add to Current file: ", $CurrentFile, " a total of ", $UnpivotedRows.Count, " Rows" -join "")
+            $GroupedFileRows.Add( $CurrentFile, $UnpivotedRows)
+            $SortedCSVs[$file].NeedsUpdating = $false
+       
+            $FilesLookupHash.Add( $CurrentFile, $SortedCSVs[$file]  )
+            $FilesLookupHash.$CurrentFile.psobject.Properties.remove('CSVData')
+
+        }
+    
+    }
+    # Write out the updated CSSEGISandData-COVID-19-Derived.csv
+    $FirstTime = $True
+    $OrderedKeys = $GroupedFileRows.Keys | Sort-Object
+    $SelectColumnList = @(
+        'Location Name Key'
+        , 'Date Reported'
+        , 'Attribute'
+        , 'Cumulative Value'
+        , 'Change Since Prior Day'
+        , 'Latitude'
+        , 'Longitude'
+        , 'Country or Region'
+        , 'Province or State'
+        , 'CSV File Name'
+        , 'USA State County'
+        , 'FIPS USA State County code'
+        , 'Last Updated UTC'
+        , 'File Number'
+        , 'Row Number'
+    )
+    $SortList = @(
+        @{Expression = "CSV File Name"; Descending = $False }
+        , @{Expression = "Row Number"; Descending = $False }
+        , @{Expression = "Attribute"; Descending = $False }
+    )
+
+    foreach ( $KeyValue in $OrderedKeys) {
+        
+        Write-Host $KeyValue
+  
+        if ( $FirstTime -eq $true) {
+            $GroupedFileRows.$KeyValue | Select-Object -Property $SelectColumnList | Sort-Object -Property $SortList | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+            $FirstTime = $false
+        }
+        else {
+            $GroupedFileRows.$KeyValue | Select-Object -Property $SelectColumnList | Sort-Object -Property $SortList | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
+        }
+    }
+
+    # Write out the new or updated Daily-Files-Metadata.csv
+    $FilesLookupHash.Values | Sort-Object -Property CsvFileName | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "") -NoTypeInformation
+}
 
 
-#>
