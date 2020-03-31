@@ -1,0 +1,7 @@
+Location Name Key,Date Reported,Attribute,Cumulative Value,Change Since Prior Day,Latitude,Longitude,Country or Region,Province or State,CSV File Name,USA State County,FIPS USA State County code,Last Updated UTC,File Number,Row Number
+"None, Austria",02-25-2020,Confirmed,2,,,,Austria,None,02-25-2020.csv,,,2020-02-25T18:55:32Z,34,59
+"None, Iraq",02-23-2020,Active,0,,,,Iraq,None,02-23-2020.csv,,,2020-02-23T18:23:06Z,32,84
+"None, Lebanon",02-21-2020,Active,1,,,,Lebanon,None,02-21-2020.csv,,,2020-02-21T15:33:03Z,30,70
+"Recovered, Canada",03-25-2020,Deaths,0,,0.0,0.0,Canada,Recovered,03-25-2020.csv,,,2020-03-25T23:37:36Z,63,3229
+"Recovered, USA",03-28-2020,Deaths,0,,0.0,0.0,USA,Recovered,03-28-2020.csv,,,2020-03-28T23:05:37Z,66,3234
+"US, USA",03-18-2020,Active,-105,,37.0902,-95.7129,USA,US,03-18-2020.csv,,,2020-03-18T19:33:03Z,56,269

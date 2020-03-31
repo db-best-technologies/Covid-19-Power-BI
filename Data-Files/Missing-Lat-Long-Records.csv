@@ -1,0 +1,152 @@
+Location Name Key,Date Reported,Attribute,Cumulative Value,Change Since Prior Day,Latitude,Longitude,Country or Region,Province or State,CSV File Name,USA State County,FIPS USA State County code,Last Updated UTC,File Number,Row Number
+Afghanistan,02-27-2020,Confirmed,1,,,,Afghanistan,,02-27-2020.csv,,,2020-02-24T23:33:02Z,36,76
+Algeria,02-28-2020,Active,1,,,,Algeria,,02-28-2020.csv,,,2020-02-25T23:43:03Z,37,80
+"Anhui, China",01-28-2020,Deaths,0,,,,China,Anhui,01-28-2020.csv,,,2020-01-28T23:00:00Z,6,7
+"Ashland, NE, USA",02-21-2020,Deaths,0,,,,USA,NE,02-21-2020.csv,Ashland,,2020-02-21T23:23:06Z,30,43
+Australia,01-25-2020,Deaths,0,,,,Australia,,01-25-2020.csv,,,2020-01-25T17:00:00Z,3,41
+Austria,02-26-2020,Deaths,0,,,,Austria,,02-26-2020.csv,,,2020-02-26T00:13:06Z,35,62
+"AZ, USA",01-28-2020,Active,1,,,,USA,AZ,01-28-2020.csv,,,2020-01-28T23:00:00Z,6,36
+Azerbaijan,02-28-2020,Confirmed,1,,,,Azerbaijan,,02-28-2020.csv,,,2020-02-28T15:03:26Z,37,78
+Bahrain,02-25-2020,Recovered,0,,,,Bahrain,,02-25-2020.csv,,,2020-02-25T18:55:32Z,34,39
+"Bavaria, Germany",01-29-2020,Confirmed,4,,,,Germany,Bavaria,01-29-2020.csv,,,2020-01-29T19:30:00Z,7,51
+"Beijing, China",02-17-2020,Deaths,4,,,,China,Beijing,02-17-2020.csv,,,2020-02-17T01:23:02Z,26,13
+Belarus,02-29-2020,Active,1,,,,Belarus,,02-29-2020.csv,,,2020-02-28T16:23:03Z,38,85
+Belgium,02-28-2020,Recovered,1,,,,Belgium,,02-28-2020.csv,,,2020-02-17T04:23:06Z,37,82
+"Bexar, TX, USA",02-21-2020,Active,2,,,,USA,TX,02-21-2020.csv,Bexar,,2020-02-21T23:23:06Z,30,60
+"Boston, MA, USA",02-15-2020,Recovered,0,,,,USA,MA,02-15-2020.csv,Boston,,2020-02-01T19:43:03Z,24,68
+Brazil,02-29-2020,Deaths,0,,,,Brazil,,02-29-2020.csv,,,2020-02-29T21:03:05Z,38,77
+"British Columbia, Canada",02-26-2020,Active,7,,,,Canada,British Columbia,02-26-2020.csv,,,2020-02-25T02:23:05Z,35,51
+"CA, USA",01-29-2020,Recovered,0,,,,USA,CA,01-29-2020.csv,,,2020-01-29T19:30:00Z,7,35
+Cambodia,02-09-2020,Deaths,0,,,,Cambodia,,02-09-2020.csv,,,2020-01-31T08:15:53Z,18,59
+"Chongqing, China",01-23-2020,Confirmed,9,,,,China,Chongqing,01-23-2020.csv,,,2020-01-23T17:00:00Z,1,2
+Colombia,01-23-2020,Confirmed,0,,,,Colombia,,01-23-2020.csv,,,2020-01-23T17:00:00Z,1,45
+"Cook, IL, USA",02-17-2020,Deaths,0,,,,USA,IL,02-17-2020.csv,Cook,,2020-02-09T19:03:03Z,26,55
+Croatia,02-26-2020,Deaths,0,,,,Croatia,,02-26-2020.csv,,,2020-02-26T20:03:06Z,35,58
+"Cruise Ship, Others",02-08-2020,Deaths,0,,,,Others,Cruise Ship,02-08-2020.csv,,,2020-02-07T16:33:03Z,17,26
+Denmark,02-29-2020,Deaths,0,,,,Denmark,,02-29-2020.csv,,,2020-02-29T18:03:05Z,38,70
+"Desoto, FL, USA",03-22-2020,Confirmed,1,,,,USA,FL,03-22-2020.csv,Desoto,,2020-03-22T23:45:00Z,60,245
+"Diamond Princess cruise ship, Others",02-11-2020,Confirmed,135,,,,Others,Diamond Princess cruise ship,02-11-2020.csv,,,2020-02-10T16:03:12Z,20,20
+"Diamond Princess Japan, TX, USA",02-27-2020,Active,42,,,,USA,TX,02-27-2020.csv,Diamond Princess Japan,,2020-02-26T20:03:06Z,36,38
+"Dona Ana, NM, USA",03-22-2020,Deaths,0,,,,USA,NM,03-22-2020.csv,Dona Ana,,2020-03-22T23:45:00Z,60,1071
+Egypt,02-23-2020,Recovered,0,,,,Egypt,,02-23-2020.csv,,,2020-02-21T18:53:02Z,32,67
+Estonia,02-29-2020,Deaths,0,,,,Estonia,,02-29-2020.csv,,,2020-02-27T16:23:03Z,38,91
+"External territories, Australia",03-22-2020,Deaths,0,,,,Australia,External territories,03-22-2020.csv,,,2020-03-22T23:48:00Z,60,3197
+Finland,02-18-2020,Active,0,,,,Finland,,02-18-2020.csv,,,2020-02-12T00:03:12Z,27,63
+France,01-29-2020,Confirmed,5,,,,France,,01-29-2020.csv,,,2020-01-29T19:30:00Z,7,42
+"From Diamond Princess, Australia",02-28-2020,Active,8,,,,Australia,From Diamond Princess,02-28-2020.csv,,,2020-02-27T03:33:06Z,37,50
+"From Diamond Princess, Israel",02-25-2020,Active,1,,,,Israel,From Diamond Princess,02-25-2020.csv,,,2020-02-22T20:53:02Z,34,75
+"Fujian, China",01-28-2020,Deaths,0,,,,China,Fujian,01-28-2020.csv,,,2020-01-28T23:00:00Z,6,11
+"Gansu, China",02-05-2020,Active,56,,,,China,Gansu,02-05-2020.csv,,,2020-02-05T16:23:06Z,14,24
+Georgia,02-28-2020,Active,1,,,,Georgia,,02-28-2020.csv,,,2020-02-27T16:23:03Z,37,90
+Germany,02-25-2020,Confirmed,17,,,,Germany,,02-25-2020.csv,,,2020-02-25T21:33:02Z,34,42
+Greece,02-28-2020,Confirmed,4,,,,Greece,,02-28-2020.csv,,,2020-02-28T15:33:03Z,37,61
+"Guangdong, China",02-13-2020,Recovered,314,,,,China,Guangdong,02-13-2020.csv,,,2020-02-13T13:33:01Z,22,1
+"Guangxi, China",02-03-2020,Confirmed,127,,,,China,Guangxi,02-03-2020.csv,,,2020-02-03T12:33:02Z,12,15
+"Guizhou, China",02-24-2020,Deaths,2,,,,China,Guizhou,02-24-2020.csv,,,2020-02-23T12:43:02Z,33,24
+"Hainan, China",02-21-2020,Active,69,,,,China,Hainan,02-21-2020.csv,,,2020-02-21T10:13:09Z,30,21
+"Hebei, China",01-28-2020,Confirmed,33,,,,China,Hebei,01-28-2020.csv,,,2020-01-28T23:00:00Z,6,19
+"Heilongjiang, China",01-24-2020,Recovered,0,,,,China,Heilongjiang,01-24-2020.csv,,,2020-01-24T17:00:00Z,2,19
+"Henan, China",02-23-2020,Recovered,868,,,,China,Henan,02-23-2020.csv,,,2020-02-23T10:23:02Z,32,2
+"Hong Kong, Hong Kong",02-01-2020,Recovered,0,,,,Hong Kong,Hong Kong,02-01-2020.csv,,,2020-02-01T05:37:00Z,10,32
+"Hubei, China",02-15-2020,Active,49030,,,,China,Hubei,02-15-2020.csv,,,2020-02-15T23:13:05Z,24,0
+"Humboldt, CA, USA",02-25-2020,Confirmed,1,,,,USA,CA,02-25-2020.csv,Humboldt,,2020-02-21T05:13:09Z,34,83
+"Hunan, China",02-18-2020,Confirmed,1007,,,,China,Hunan,02-18-2020.csv,,,2020-02-18T13:43:02Z,27,4
+Iceland,02-29-2020,Deaths,0,,,,Iceland,,02-29-2020.csv,,,2020-02-29T00:33:01Z,38,93
+"IL, USA",01-31-2020,Confirmed,2,,,,USA,IL,01-31-2020.csv,,,2020-01-31T23:59:00Z,9,44
+India,02-11-2020,Confirmed,3,,,,India,,02-11-2020.csv,,,2020-02-03T21:43:02Z,20,48
+"Inner Mongolia, China",02-10-2020,Deaths,0,,,,China,Inner Mongolia,02-10-2020.csv,,,2020-02-10T02:43:05Z,19,27
+Iran,02-23-2020,Confirmed,43,,,,Iran,,02-23-2020.csv,,,2020-02-23T15:13:15Z,32,35
+Iraq,02-29-2020,Recovered,0,,,,Iraq,,02-29-2020.csv,,,2020-02-29T18:03:05Z,38,51
+Ireland,02-29-2020,Active,1,,,,Ireland,,02-29-2020.csv,,,2020-02-29T22:33:03Z,38,94
+Israel,02-28-2020,Deaths,0,,,,Israel,,02-28-2020.csv,,,2020-02-28T15:53:03Z,37,62
+Italy,02-05-2020,Deaths,0,,,,Italy,,02-05-2020.csv,,,2020-01-31T08:15:53Z,14,49
+Ivory Coast,01-27-2020,Recovered,0,,,,Ivory Coast,,01-27-2020.csv,,,2020-01-27T23:59:00Z,5,48
+Japan,02-05-2020,Deaths,0,,,,Japan,,02-05-2020.csv,,,2020-02-04T16:43:03Z,14,31
+"Jervis Bay Territory, Australia",03-22-2020,Deaths,0,,,,Australia,Jervis Bay Territory,03-22-2020.csv,,,2020-03-22T23:48:00Z,60,3198
+"Jiangsu, China",02-22-2020,Deaths,0,,,,China,Jiangsu,02-22-2020.csv,,,2020-02-22T07:43:03Z,31,9
+"Jiangxi, China",01-29-2020,Deaths,0,,,,China,Jiangxi,01-29-2020.csv,,,2020-01-29T19:30:00Z,7,9
+"Jilin, China",02-06-2020,Confirmed,59,,,,China,Jilin,02-06-2020.csv,,,2020-02-06T14:23:04Z,15,25
+"Kenai Peninsula, AK, USA",03-22-2020,Confirmed,1,,,,USA,AK,03-22-2020.csv,Kenai Peninsula,,2020-03-22T23:45:00Z,60,1148
+Kuwait,02-24-2020,Recovered,0,,,,Kuwait,,02-24-2020.csv,,,2020-02-24T23:33:02Z,33,72
+"Lackland, TX (From Diamond Princess), USA",02-29-2020,Confirmed,0,,,,USA,TX (From Diamond Princess),02-29-2020.csv,Lackland,,2020-02-24T23:33:02Z,38,116
+"Le Sueur, MN, USA",03-22-2020,Recovered,0,,,,USA,MN,03-22-2020.csv,Le Sueur,,2020-03-22T23:45:00Z,60,872
+Lebanon,02-28-2020,Active,2,,,,Lebanon,,02-28-2020.csv,,,2020-02-26T19:33:02Z,37,70
+"Liaoning, China",02-05-2020,Recovered,4,,,,China,Liaoning,02-05-2020.csv,,,2020-02-05T15:23:02Z,14,20
+Lithuania,02-28-2020,Confirmed,1,,,,Lithuania,,02-28-2020.csv,,,2020-02-28T16:23:03Z,37,92
+"London, ON, Canada",02-14-2020,Recovered,1,,,,Canada,ON,02-14-2020.csv,London,,2020-02-12T18:53:03Z,23,61
+"Los Angeles, CA, USA",02-09-2020,Active,1,,,,USA,CA,02-09-2020.csv,Los Angeles,,2020-02-01T19:53:03Z,18,67
+Luxembourg,02-29-2020,Confirmed,1,,,,Luxembourg,,02-29-2020.csv,,,2020-02-29T21:03:05Z,38,96
+"Macau, Macau",02-26-2020,Active,3,,,,Macau,Macau,02-26-2020.csv,,,2020-02-25T15:23:04Z,35,49
+"Madison, WI, USA",02-19-2020,Confirmed,1,,,,USA,WI,02-19-2020.csv,Madison,,2020-02-05T21:53:02Z,28,71
+Malaysia,02-17-2020,Active,15,,,,Malaysia,,02-17-2020.csv,,,2020-02-15T23:43:02Z,26,35
+Mexico,02-28-2020,Deaths,0,,,,Mexico,,02-28-2020.csv,,,2020-02-28T15:03:26Z,37,94
+Monaco,02-29-2020,Confirmed,1,,,,Monaco,,02-29-2020.csv,,,2020-02-29T00:33:01Z,38,98
+"Montreal, QC, Canada",02-28-2020,Active,1,,,,Canada,QC,02-28-2020.csv,Montreal,,2020-02-28T05:23:07Z,37,85
+"Nantucket, MA, USA",03-22-2020,Recovered,0,,,,USA,MA,03-22-2020.csv,Nantucket,,2020-03-22T23:45:00Z,60,298
+"Nashua, NH, USA",03-22-2020,Active,1,,,,USA,NH,03-22-2020.csv,Nashua,,2020-03-22T23:45:00Z,60,1033
+Nepal,02-23-2020,Recovered,1,,,,Nepal,,02-23-2020.csv,,,2020-02-12T14:43:03Z,32,72
+Netherlands,02-27-2020,Deaths,0,,,,Netherlands,,02-27-2020.csv,,,2020-02-27T21:13:10Z,36,88
+"New South Wales, Australia",02-29-2020,Active,0,,,,Australia,New South Wales,02-29-2020.csv,,,2020-02-13T17:53:03Z,38,64
+New Zealand,02-29-2020,Deaths,0,,,,New Zealand,,02-29-2020.csv,,,2020-02-28T16:23:03Z,38,100
+Nigeria,02-29-2020,Deaths,0,,,,Nigeria,,02-29-2020.csv,,,2020-02-28T16:23:03Z,38,101
+"Ningxia, China",01-31-2020,Confirmed,21,,,,China,Ningxia,01-31-2020.csv,,,2020-01-31T23:59:00Z,9,25
+"None, Austria",02-25-2020,Confirmed,2,,,,Austria,None,02-25-2020.csv,,,2020-02-25T18:55:32Z,34,59
+"None, Iraq",02-23-2020,Active,0,,,,Iraq,None,02-23-2020.csv,,,2020-02-23T18:23:06Z,32,84
+"None, Lebanon",02-21-2020,Active,1,,,,Lebanon,None,02-21-2020.csv,,,2020-02-21T15:33:03Z,30,70
+North Ireland,02-28-2020,Recovered,0,,,,North Ireland,,02-28-2020.csv,,,2020-02-28T05:43:02Z,37,99
+North Macedonia,02-28-2020,Active,1,,,,North Macedonia,,02-28-2020.csv,,,2020-02-27T16:23:03Z,37,100
+"Northwest Territories, Canada",03-22-2020,Recovered,0,,,,Canada,Northwest Territories,03-22-2020.csv,,,2020-03-22T23:48:00Z,60,3187
+Norway,02-26-2020,Recovered,0,,,,Norway,,02-26-2020.csv,,,2020-02-26T20:23:12Z,35,85
+"Omaha, NE (From Diamond Princess), USA",02-23-2020,Confirmed,11,,,,USA,NE (From Diamond Princess),02-23-2020.csv,Omaha,,2020-02-22T23:03:09Z,32,44
+Oman,02-25-2020,Active,2,,,,Oman,,02-25-2020.csv,,,2020-02-25T01:13:09Z,34,60
+"Ontario, Canada",01-27-2020,Active,1,,,,Canada,Ontario,01-27-2020.csv,,,2020-01-27T23:59:00Z,5,45
+"Orange, CA, USA",02-16-2020,Confirmed,1,,,,USA,CA,02-16-2020.csv,Orange,,2020-02-01T19:53:03Z,25,71
+"Out-of-state, TN, USA",03-22-2020,Recovered,0,,,,USA,TN,03-22-2020.csv,Out-of-state,,2020-03-22T23:45:00Z,60,483
+Pakistan,02-28-2020,Active,2,,,,Pakistan,,02-28-2020.csv,,,2020-02-26T23:53:02Z,37,71
+Philippines,02-08-2020,Confirmed,3,,,,Philippines,,02-08-2020.csv,,,2020-02-07T16:43:04Z,17,49
+"Plymonth, MA, USA",03-22-2020,Recovered,0,,,,USA,MA,03-22-2020.csv,Plymonth,,2020-03-22T23:45:00Z,60,296
+"Portland, OR, USA",02-29-2020,Recovered,0,,,,USA,OR,02-29-2020.csv,Portland,,2020-02-29T02:23:11Z,38,111
+Qatar,02-29-2020,Recovered,0,,,,Qatar,,02-29-2020.csv,,,2020-02-29T14:33:03Z,38,103
+"Qinghai, China",02-01-2020,Active,9,,,,China,Qinghai,02-01-2020.csv,,,2020-02-01T05:37:00Z,10,35
+"Queensland, Australia",02-13-2020,Confirmed,5,,,,Australia,Queensland,02-13-2020.csv,,,2020-02-09T19:33:02Z,22,44
+Romania,02-26-2020,Deaths,0,,,,Romania,,02-26-2020.csv,,,2020-02-26T23:43:03Z,35,86
+Russia,02-16-2020,Recovered,2,,,,Russia,,02-16-2020.csv,,,2020-02-12T14:43:03Z,25,53
+"Sacramento, CA, USA",02-22-2020,Confirmed,1,,,,USA,CA,02-22-2020.csv,Sacramento,,2020-02-21T23:13:16Z,31,80
+"San Antonio, TX, USA",02-20-2020,Active,1,,,,USA,TX,02-20-2020.csv,San Antonio,,2020-02-13T18:53:02Z,29,73
+"San Benito, CA, USA",02-25-2020,Recovered,0,,,,USA,CA,02-25-2020.csv,San Benito,,2020-02-03T03:53:02Z,34,63
+"San Diego, CA, USA",02-27-2020,Active,1,,,,USA,CA,02-27-2020.csv,San Diego,,2020-02-21T05:43:02Z,36,74
+San Marino,02-27-2020,Deaths,0,,,,San Marino,,02-27-2020.csv,,,2020-02-27T21:13:10Z,36,92
+"Santa Clara, CA, USA",02-28-2020,Recovered,1,,,,USA,CA,02-28-2020.csv,Santa Clara,,2020-02-21T05:23:04Z,37,77
+"Seattle, WA, USA",02-26-2020,Active,0,,,,USA,WA,02-26-2020.csv,Seattle,,2020-02-09T07:03:04Z,35,96
+"Shaanxi, China",02-01-2020,Active,101,,,,China,Shaanxi,02-01-2020.csv,,,2020-02-01T05:37:00Z,10,14
+"Shandong, China",02-17-2020,Recovered,191,,,,China,Shandong,02-17-2020.csv,,,2020-02-17T11:03:06Z,26,9
+"Shanghai, China",02-10-2020,Active,250,,,,China,Shanghai,02-10-2020.csv,,,2020-02-10T06:03:13Z,19,13
+"Shanxi, China",02-24-2020,Active,39,,,,China,Shanxi,02-24-2020.csv,,,2020-02-24T23:13:02Z,33,26
+"Sichuan, China",02-29-2020,Deaths,3,,,,China,Sichuan,02-29-2020.csv,,,2020-02-29T12:03:07Z,38,14
+Singapore,02-16-2020,Confirmed,75,,,,Singapore,,02-16-2020.csv,,,2020-02-16T16:23:06Z,25,27
+"Snohomish, WA, USA",02-29-2020,Active,1,,,,USA,WA,02-29-2020.csv,Snohomish,,2020-02-29T15:03:04Z,38,113
+"South Australia, Australia",02-01-2020,Recovered,0,,,,Australia,South Australia,02-01-2020.csv,,,2020-02-01T18:12:00Z,10,50
+South Korea,01-26-2020,Confirmed,3,,,,South Korea,,01-26-2020.csv,,,2020-01-26T16:00:00Z,4,39
+Spain,02-10-2020,Confirmed,2,,,,Spain,,02-10-2020.csv,,,2020-02-09T20:33:03Z,19,54
+Sri Lanka,02-22-2020,Recovered,1,,,,Sri Lanka,,02-22-2020.csv,,,2020-02-08T03:43:03Z,31,73
+"Sterling, AK, USA",03-22-2020,Deaths,0,,,,USA,AK,03-22-2020.csv,Sterling,,2020-03-22T23:45:00Z,60,1149
+Sweden,02-15-2020,Active,1,,,,Sweden,,02-15-2020.csv,,,2020-02-01T02:13:26Z,24,67
+Switzerland,02-25-2020,Recovered,0,,,,Switzerland,,02-25-2020.csv,,,2020-02-25T19:13:21Z,34,81
+"Taiwan, Taiwan",01-28-2020,Recovered,0,,,,Taiwan,Taiwan,01-28-2020.csv,,,2020-01-28T23:00:00Z,6,29
+"Tempe, AZ, USA",02-15-2020,Recovered,0,,,,USA,AZ,02-15-2020.csv,Tempe,,2020-02-01T19:43:03Z,24,74
+Thailand,02-06-2020,Recovered,5,,,,Thailand,,02-06-2020.csv,,,2020-02-04T15:33:03Z,15,31
+"Tianjin, China",02-15-2020,Recovered,37,,,,China,Tianjin,02-15-2020.csv,,,2020-02-15T13:43:01Z,24,23
+"Tibet, China",02-24-2020,Deaths,0,,,,China,Tibet,02-24-2020.csv,,,2020-02-12T06:43:02Z,33,74
+"Toronto, ON, Canada",02-08-2020,Confirmed,2,,,,Canada,ON,02-08-2020.csv,Toronto,,2020-02-04T00:13:06Z,17,52
+"Travis, CA (From Diamond Princess), USA",02-22-2020,Active,5,,,,USA,CA (From Diamond Princess),02-22-2020.csv,Travis,,2020-02-22T17:13:24Z,31,50
+"Travis, CA, USA",02-21-2020,Active,5,,,,USA,CA,02-21-2020.csv,Travis,,2020-02-21T23:23:06Z,30,49
+UK,01-31-2020,Confirmed,2,,,,UK,,01-31-2020.csv,,,2020-01-31T23:59:00Z,9,50
+United Arab Emirates,02-10-2020,Deaths,0,,,,United Arab Emirates,,02-10-2020.csv,,,2020-02-10T23:03:09Z,19,43
+"Unknown, TN, USA",03-22-2020,Recovered,0,,,,USA,TN,03-22-2020.csv,Unknown,,2020-03-22T23:45:00Z,60,486
+"Victoria, Australia",02-08-2020,Confirmed,4,,,,Australia,Victoria,02-08-2020.csv,,,2020-02-01T18:12:49Z,17,45
+Vietnam,02-29-2020,Confirmed,16,,,,Vietnam,,02-29-2020.csv,,,2020-02-25T08:53:02Z,38,49
+"WA, USA",01-24-2020,Deaths,0,,,,USA,WA,01-24-2020.csv,,,2020-01-24T17:00:00Z,2,33
+"Western Australia, Australia",02-29-2020,Recovered,0,,,,Australia,Western Australia,02-29-2020.csv,,,2020-02-29T23:13:06Z,38,76
+"Xinjiang, China",01-30-2020,Confirmed,14,,,,China,Xinjiang,01-30-2020.csv,,,2020-01-30T16:00:00Z,8,27
+"Yunnan, China",02-03-2020,Active,112,,,,China,Yunnan,02-03-2020.csv,,,2020-02-03T23:23:03Z,12,17
+"Zhejiang, China",02-07-2020,Deaths,0,,,,China,Zhejiang,02-07-2020.csv,,,2020-02-07T11:33:11Z,16,2

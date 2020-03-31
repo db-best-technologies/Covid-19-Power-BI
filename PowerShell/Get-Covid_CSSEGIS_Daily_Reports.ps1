@@ -658,7 +658,7 @@ Write-Host "Number of records with 0 values for Lat and Long: ", $MissingLatLong
 $ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property 'Location Name Key' -Unique
+$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property @{Expression = 'Location Name Key'} -Unique
 Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
 $UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -674,27 +674,30 @@ $UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -n
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$OddStateValues
-    #    'None'                                        = ""
-    #    'US'                                          = ""
-    #    'Recovered'                                   = ""
+$OddStateValues = $PriorDataRows | Where-Object {( $_.'Province or State' -eq "None" -or $_.'Province or State' -eq "US" -or $_.'Province or State' -eq "Recovered" )} |  Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "Count of unique values for OddStateValues: ", $OddStateValues.Count
+$OddStateValues | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Odd-State-Values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
+
+$FirstConfirmedReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Confirmed" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+Write-Host "Count of unique values for FirstConfirmedReports: ", $FirstConfirmedReports.Count
+$FirstConfirmedReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Confirmed-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+
+$FirstDeathReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Deaths" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+Write-Host "Count of unique values for FirstDeathReports: ", $FirstDeathReports.Count
+$FirstDeathReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Deaths-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+
+$FirstRecoveredReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Recovered" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+Write-Host "Count of unique values for FirstRecoveredReports: ", $FirstRecoveredReports.Count
+$FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+
+<#
 $DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
 ((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk', 'Norfolk') | Set-Content -Path $DerivedCSVPath
 ((Get-Content -path $DerivedCSVPath -Raw) -replace ' Montreal', 'Montreal') | Set-Content -Path $DerivedCSVPath
-
-
-# Clean up spaces in GroupFileRows using $SpacesInCountyValue and then write out new file
-foreach ( $SpaceRow in $SpacesInCountyValue){
-    $KeyValue = '03-03-2020.csv' # $SpaceRow.'CSV File Name'
-
-    foreach ( $RowData in ($GroupedFileRows.$KeyValue | Where-Object { ($_.'Location Name Key' -eq " Norfolk, MA, USA" ) } ) ) {
-        $RowData
-        
-    }
-    break
-    $RowValue = $SpaceRow.'Row Number'
-    $GroupedFileRows.$KeyValue[$RowValue-1]
-}
+#>
 
 
