@@ -67,10 +67,10 @@ $CountyReplacements = [PSCustomObject]@{
     'New York City'       = "New York"
     'Brockton'            = "Plymonth"
     'Dukes and Nantucket' = "Nantucket"
-#    'Unknown'             = ""
+    #    'Unknown'             = ""
     'Soldotna'            = "Kenai Peninsula"
     'LeSeur'              = "Le Sueur"
-#    'Unassigned'          = ""
+    #    'Unassigned'          = ""
 }
 $StateReplacements = [PSCustomObject]@{
     'Chicago'                                     = "Cook, IL"
@@ -82,9 +82,9 @@ $StateReplacements = [PSCustomObject]@{
     'Unassigned Location (From Diamond Princess)' = "Diamond Princess Japan, TX"
     'Chicago, IL'                                 = "Cook, IL"
     'Lackland, TX'                                = "Bexar, TX"
-    'None'                                        = ""
-    'US'                                          = ""
-    'Recovered'                                   = ""
+    #    'None'                                        = ""
+    #    'US'                                          = ""
+    #    'Recovered'                                   = ""
     'Wuhan Evacuee'                               = 'California'
 }
 #Debug values
@@ -113,49 +113,63 @@ $LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metada
 #$TempDataFilesMetadata = $GitLocalRoot, "\", $TempDataLocation, "Daily-Files-Metadata.csv" -join ""
 $WebRequest = $null
 $WebRequest = Invoke-WebRequest -Uri $URLs.GitRawDataFilesMetadata
-if ( $null -ne $WebRequest ) {
-    #Download the Metadata file from our GitHob project
+if ( $null -ne $WebRequest -and $null -ne $WebRequest.Content) {
+    #Download the Metadata file from our GitHub project
     $WebRequest.Content | Out-File -FilePath $LocalDataFilesMetadata
     $FilesInfo = Import-Csv -Path $LocalDataFilesMetadata | Sort-Object  PeriodEnding
+
+    if ( $null -ne $FilesInfo ) {
+        $CSVFileCount = $FilesInfo.count
+
+        if ( $null -eq $FilesInfo[0].NeedsUpdating) {
+            $FilesInfo | Add-Member -MemberType NoteProperty -Name 'NeedsUpdating' -Value $False
+            $FilesInfo | Add-Member -MemberType NoteProperty -Name 'FileNumber' -Value -1
+        
+        }
+        $FileNumber = 0
+        foreach ($FileRef in $FilesInfo) {
+            if ( $FileRef.FileNumber -eq -1) {
+                $FileRef.FileNumber = $FileNumber
+            }
+            $FilesLookupHash.Add($FileRef.CsvFileName, $FileRef)
+            $FileNumber ++
+        }
+
+        $NewestFile = $FilesInfo | Sort-Object FileNumber -Bottom 1
+        $NextFileNumber = $NewestFile.FileNumber + 1
+        # $FilesLookupHash.'03-27-2020.csv'.DateLastModifiedUTC
+    }
+    else {
+        $RowError = @{
+            Severity   = "Import of File Metadata Failed"
+            Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
+            Message    = "File not found"
+            Correction = "Download all files"
+        }
+        $ErrorLog += $RowError
+        $RowError
+        
+        $FilesInfo = @()
+        $NextFileNumber = 0
+    }   
 }
 else {
     $RowError = @{
-        Severity   = "Metadata File not found"
-        Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
-        Message    = "File not dound"
+        Severity   = "Import of File Metadata missing"
+        Process    = "Retrieving web page URL [$($URLs.GitRawDataFilesMetadata)]"
+        Message    = "File not found"
         Correction = "Download all files"
     }
     $ErrorLog += $RowError
     $RowError
+
+    $FilesInfo = @()
+    $NextFileNumber = 0
+  
 }
 
 $FilesLookupHash = @{ }
-
-if ( $null -ne $FilesInfo ) {
-    $CSVFileCount = $FilesInfo.count
-
-    if ( $null -eq $FilesInfo[0].NeedsUpdating) {
-        $FilesInfo | Add-Member -MemberType NoteProperty -Name 'NeedsUpdating' -Value $False
-        $FilesInfo | Add-Member -MemberType NoteProperty -Name 'FileNumber' -Value -1
-        
-    }
-    $FileNumber = 0
-    foreach ($FileRef in $FilesInfo) {
-        if ( $FileRef.FileNumber -eq -1) {
-            $FileRef.FileNumber = $FileNumber
-        }
-        $FilesLookupHash.Add($FileRef.CsvFileName, $FileRef)
-        $FileNumber ++
-    }
-
-    $NewestFile = $FilesInfo | Sort-Object FileNumber -Bottom 1
-    $NextFileNumber = $NewestFile.FileNumber + 1
-    # $FilesLookupHash.'03-27-2020.csv'.DateLastModifiedUTC
-}
-else {
-    $NextFileNumber = 0
-}
-$FilesLookupHash.Keys | sort -bottom 1
+$GroupedFileRows = @{ }
 
 # Load in the local or web version of the last data file if it exists
 $PriorDataRows = @()
@@ -167,56 +181,60 @@ if ( $null -ne $WebRequest.Content ) {
     if ($null -eq $PriorDataRows[0].psobject.properties.Match( 'Date Reported') ) {
         $PriorDataRows | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value ""
     }
-}
-else {
-    $RowError = @{
-        Severity   = "Derived data file not found"
-        Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
-        Message    = "File not dound"
-        Correction = "Download all files"
-    }
-    $ErrorLog += $RowError
-    $RowError
-}
-$MissingLatLong = @()
-$ZeroForLatLong = @()
-# Recreate the hash table of file and their data
-$timer = [Diagnostics.Stopwatch]::StartNew()
-$GroupedFileRows = @{ }
-if ( $null -ne $PriorDataRows) {
-    $FileRows = $null
-    $FileNumber = 0
-    $FileRows = @()
-    $CurrentFile = $PriorDataRows[0].'CSV File Name'
-    for ( $Element = 0; $Element -lt $PriorDataRows.Count; $Element ++ ) {
-        if ( $PriorDataRows[$Element].'Latitude' -eq "") { $MissingLatLong += $PriorDataRows[$Element]}
-        if ( $PriorDataRows[$Element].'Latitude' -eq "0" -and $PriorDataRows[$Element].'Longitude' -eq "0") { $ZeroForLatLong += $PriorDataRows[$Element]}    
-        if ( $PriorDataRows[$Element].'Csv File Name' -eq $CurrentFile) {
-            $DateReported = $CurrentFile.Split('.csv')[0]
-            $PriorDataRows[$Element].'Date Reported' = $DateReported
-            $FileRows += $PriorDataRows[$Element]
-        }
-        else {
-            Write-Host ("Capturing FileNumber = ", $FileNumber, "Current file name = ", $CurrentFile, " Elapsed time so for = ", $timer.Elapsed.TotalSeconds -join "") 
-            $GroupedFileRows.Add( $CurrentFile, $FileRows)
-            $FileRows = @()
-            $CurrentFile = $PriorDataRows[$Element].'CSV File Name'
-            $DateReported = $CurrentFile.Split('.csv')[0]
-            $PriorDataRows[$Element].'Date Reported' = $DateReported
-            $FileRows += $PriorDataRows[$Element]
-        }
-    }
-}
-Write-Host $timer.Elapsed.TotalSeconds
-$timer = $null
-Write-Host "Count of missing lat/long: ", $MissingLatLong.Count, " and  count of zeros for lat/long: ", $ZeroForLatLong.Count
-$GroupedFileRows.'03-26-2020.csv' | Where-Object { ($_.'Location Name Key' -eq "Clark, NV, USA" -and $_.Attribute -eq "Deaths") }
-$GroupedFileRows.'02-18-2020.csv'[0]
-$MissingLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
-$ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
+
+    $MissingLatLong = @()
+    $ZeroForLatLong = @()
+    # Recreate the hash table of file and their data
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $GroupedFileRows = @{ }
+    if ( $null -ne $PriorDataRows) {
+        $FileRows = $null
+        $FileNumber = 0
+        $FileRows = @()
+        $CurrentFile = $PriorDataRows[0].'CSV File Name'
+        for ( $Element = 0; $Element -lt $PriorDataRows.Count; $Element ++ ) {
+            if ( $PriorDataRows[$Element].'Latitude' -eq "") { $MissingLatLong += $PriorDataRows[$Element] }
+            if ( $PriorDataRows[$Element].'Latitude' -eq "0" -and $PriorDataRows[$Element].'Longitude' -eq "0") { $ZeroForLatLong += $PriorDataRows[$Element] }    
+            if ( $PriorDataRows[$Element].'Csv File Name' -eq $CurrentFile) {
+                $DateReported = $CurrentFile.Split('.csv')[0]
+                $PriorDataRows[$Element].'Date Reported' = $DateReported
+                $FileRows += $PriorDataRows[$Element]
+            }
+            else {
+                Write-Host ("Capturing FileNumber = ", $FileNumber, "Current file name = ", $CurrentFile, " Elapsed time so for = ", $timer.Elapsed.TotalSeconds -join "") 
+                $GroupedFileRows.Add( $CurrentFile, $FileRows)
+                $FileRows = @()
+                $CurrentFile = $PriorDataRows[$Element].'CSV File Name'
+                $DateReported = $CurrentFile.Split('.csv')[0]
+                $PriorDataRows[$Element].'Date Reported' = $DateReported
+                $FileRows += $PriorDataRows[$Element]
+            }
+        }
+
+
+        Write-Host $timer.Elapsed.TotalSeconds
+        $timer = $null
+        Write-Host "Count of missing lat/long: ", $MissingLatLong.Count, " and  count of zeros for lat/long: ", $ZeroForLatLong.Count
+        $GroupedFileRows.'03-26-2020.csv' | Where-Object { ($_.'Location Name Key' -eq "Clark, NV, USA" -and $_.Attribute -eq "Deaths") }
+        $GroupedFileRows.'02-18-2020.csv'[0]
+        
+    }
+    else {
+        $RowError = @{
+            Severity   = "Derived data file not found"
+            Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
+            Message    = "File not found"
+            Correction = "Download all files"
+        }
+        $ErrorLog += $RowError
+        $RowError
+    }
+}
 $ChangeInGitHubFiles = $False
 $arrayNewCSVData = @()
+
+
 foreach ( $Link in $WR.Links) {
     if ( $Link.href -like "*2020.csv" ) {
         # Using the data in the $Link.href string, parse out the file name to use to grab the actual csv data from the GitHub
@@ -285,6 +303,7 @@ foreach ( $Link in $WR.Links) {
                 $PeriodEnding = $CSVFileName.Split('.csv')[0]
                 $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
                 $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
+                $CSVData | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") -NoTypeInformation -UseQuotes AsNeeded
                 $FileMetadata = $FilesLookupHash.$CSVFileName
                 
                 $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
@@ -317,7 +336,7 @@ foreach ( $Link in $WR.Links) {
             $PeriodEnding = $CSVFileName.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
             $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
             $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
-        
+            $CSVData | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") -NoTypeInformation -UseQuotes AsNeeded
             $FileMetadata = [PSCustomObject]@{
                 CsvFileName         = $CSVFileName
                 PeriodEnding        = $PeriodEnding
