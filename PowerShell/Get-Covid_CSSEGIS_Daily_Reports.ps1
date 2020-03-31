@@ -674,9 +674,14 @@ $UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -n
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
+$OddStateValues
+    #    'None'                                        = ""
+    #    'US'                                          = ""
+    #    'Recovered'                                   = ""
+
 $DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
-((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk, MA, USA', 'Norfolk, MA, USA') | Set-Content -Path $DerivedCSVPath
-((Get-Content -path $DerivedCSVPath -Raw) -replace ' Montreal, QC, Canada', 'Montreal, QC, Canada') | Set-Content -Path $DerivedCSVPath
+((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk', 'Norfolk') | Set-Content -Path $DerivedCSVPath
+((Get-Content -path $DerivedCSVPath -Raw) -replace ' Montreal', 'Montreal') | Set-Content -Path $DerivedCSVPath
 
 
 # Clean up spaces in GroupFileRows using $SpacesInCountyValue and then write out new file
