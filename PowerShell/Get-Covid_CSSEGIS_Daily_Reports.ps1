@@ -681,17 +681,17 @@ $OddStateValues | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Odd-State
 
 $FirstConfirmedReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Confirmed" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
 Write-Host "Count of unique values for FirstConfirmedReports: ", $FirstConfirmedReports.Count
-$FirstConfirmedReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Confirmed-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$FirstConfirmedReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Confirmed-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
 $FirstDeathReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Deaths" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
 Write-Host "Count of unique values for FirstDeathReports: ", $FirstDeathReports.Count
-$FirstDeathReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Deaths-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$FirstDeathReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Deaths-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
 $FirstRecoveredReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Recovered" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
 Write-Host "Count of unique values for FirstRecoveredReports: ", $FirstRecoveredReports.Count
-$FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
 <#
