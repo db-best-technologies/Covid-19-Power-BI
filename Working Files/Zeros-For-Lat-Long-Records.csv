@@ -1,0 +1,22 @@
+Location Name Key,Date Reported,Attribute,Cumulative Value,Change Since Prior Day,Latitude,Longitude,Country or Region,Province or State,CSV File Name,USA State County,FIPS USA State County code,Last Updated UTC,File Number,Row Number
+"Diamond Princess Japan, TX, Canada",03-22-2020,Recovered,0,,0,0,Canada,TX,03-22-2020.csv,Diamond Princess Japan,,2020-03-22T23:48:00Z,60,3188
+"Diamond Princess Japan, TX, Cruise Ship",03-22-2020,Recovered,567,,0,0,Cruise Ship,TX,03-22-2020.csv,Diamond Princess Japan,,2020-03-22T23:45:00Z,60,3258
+"Diamond Princess Japan, TX, USA",03-22-2020,Active,49,,0,0,USA,TX,03-22-2020.csv,Diamond Princess Japan,88888,2020-03-22T23:45:00Z,60,1099
+"Grand Princess Oakland, CA, Canada",03-22-2020,Recovered,0,,0,0,Canada,CA,03-22-2020.csv,Grand Princess Oakland,,2020-03-22T23:48:00Z,60,3184
+"Grand Princess Oakland, CA, USA",03-22-2020,Recovered,0,,0,0,USA,CA,03-22-2020.csv,Grand Princess Oakland,99999,2020-03-22T23:45:00Z,60,1120
+"Unassigned, AR, USA",03-22-2020,Recovered,0,,0,0,USA,AR,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,873
+"Unassigned, CA, USA",03-22-2020,Active,4,,0,0,USA,CA,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,1159
+"Unassigned, CO, USA",03-22-2020,Recovered,0,,0,0,USA,CO,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,445
+"Unassigned, FL, USA",03-22-2020,Active,1,,0,0,USA,FL,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,243
+"Unassigned, GA, USA",03-22-2020,Deaths,10,,0,0,USA,GA,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,363
+"Unassigned, IL, USA",03-22-2020,Recovered,0,,0,0,USA,IL,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,153
+"Unassigned, KY, USA",03-22-2020,Recovered,0,,0,0,USA,KY,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,950
+"Unassigned, LA, USA",03-22-2020,Active,50,,0,0,USA,LA,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,249
+"Unassigned, MA, USA",03-22-2020,Deaths,3,,0,0,USA,MA,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,292
+"Unassigned, ME, USA",03-22-2020,Confirmed,8,,0,0,USA,ME,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,1013
+"Unassigned, MT, USA",03-22-2020,Active,1,,0,0,USA,MT,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,1115
+"Unassigned, NJ, USA",03-22-2020,Confirmed,221,,0,0,USA,NJ,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,76
+"Unassigned, NV, USA",03-22-2020,Recovered,0,,0,0,USA,NV,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,834
+"Unassigned, NY, USA",03-22-2020,Confirmed,23,,0,0,USA,NY,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,14
+"Unassigned, RI, USA",03-22-2020,Recovered,0,,0,0,USA,RI,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,1024
+"Unassigned, WA, USA",03-22-2020,Deaths,0,,0,0,USA,WA,03-22-2020.csv,Unassigned,,2020-03-22T23:45:00Z,60,47

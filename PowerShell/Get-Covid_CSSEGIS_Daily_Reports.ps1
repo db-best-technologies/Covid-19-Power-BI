@@ -177,7 +177,7 @@ $WebRequest = $null
 $WebRequest = Invoke-WebRequest -Uri $URLs.DBBestDerivedData
 if ( $null -ne $WebRequest.Content ) {
     $WebRequest.Content | Out-File -FilePath "$($GitLocalRoot)\Working Files\CheckedInDerivedFiles.csv"
-    $PriorDataRows = Import-Csv -Path $LocalDataFile | Sort-Object  -Property @{Expression = "CSV File Name"; Descending = $False }, @{Expression = "Row Number"; Descending = $False }
+    $PriorDataRows = Import-Csv -Path $LocalDataFile 
     if ($null -eq $PriorDataRows[0].psobject.properties.Match( 'Date Reported') ) {
         $PriorDataRows | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value ""
     }
@@ -194,8 +194,7 @@ if ( $null -ne $WebRequest.Content ) {
         $FileRows = @()
         $CurrentFile = $PriorDataRows[0].'CSV File Name'
         for ( $Element = 0; $Element -lt $PriorDataRows.Count; $Element ++ ) {
-            if ( $PriorDataRows[$Element].'Latitude' -eq "") { $MissingLatLong += $PriorDataRows[$Element] }
-            if ( $PriorDataRows[$Element].'Latitude' -eq "0" -and $PriorDataRows[$Element].'Longitude' -eq "0") { $ZeroForLatLong += $PriorDataRows[$Element] }    
+            
             if ( $PriorDataRows[$Element].'Csv File Name' -eq $CurrentFile) {
                 $DateReported = $CurrentFile.Split('.csv')[0]
                 $PriorDataRows[$Element].'Date Reported' = $DateReported
@@ -215,9 +214,7 @@ if ( $null -ne $WebRequest.Content ) {
 
         Write-Host $timer.Elapsed.TotalSeconds
         $timer = $null
-        Write-Host "Count of missing lat/long: ", $MissingLatLong.Count, " and  count of zeros for lat/long: ", $ZeroForLatLong.Count
-        $GroupedFileRows.'03-26-2020.csv' | Where-Object { ($_.'Location Name Key' -eq "Clark, NV, USA" -and $_.Attribute -eq "Deaths") }
-        $GroupedFileRows.'02-18-2020.csv'[0]
+       
         
     }
     else {
@@ -650,6 +647,49 @@ else {
 
     # Write out the new or updated Daily-Files-Metadata.csv
     $FilesLookupHash.Values | Sort-Object -Property CsvFileName | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "") -NoTypeInformation
+}
+
+$MissingLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "" -or $_.Longitude -eq "" )} | Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "Number of records with Missing Lat/Long: ", $MissingLatLong.Count
+$MissingLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$ZeroForLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "0" -and $_.Longitude -eq "0" )} |  Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "Number of records with 0 values for Lat and Long: ", $MissingLatLong.Count
+$ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+
+$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
+$UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
+$UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$SpacesInCountyValue = $PriorDataRows | Where-Object {( $_.'Location Name Key' -eq " Norfolk, MA, USA" -or $_.'Location Name Key' -eq " Montreal, QC, Canada" )}
+Write-Host "Count of SpacesInCountyValue: ", $SpacesInCountyValue.Count
+$SpacesInCountyValue | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Spaces-In-County-Value.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique
+Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
+$UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+$DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
+((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk, MA, USA', 'Norfolk, MA, USA') | Set-Content -Path $DerivedCSVPath
+((Get-Content -path $DerivedCSVPath -Raw) -replace ' Montreal, QC, Canada', 'Montreal, QC, Canada') | Set-Content -Path $DerivedCSVPath
+
+
+# Clean up spaces in GroupFileRows using $SpacesInCountyValue and then write out new file
+foreach ( $SpaceRow in $SpacesInCountyValue){
+    $KeyValue = '03-03-2020.csv' # $SpaceRow.'CSV File Name'
+
+    foreach ( $RowData in ($GroupedFileRows.$KeyValue | Where-Object { ($_.'Location Name Key' -eq " Norfolk, MA, USA" ) } ) ) {
+        $RowData
+        
+    }
+    break
+    $RowValue = $SpaceRow.'Row Number'
+    $GroupedFileRows.$KeyValue[$RowValue-1]
 }
 
 
