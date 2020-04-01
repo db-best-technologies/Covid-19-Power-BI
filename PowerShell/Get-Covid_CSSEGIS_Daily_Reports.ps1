@@ -662,7 +662,7 @@ $UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State Co
 Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
 $UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  
+$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
 Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
 $UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -670,7 +670,7 @@ $SpacesInCountyValue = $PriorDataRows | Where-Object {( $_.'Location Name Key' -
 Write-Host "Count of SpacesInCountyValue: ", $SpacesInCountyValue.Count
 $SpacesInCountyValue | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Spaces-In-County-Value.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique
+$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -698,6 +698,118 @@ $USStateLatLongData = $PriorDataRows | Where-Object {( $_.'Country or Region' -e
 Write-Host "Count of unique values for USStateLatLongData: ", $USStateLatLongData.Count
 $USStateLatLongData | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "US-State-Lat-Long-Data.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
+#Create one file for all of the reported locations to use as a look up file for the 'Location Name Key' value
+$UniqueLocationKeys.Count
+$UniqueLocationKeysWithLatLong.Count
+$MissingLatLong.Count 
+$ZeroForLatLong.Count
+
+$ArrayMissing = @()
+$ArrayFound = @()
+foreach ( $Location in $UniqueLocationKeys ) {
+    if ( ( $Location.Latitude -eq "0" -and $Location.Longitude - "0" ) -or ($Location.Latitude -eq ""  -or $Location.Longitude -eq "") ) {
+        $LatLong = $UniqueLocationKeysWithLatLong | Where-Object { ( $_.'Location Name Key' -eq $Location.'Location Name Key' )}
+        if ( $null -eq $LatLong ) {
+
+            $ArrayMissing += $Location
+        } else {
+            $Location.Latitude = $LatLong[0].Latitude
+            $Location.Longitude = $LatLong[0].Longitude
+            $ArrayFound += $Location
+        }
+    }
+    else {
+        $ArrayFound += $Location
+    }
+}
+$ArrayMissing | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unresolved-Locations-Lat-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$ArrayFound.Count
+$UniqueLocationKeys.Count
+$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
+#Used https://www.latlong.net/
+$ManualResolution = @(
+      [PSCustomObject]@{'Location Name Key'="Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940" }
+    , [PSCustomObject]@{'Location Name Key'="Australia"; Latitude = "-25.274399"; Longitude = "133.775131" }
+    , [PSCustomObject]@{'Location Name Key'="Bavaria, Germany"; Latitude = "48.917431"; Longitude = "11.407980" }
+    , [PSCustomObject]@{'Location Name Key'="Cruise Ship, Others"; Latitude = "25.695980"; Longitude = "32.645649" }
+    , [PSCustomObject]@{'Location Name Key'="External territories, Australia"; Latitude = "-10.484470"; Longitude = "105.637100" }
+    , [PSCustomObject]@{'Location Name Key'="From Diamond Princess, Israel"; Latitude = "32.089556"; Longitude = "34.797614" }
+    , [PSCustomObject]@{'Location Name Key'="Ivory Coast"; Latitude = "-22.497511"; Longitude = "17.015369" }
+    , [PSCustomObject]@{'Location Name Key'="Jervis Bay Territory, Australia"; Latitude = "-35.140020"; Longitude = "150.728240" }
+    , [PSCustomObject]@{'Location Name Key'="Nashua, NH, USA"; Latitude = "42.757870"; Longitude = "-71.463951" }
+    , [PSCustomObject]@{'Location Name Key'="None, Austria"; Latitude = "47.516232"; Longitude = "14.550072" }
+    , [PSCustomObject]@{'Location Name Key'="None, Iraq"; Latitude = "33.223190"; Longitude = "43.679291" }
+    , [PSCustomObject]@{'Location Name Key'="None, Lebanon"; Latitude = "33.854721"; Longitude = "35.862286" }
+    , [PSCustomObject]@{'Location Name Key'="North Ireland"; Latitude = "54.597271"; Longitude = "-5.930110" }
+    , [PSCustomObject]@{'Location Name Key'="Out-of-state, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" }
+    , [PSCustomObject]@{'Location Name Key'="Plymonth, MA, USA"; Latitude = "41.955750"; Longitude = "-70.664390" }
+    , [PSCustomObject]@{'Location Name Key'="Sterling, AK, USA"; Latitude = "60.537470"; Longitude = "-150.765050" }
+    , [PSCustomObject]@{'Location Name Key'="Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" }
+    , [PSCustomObject]@{'Location Name Key'="Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" }
+)
+$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
+
+
+function Get-GeoCode
+{
+    [CmdletBinding()]
+    Param
+    (
+        # Param1 help description
+        [Parameter( Mandatory=$true,
+                    ValueFromPipelineByPropertyName = $true,
+                    ValueFromPipeline = $true,
+                    Position = 0 )]
+        [string]$Address
+    )
+
+    Begin
+    {
+        # Nothing
+    }
+    Process
+    {
+        $i = 0
+        While ( $i -lt $Address.Count )
+        {
+            if ( $FailureCount -ge 2 )
+            {
+                Write-Error "You have called the Google Maps API too frequently and this has failed.  Wait 24 hours and try again."
+                break
+            }
+
+            $Parameter = "address=" + $Address.Replace(" ","%20")
+            $ApiUri = "https://maps.googleapis.com/maps/api/geocode/xml?$($Parameter)"
+            $Response = Invoke-WebRequest -Uri $ApiUri
+            $ResponseXml = [xml]($Response.Content)
+            if ( $ResponseXml.GeocodeResponse.status -eq "OK" )
+            {
+                $ObjectHash = [ordered]@{ Address = $Address; Latitude = $ResponseXml.GeocodeResponse.result.geometry.location.lat; Longitude = $ResponseXml.GeocodeResponse.result.geometry.location.lng }
+                New-Object -TypeName PSObject -Property $ObjectHash
+                # It worked.  Move to the next element and reset the failure count
+                $i++
+                $FailureCount = 0
+            }
+            elseif ( $ResponseXml.GeocodeResponse.status -eq "OVER_QUERY_LIMIT" )
+            {
+                Write-Warning "Too many calls to the Google API.  Pausing for 2 seconds..."
+                $FailureCount++
+                Start-Sleep -Seconds 2
+            }
+            else
+            {
+                Write-Host "Failed to get GeoCode for '$Address' and continuing." -ForegroundColor Red
+                $i++
+            }
+        }
+    }
+    End
+    {
+        # Nothing
+    }
+}
+
+$ArrayMissing | 
 <#
 $DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
 ((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk', 'Norfolk') | Set-Content -Path $DerivedCSVPath
