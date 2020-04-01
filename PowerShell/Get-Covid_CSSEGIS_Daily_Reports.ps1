@@ -107,7 +107,7 @@ for ($s = 0; $s -lt $StatesCsv.Length; $s++ ) {
 }
 $StateLook = [PSCustomObject]$StateHash
 
-
+$FilesLookupHash = @{}
 #Check to see files have changes since the last download
 $LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join ""
 #$TempDataFilesMetadata = $GitLocalRoot, "\", $TempDataLocation, "Daily-Files-Metadata.csv" -join ""
@@ -167,8 +167,6 @@ else {
     $NextFileNumber = 0
   
 }
-
-$FilesLookupHash = @{ }
 $GroupedFileRows = @{ }
 
 # Load in the local or web version of the last data file if it exists
@@ -448,18 +446,18 @@ else {
             $Values = @()
             if ( $null -ne $Mapping.'USA State County' -and ($Mapping.'USA State County').Length -gt 0 ) { 
                 if ( $null -ne $CountyReplacements.($Mapping.'USA State County') ) {
-                    $Value = $CountyReplacements.($Mapping.'USA State County')
+                    $Value = $CountyReplacements.($Mapping.'USA State County').Trim()
                     $Mapping.'USA State County' = $Value   # Replace the old value with the new one
                 }
                 else { $Value = $Mapping.'USA State County' }
-                if ( $Value.Length -gt 0) { $Values += $Value }
+                if ( $Value.Length -gt 0) { $Values += $Value.Trim() }
             }
             
             if ( $null -ne $Mapping.'Province or State' -and ($Mapping.'Province or State').Length -gt 0) {
                 # First look for replacement in $StateReplacements
                 if ( $null -ne $StateReplacements.($Mapping.'Province or State')) {
                     $Value = $StateReplacements.($Mapping.'Province or State')
-                    $Mapping.'Province or State' = $Value
+                    $Mapping.'Province or State' = $Value.Ttim()
                 }
                 if ( $Mapping.'Province or State' -like "*, *" ) {
                     # Looking at older file format. New format as the full state name
@@ -472,15 +470,15 @@ else {
                         $Mapping.Add( 'USA State County', $CountyValue )  # Test $RowNumber = 1120
                     }
                     else { $Mapping.'USA State County' = $CountyValue }
-                    $Values += $CountyValue
-                    $Mapping.'Province or State' = $StateCode
+                    $Values += $CountyValue.Trim()
+                    $Mapping.'Province or State' = $StateCode.Trim()
                 }
                 else {
                     #Looks like an actual Province or State value, but for the US, need to use abbreviation
                     if ( $Mapping.'Country or Region' -eq "US" -and $Mapping.'Province or State' -ne "") {
                         $StateCode = $StateLook.($Mapping.'Province or State')
                         if ( $null -ne $StateCode) {
-                            $Mapping.'Province or State' = $StateCode
+                            $Mapping.'Province or State' = $StateCode.Trim()
                         }
                         else {
                             $RowError = @{
@@ -499,7 +497,7 @@ else {
                     }
                 }
                 if ($Mapping.'Province or State' -ne "" -and $null -ne $Mapping.'Province or State') {
-                    $Values += $Mapping.'Province or State'
+                    $Values += $Mapping.'Province or State'.Trim()
                 }
             
             }
@@ -507,10 +505,10 @@ else {
             if ( $null -ne $Mapping.'Country or Region' -and ($Mapping.'Country or Region').Length -gt 0 ) {
                 if ( $null -ne $CountryReplacements.($Mapping.'Country or Region')) {
                     $Value = $CountryReplacements.($Mapping.'Country or Region')
-                    $Mapping.'Country or Region' = $Value
+                    $Mapping.'Country or Region' = $Value.Trim()
                 }
                 else { $Value = $Mapping.'Country or Region' }
-                $Values += $Value
+                $Values += $Value.Trim()
             }
 
             if ( $null -ne $Values) {
@@ -533,9 +531,9 @@ else {
             }
 
             if ( $null -eq $Mapping.'Location Name Key' ) {
-                $Mapping.Add( 'Location Name Key', $Value )
+                $Mapping.Add( 'Location Name Key', $Value.Trim() )
             }
-            else { $Mapping.'Location Name Key' = $Value }
+            else { $Mapping.'Location Name Key' = $Value.Trim() }
             if ( $null -eq $Mapping.'FIPS USA State County code') { $Mapping.Add( 'FIPS USA State County code', "") }
             if ( $null -eq $Mapping.'USA State County') { $Mapping.Add( 'USA State County', "") }
 
@@ -615,13 +613,13 @@ else {
         , 'Attribute'
         , 'Cumulative Value'
         , 'Change Since Prior Day'
-        , 'Latitude'
-        , 'Longitude'
-        , 'Country or Region'
-        , 'Province or State'
+#        , 'Latitude'
+#        , 'Longitude'
+#        , 'Country or Region'
+#        , 'Province or State'
         , 'CSV File Name'
-        , 'USA State County'
-        , 'FIPS USA State County code'
+#        , 'USA State County'
+#        , 'FIPS USA State County code'
         , 'Last Updated UTC'
         , 'File Number'
         , 'Row Number'
@@ -725,7 +723,7 @@ foreach ( $Location in $UniqueLocationKeys ) {
 $ArrayMissing | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unresolved-Locations-Lat-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 $ArrayFound.Count
 $UniqueLocationKeys.Count
-$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
+$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
 #Used https://www.latlong.net/
 $ManualResolution = @(
       [PSCustomObject]@{'Location Name Key'="Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940" }
@@ -747,73 +745,4 @@ $ManualResolution = @(
     , [PSCustomObject]@{'Location Name Key'="Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" }
     , [PSCustomObject]@{'Location Name Key'="Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" }
 )
-$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
-
-
-function Get-GeoCode
-{
-    [CmdletBinding()]
-    Param
-    (
-        # Param1 help description
-        [Parameter( Mandatory=$true,
-                    ValueFromPipelineByPropertyName = $true,
-                    ValueFromPipeline = $true,
-                    Position = 0 )]
-        [string]$Address
-    )
-
-    Begin
-    {
-        # Nothing
-    }
-    Process
-    {
-        $i = 0
-        While ( $i -lt $Address.Count )
-        {
-            if ( $FailureCount -ge 2 )
-            {
-                Write-Error "You have called the Google Maps API too frequently and this has failed.  Wait 24 hours and try again."
-                break
-            }
-
-            $Parameter = "address=" + $Address.Replace(" ","%20")
-            $ApiUri = "https://maps.googleapis.com/maps/api/geocode/xml?$($Parameter)"
-            $Response = Invoke-WebRequest -Uri $ApiUri
-            $ResponseXml = [xml]($Response.Content)
-            if ( $ResponseXml.GeocodeResponse.status -eq "OK" )
-            {
-                $ObjectHash = [ordered]@{ Address = $Address; Latitude = $ResponseXml.GeocodeResponse.result.geometry.location.lat; Longitude = $ResponseXml.GeocodeResponse.result.geometry.location.lng }
-                New-Object -TypeName PSObject -Property $ObjectHash
-                # It worked.  Move to the next element and reset the failure count
-                $i++
-                $FailureCount = 0
-            }
-            elseif ( $ResponseXml.GeocodeResponse.status -eq "OVER_QUERY_LIMIT" )
-            {
-                Write-Warning "Too many calls to the Google API.  Pausing for 2 seconds..."
-                $FailureCount++
-                Start-Sleep -Seconds 2
-            }
-            else
-            {
-                Write-Host "Failed to get GeoCode for '$Address' and continuing." -ForegroundColor Red
-                $i++
-            }
-        }
-    }
-    End
-    {
-        # Nothing
-    }
-}
-
-$ArrayMissing | 
-<#
-$DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
-((Get-Content -path $DerivedCSVPath -Raw) -replace ' Norfolk', 'Norfolk') | Set-Content -Path $DerivedCSVPath
-((Get-Content -path $DerivedCSVPath -Raw) -replace ' Montreal', 'Montreal') | Set-Content -Path $DerivedCSVPath
-#>
-
-
+$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
