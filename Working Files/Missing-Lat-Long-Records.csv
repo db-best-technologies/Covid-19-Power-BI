@@ -1,0 +1,152 @@
+Location Name Key,Latitude,Longitude,CSV File Name,Row Number
+Afghanistan,,,02-27-2020.csv,76
+Algeria,,,02-28-2020.csv,80
+"Anhui, China",,,01-28-2020.csv,7
+"Ashland, NE, USA",,,02-21-2020.csv,43
+Australia,,,01-25-2020.csv,41
+Austria,,,02-26-2020.csv,62
+"AZ, USA",,,01-28-2020.csv,36
+Azerbaijan,,,02-28-2020.csv,78
+Bahrain,,,02-25-2020.csv,39
+"Bavaria, Germany",,,01-29-2020.csv,51
+"Beijing, China",,,02-17-2020.csv,13
+Belarus,,,02-29-2020.csv,85
+Belgium,,,02-28-2020.csv,82
+"Bexar, TX, USA",,,02-21-2020.csv,60
+"Boston, MA, USA",,,02-15-2020.csv,68
+Brazil,,,02-29-2020.csv,77
+"British Columbia, Canada",,,02-26-2020.csv,51
+"CA, USA",,,01-29-2020.csv,35
+Cambodia,,,02-09-2020.csv,59
+"Chongqing, China",,,01-23-2020.csv,2
+Colombia,,,01-23-2020.csv,45
+"Cook, IL, USA",,,02-17-2020.csv,55
+Croatia,,,02-26-2020.csv,58
+"Cruise Ship, Others",,,02-08-2020.csv,26
+Denmark,,,02-29-2020.csv,70
+"Desoto, FL, USA",,,03-22-2020.csv,245
+"Diamond Princess cruise ship, Others",,,02-11-2020.csv,20
+"Diamond Princess Japan, TX, USA",,,02-27-2020.csv,38
+"Dona Ana, NM, USA",,,03-22-2020.csv,1071
+Egypt,,,02-23-2020.csv,67
+Estonia,,,02-29-2020.csv,91
+"External territories, Australia",,,03-22-2020.csv,3197
+Finland,,,02-18-2020.csv,63
+France,,,01-29-2020.csv,42
+"From Diamond Princess, Australia",,,02-28-2020.csv,50
+"From Diamond Princess, Israel",,,02-25-2020.csv,75
+"Fujian, China",,,01-28-2020.csv,11
+"Gansu, China",,,02-05-2020.csv,24
+Georgia,,,02-28-2020.csv,90
+Germany,,,02-25-2020.csv,42
+Greece,,,02-28-2020.csv,61
+"Guangdong, China",,,02-13-2020.csv,1
+"Guangxi, China",,,02-03-2020.csv,15
+"Guizhou, China",,,02-24-2020.csv,24
+"Hainan, China",,,02-21-2020.csv,21
+"Hebei, China",,,01-28-2020.csv,19
+"Heilongjiang, China",,,01-24-2020.csv,19
+"Henan, China",,,02-23-2020.csv,2
+"Hong Kong, Hong Kong",,,02-01-2020.csv,32
+"Hubei, China",,,02-15-2020.csv,0
+"Humboldt, CA, USA",,,02-25-2020.csv,83
+"Hunan, China",,,02-18-2020.csv,4
+Iceland,,,02-29-2020.csv,93
+"IL, USA",,,01-31-2020.csv,44
+India,,,02-11-2020.csv,48
+"Inner Mongolia, China",,,02-10-2020.csv,27
+Iran,,,02-23-2020.csv,35
+Iraq,,,02-29-2020.csv,51
+Ireland,,,02-29-2020.csv,94
+Israel,,,02-28-2020.csv,62
+Italy,,,02-05-2020.csv,49
+Ivory Coast,,,01-27-2020.csv,48
+Japan,,,02-05-2020.csv,31
+"Jervis Bay Territory, Australia",,,03-22-2020.csv,3198
+"Jiangsu, China",,,02-22-2020.csv,9
+"Jiangxi, China",,,01-29-2020.csv,9
+"Jilin, China",,,02-06-2020.csv,25
+"Kenai Peninsula, AK, USA",,,03-22-2020.csv,1148
+Kuwait,,,02-24-2020.csv,72
+"Lackland, TX (From Diamond Princess), USA",,,02-29-2020.csv,116
+"Le Sueur, MN, USA",,,03-22-2020.csv,872
+Lebanon,,,02-28-2020.csv,70
+"Liaoning, China",,,02-05-2020.csv,20
+Lithuania,,,02-28-2020.csv,92
+"London, ON, Canada",,,02-14-2020.csv,61
+"Los Angeles, CA, USA",,,02-09-2020.csv,67
+Luxembourg,,,02-29-2020.csv,96
+"Macau, Macau",,,02-26-2020.csv,49
+"Madison, WI, USA",,,02-19-2020.csv,71
+Malaysia,,,02-17-2020.csv,35
+Mexico,,,02-28-2020.csv,94
+Monaco,,,02-29-2020.csv,98
+"Montreal, QC, Canada",,,02-28-2020.csv,85
+"Nantucket, MA, USA",,,03-22-2020.csv,298
+"Nashua, NH, USA",,,03-22-2020.csv,1033
+Nepal,,,02-23-2020.csv,72
+Netherlands,,,02-27-2020.csv,88
+"New South Wales, Australia",,,02-29-2020.csv,64
+New Zealand,,,02-29-2020.csv,100
+Nigeria,,,02-29-2020.csv,101
+"Ningxia, China",,,01-31-2020.csv,25
+"None, Austria",,,02-25-2020.csv,59
+"None, Iraq",,,02-23-2020.csv,84
+"None, Lebanon",,,02-21-2020.csv,70
+North Ireland,,,02-28-2020.csv,99
+North Macedonia,,,02-28-2020.csv,100
+"Northwest Territories, Canada",,,03-22-2020.csv,3187
+Norway,,,02-26-2020.csv,85
+"Omaha, NE (From Diamond Princess), USA",,,02-23-2020.csv,44
+Oman,,,02-25-2020.csv,60
+"Ontario, Canada",,,01-27-2020.csv,45
+"Orange, CA, USA",,,02-16-2020.csv,71
+"Out-of-state, TN, USA",,,03-22-2020.csv,483
+Pakistan,,,02-28-2020.csv,71
+Philippines,,,02-08-2020.csv,49
+"Plymonth, MA, USA",,,03-22-2020.csv,296
+"Portland, OR, USA",,,02-29-2020.csv,111
+Qatar,,,02-29-2020.csv,103
+"Qinghai, China",,,02-01-2020.csv,35
+"Queensland, Australia",,,02-13-2020.csv,44
+Romania,,,02-26-2020.csv,86
+Russia,,,02-16-2020.csv,53
+"Sacramento, CA, USA",,,02-22-2020.csv,80
+"San Antonio, TX, USA",,,02-20-2020.csv,73
+"San Benito, CA, USA",,,02-25-2020.csv,63
+"San Diego, CA, USA",,,02-27-2020.csv,74
+San Marino,,,02-27-2020.csv,92
+"Santa Clara, CA, USA",,,02-28-2020.csv,77
+"Seattle, WA, USA",,,02-26-2020.csv,96
+"Shaanxi, China",,,02-01-2020.csv,14
+"Shandong, China",,,02-17-2020.csv,9
+"Shanghai, China",,,02-10-2020.csv,13
+"Shanxi, China",,,02-24-2020.csv,26
+"Sichuan, China",,,02-29-2020.csv,14
+Singapore,,,02-16-2020.csv,27
+"Snohomish, WA, USA",,,02-29-2020.csv,113
+"South Australia, Australia",,,02-01-2020.csv,50
+South Korea,,,01-26-2020.csv,39
+Spain,,,02-10-2020.csv,54
+Sri Lanka,,,02-22-2020.csv,73
+"Sterling, AK, USA",,,03-22-2020.csv,1149
+Sweden,,,02-15-2020.csv,67
+Switzerland,,,02-25-2020.csv,81
+"Taiwan, Taiwan",,,01-28-2020.csv,29
+"Tempe, AZ, USA",,,02-15-2020.csv,74
+Thailand,,,02-06-2020.csv,31
+"Tianjin, China",,,02-15-2020.csv,23
+"Tibet, China",,,02-24-2020.csv,74
+"Toronto, ON, Canada",,,02-08-2020.csv,52
+"Travis, CA (From Diamond Princess), USA",,,02-22-2020.csv,50
+"Travis, CA, USA",,,02-21-2020.csv,49
+UK,,,01-31-2020.csv,50
+United Arab Emirates,,,02-10-2020.csv,43
+"Unknown, TN, USA",,,03-22-2020.csv,486
+"Victoria, Australia",,,02-08-2020.csv,45
+Vietnam,,,02-29-2020.csv,49
+"WA, USA",,,01-24-2020.csv,33
+"Western Australia, Australia",,,02-29-2020.csv,76
+"Xinjiang, China",,,01-30-2020.csv,27
+"Yunnan, China",,,02-03-2020.csv,17
+"Zhejiang, China",,,02-07-2020.csv,2

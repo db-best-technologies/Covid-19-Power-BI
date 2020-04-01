@@ -649,20 +649,20 @@ else {
     $FilesLookupHash.Values | Sort-Object -Property CsvFileName | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "") -NoTypeInformation
 }
 
-$MissingLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "" -or $_.Longitude -eq "" )} | Sort-Object -Property 'Location Name Key' -Unique
+$MissingLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "" -or $_.Longitude -eq "" )} | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
 Write-Host "Number of records with Missing Lat/Long: ", $MissingLatLong.Count
 $MissingLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$ZeroForLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "0" -and $_.Longitude -eq "0" )} |  Sort-Object -Property 'Location Name Key' -Unique
+$ZeroForLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "0" -and $_.Longitude -eq "0" )} |  Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
 Write-Host "Number of records with 0 values for Lat and Long: ", $MissingLatLong.Count
 $ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property @{Expression = 'Location Name Key'} -Unique
+$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property @{Expression = 'Location Name Key'} -Unique 
 Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
 $UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique
+$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  
 Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
 $UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -674,7 +674,7 @@ $UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -n
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$OddStateValues = $PriorDataRows | Where-Object {( $_.'Province or State' -eq "None" -or $_.'Province or State' -eq "US" -or $_.'Province or State' -eq "Recovered" )} |  Sort-Object -Property 'Location Name Key' -Unique
+$OddStateValues = $PriorDataRows | Where-Object {( $_.'Province or State' -eq "None" -or $_.'Province or State' -eq "US" -or $_.'Province or State' -eq "Recovered" )} |  Sort-Object -Property 'Location Name Key'# -Unique
 Write-Host "Count of unique values for OddStateValues: ", $OddStateValues.Count
 $OddStateValues | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Odd-State-Values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -693,6 +693,10 @@ $FirstRecoveredReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "R
 Write-Host "Count of unique values for FirstRecoveredReports: ", $FirstRecoveredReports.Count
 $FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
+
+$USStateLatLongData = $PriorDataRows | Where-Object {( $_.'Country or Region' -eq "USA" -and  $_.'Province or State' -ne "" -and $_.'USA State County' -eq "" -and $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State'
+Write-Host "Count of unique values for USStateLatLongData: ", $USStateLatLongData.Count
+$USStateLatLongData | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "US-State-Lat-Long-Data.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 <#
 $DerivedCSVPath = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join ""
