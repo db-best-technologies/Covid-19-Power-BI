@@ -660,7 +660,7 @@ $UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State Co
 Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
 $UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
+$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
 $UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -668,7 +668,7 @@ $SpacesInCountyValue = $PriorDataRows | Where-Object {( $_.'Location Name Key' -
 Write-Host "Count of SpacesInCountyValue: ", $SpacesInCountyValue.Count
 $SpacesInCountyValue | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Spaces-In-County-Value.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
+$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -692,13 +692,13 @@ Write-Host "Count of unique values for FirstRecoveredReports: ", $FirstRecovered
 $FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$USStateLatLongData = $PriorDataRows | Where-Object {( $_.'Country or Region' -eq "USA" -and  $_.'Province or State' -ne "" -and $_.'USA State County' -eq "" -and $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State'
+$USStateLatLongData = $PriorDataRows | Where-Object {( $_.'Country or Region' -eq "USA" -and  $_.'Province or State' -ne "" -and $_.'USA State County' -eq "" -and $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for USStateLatLongData: ", $USStateLatLongData.Count
 $USStateLatLongData | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "US-State-Lat-Long-Data.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 #Create one file for all of the reported locations to use as a look up file for the 'Location Name Key' value
-$UniqueLocationKeys.Count
-$UniqueLocationKeysWithLatLong.Count
+$UniqueLocationKeys[0].psobject.Properties.Name
+$UniqueLocationKeysWithLatLong[0].psobject.Properties.Name
 $MissingLatLong.Count 
 $ZeroForLatLong.Count
 
@@ -723,26 +723,26 @@ foreach ( $Location in $UniqueLocationKeys ) {
 $ArrayMissing | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unresolved-Locations-Lat-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 $ArrayFound.Count
 $UniqueLocationKeys.Count
-$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
+$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'| Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
 #Used https://www.latlong.net/
 $ManualResolution = @(
-      [PSCustomObject]@{'Location Name Key'="Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940" }
-    , [PSCustomObject]@{'Location Name Key'="Australia"; Latitude = "-25.274399"; Longitude = "133.775131" }
-    , [PSCustomObject]@{'Location Name Key'="Bavaria, Germany"; Latitude = "48.917431"; Longitude = "11.407980" }
-    , [PSCustomObject]@{'Location Name Key'="Cruise Ship, Others"; Latitude = "25.695980"; Longitude = "32.645649" }
-    , [PSCustomObject]@{'Location Name Key'="External territories, Australia"; Latitude = "-10.484470"; Longitude = "105.637100" }
-    , [PSCustomObject]@{'Location Name Key'="From Diamond Princess, Israel"; Latitude = "32.089556"; Longitude = "34.797614" }
-    , [PSCustomObject]@{'Location Name Key'="Ivory Coast"; Latitude = "-22.497511"; Longitude = "17.015369" }
-    , [PSCustomObject]@{'Location Name Key'="Jervis Bay Territory, Australia"; Latitude = "-35.140020"; Longitude = "150.728240" }
-    , [PSCustomObject]@{'Location Name Key'="Nashua, NH, USA"; Latitude = "42.757870"; Longitude = "-71.463951" }
-    , [PSCustomObject]@{'Location Name Key'="None, Austria"; Latitude = "47.516232"; Longitude = "14.550072" }
-    , [PSCustomObject]@{'Location Name Key'="None, Iraq"; Latitude = "33.223190"; Longitude = "43.679291" }
-    , [PSCustomObject]@{'Location Name Key'="None, Lebanon"; Latitude = "33.854721"; Longitude = "35.862286" }
-    , [PSCustomObject]@{'Location Name Key'="North Ireland"; Latitude = "54.597271"; Longitude = "-5.930110" }
-    , [PSCustomObject]@{'Location Name Key'="Out-of-state, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" }
-    , [PSCustomObject]@{'Location Name Key'="Plymonth, MA, USA"; Latitude = "41.955750"; Longitude = "-70.664390" }
-    , [PSCustomObject]@{'Location Name Key'="Sterling, AK, USA"; Latitude = "60.537470"; Longitude = "-150.765050" }
-    , [PSCustomObject]@{'Location Name Key'="Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" }
-    , [PSCustomObject]@{'Location Name Key'="Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" }
+      [PSCustomObject]@{'Location Name Key'="Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940"; 'Country or Region' = "USA"; 'Province or State' = "NE"; 'USA State County' = "Ashland";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Australia"; Latitude = "-25.274399"; Longitude = "133.775131"; 'Country or Region' = "Australia"; 'Province or State' = ""; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="Bavaria, Germany"; Latitude = "48.917431"; Longitude = "11.407980" ; 'Country or Region' = "Germany"; 'Province or State' = "Bavaria"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="Cruise Ship, Others"; Latitude = "25.695980"; Longitude = "32.645649" ; 'Country or Region' = "Others"; 'Province or State' = "Cruise Ship"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="External territories, Australia"; Latitude = "-10.484470"; Longitude = "105.637100" ; 'Country or Region' = "Australia"; 'Province or State' = "NE"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="From Diamond Princess, Israel"; Latitude = "32.089556"; Longitude = "34.797614" ; 'Country or Region' = "Israel"; 'Province or State' = "From Diamond Princess"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="Ivory Coast"; Latitude = "-22.497511"; Longitude = "17.015369" ; 'Country or Region' = "Ivory Coast"; 'Province or State' = ""; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="Jervis Bay Territory, Australia"; Latitude = "-35.140020"; Longitude = "150.728240" ; 'Country or Region' = "Australia"; 'Province or State' = "Jervis Bay Territory"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="Nashua, NH, USA"; Latitude = "42.757870"; Longitude = "-71.463951" ; 'Country or Region' = "USA"; 'Province or State' = "NH"; 'USA State County' = "Nashua";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="None, Austria"; Latitude = "47.516232"; Longitude = "14.550072" ; 'Country or Region' = "Austria"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = ""}
+    , [PSCustomObject]@{'Location Name Key'="None, Iraq"; Latitude = "33.223190"; Longitude = "43.679291" ; 'Country or Region' = "Iraq"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="None, Lebanon"; Latitude = "33.854721"; Longitude = "35.862286" ; 'Country or Region' = "Lebanon"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="North Ireland"; Latitude = "54.597271"; Longitude = "-5.930110" ; 'Country or Region' = "Ireland"; 'Province or State' = "Belfast"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Out-of-state, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Out-of-state";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Plymonth, MA, USA"; Latitude = "41.955750"; Longitude = "-70.664390" ; 'Country or Region' = "USA"; 'Province or State' = "MA"; 'USA State County' = "Plymonth";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Sterling, AK, USA"; Latitude = "60.537470"; Longitude = "-150.765050" ; 'Country or Region' = "USA"; 'Province or State' = "AK"; 'USA State County' = "Sterling";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" ; 'Country or Region' = "USA"; 'Province or State' = "CA"; 'USA State County' = "Travis";'FIPS USA State County code' = "99999"}
+    , [PSCustomObject]@{'Location Name Key'="Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Unknown";'FIPS USA State County code' = "99999"}
 )
-$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
+$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code' | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append

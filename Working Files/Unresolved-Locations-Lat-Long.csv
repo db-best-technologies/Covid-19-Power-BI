@@ -1,19 +1,19 @@
-Location Name Key,Latitude,Longitude,CSV File Name,Row Number
-"Ashland, NE, USA",,,02-21-2020.csv,43
-Australia,,,01-25-2020.csv,41
-"Bavaria, Germany",,,01-30-2020.csv,53
-"Cruise Ship, Others",,,02-08-2020.csv,26
-"External territories, Australia",,,03-22-2020.csv,3197
-"From Diamond Princess, Israel",,,02-23-2020.csv,69
-Ivory Coast,,,01-27-2020.csv,48
-"Jervis Bay Territory, Australia",,,03-22-2020.csv,3198
-"Nashua, NH, USA",,,03-22-2020.csv,1033
-"None, Austria",,,02-25-2020.csv,59
-"None, Iraq",,,02-23-2020.csv,84
-"None, Lebanon",,,02-21-2020.csv,70
-North Ireland,,,02-28-2020.csv,99
-"Out-of-state, TN, USA",,,03-22-2020.csv,483
-"Plymonth, MA, USA",,,03-22-2020.csv,296
-"Sterling, AK, USA",,,03-22-2020.csv,1149
-"Travis, CA, USA",,,02-21-2020.csv,49
-"Unknown, TN, USA",,,03-22-2020.csv,486
+Location Name Key,Latitude,Longitude,Country or Region,Province or State,USA State County,FIPS USA State County code
+"Ashland, NE, USA",,,USA,NE,Ashland,
+Australia,,,Australia,,,
+"Bavaria, Germany",,,Germany,Bavaria,,
+"Cruise Ship, Others",,,Others,Cruise Ship,,
+"External territories, Australia",,,Australia,External territories,,
+"From Diamond Princess, Israel",,,Israel,From Diamond Princess,,
+Ivory Coast,,,Ivory Coast,,,
+"Jervis Bay Territory, Australia",,,Australia,Jervis Bay Territory,,
+"Nashua, NH, USA",,,USA,NH,Nashua,
+"None, Austria",,,Austria,None,,
+"None, Iraq",,,Iraq,None,,
+"None, Lebanon",,,Lebanon,None,,
+North Ireland,,,North Ireland,,,
+"Out-of-state, TN, USA",,,USA,TN,Out-of-state,
+"Plymonth, MA, USA",,,USA,MA,Plymonth,
+"Sterling, AK, USA",,,USA,AK,Sterling,
+"Travis, CA, USA",,,USA,CA,Travis,
+"Unknown, TN, USA",,,USA,TN,Unknown,
