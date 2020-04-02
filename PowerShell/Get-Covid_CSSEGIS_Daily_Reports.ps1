@@ -6,7 +6,7 @@ Author:      Bill Ramos, DB Best Technologies
 MoreInfo:    https://github.com/db-best-technologies/Covid-19-Power-BI/blob/master/PowerShell/Get-Covid_CSSEGIS_Daily_Reports.yaml
 #>
 
-$DebugOptions = Set-DebugOptions -WriteFilesToTemp $true -TempPath "C:\Temp\Working Files" -DeleteTempFilesAtStart $true -UpdateLocalFiles $true -AppendDebugData $false -Workaround $true
+$DebugOptions = Set-DebugOptions -WriteFilesToTemp $true -TempPath "C:\Temp\Covid-Temp-Files" -DeleteTempFilesAtStart $false -UpdateLocalFiles $true -AppendDebugData $false -Workaround $true
 Write-Host @DebugOptions 
 
 $Errorlog = @()
@@ -27,7 +27,7 @@ $URLs = @{
     DBBestDerivedData       = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
     DBBestDerivedMetadata   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
     GitHubRoot              = "https://github"
-    GitRawDataFilesMetadata = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", "Daily-Files-Metadata.csv" -join ""
+    GitRawDataFilesMetadata = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", "CSSEGISandData-COVID-19-Derived-FileInfo.csv" -join ""
 }
 $WR = $null
 $WR = Invoke-WebRequest -Uri $URLs.URLReports
@@ -117,7 +117,7 @@ $StateLook = [PSCustomObject]$StateHash
 
 $FilesLookupHash = [ordered]@{ }
 #Check to see files have changes since the last download
-$LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join ""
+$LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived-FileInfo.csv" -join ""
 #$TempDataFilesMetadata = $GitLocalRoot, "\", $TempDataLocation, "Daily-Files-Metadata.csv" -join ""
 $WebRequest = $null
 $WebRequest = Invoke-WebRequest -Uri $URLs.GitRawDataFilesMetadata
@@ -718,17 +718,14 @@ else {
     }
 
     # Write out the new or updated Daily-Files-Metadata.csv
+    $LocalDataFilesMetadata | Split-Path -LeafBase
     if ( $DebugOptions.WriteFilesToTemp) {
-        $OutputPath = ($DebugOptions.TempPath, "\", "Daily-Files-Metadata.yaml" -join "")
-        $FilesLookupHash | ConvertTo-Yaml | Out-File -Path $OutputPath
+        $OutputPath = ($DebugOptions.TempPath, "\", ($LocalDataFilesMetadata | Split-Path -LeafBase), ".yaml" -join "")
+        $FilesInfo | ConvertTo-Yaml | Out-File -Path $OutputPath
     }
     if ( $DebugOptions.UpdateLocalFiles ) {
-        $OutputPath = ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "")
-        if ( "Hashtable" -eq ($FilesLookupHash.Values | Sort-Object -top 1 ).GetType().Name ) {
-            $FilesLookupHash.Values | ConvertTo-PsCustomObjectFromHashtable | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
-        }
-        else {
-            $FilesLookupHash.Values | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+        $OutputPath = $LocalDataFilesMetadata
+        $FilesInfo | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
         }
     }
 

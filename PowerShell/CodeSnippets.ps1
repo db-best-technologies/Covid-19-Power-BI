@@ -1,7 +1,7 @@
 function Set-DebugOptions {
     param(
         [bool]$WriteFilesToTemp = $true
-        , [string]$TempPath = "C:\Temp\Working Files"
+        , [string]$TempPath = "C:\Temp\Covid-Temp-Files"
         , [bool]$DeleteTempFilesAtStart = $true
         , [bool]$UpdateLocalFiles = $true
         , [bool]$AppendDebugData = $false
@@ -16,6 +16,24 @@ function Set-DebugOptions {
         LastRun                = Get-Date
         AppendDebugData        = $AppendDebugData
         Workaround             = $Workaround
+    }
+    # Check to see if the temp folder exists and created it if it doesn't exist
+    if (-not (Test-Path -Path $TempPath ) ) {
+        $Root = ( Split-Path -Path $TempPath ), "\" -join ""
+        $Leaf = Split-Path -Path $TempPath -Leaf
+        if ( -not (Test-Path -Path $Root) ) {
+            $Root = $env:Temp, "\" -join ""
+            $TempPath = $Root, $Leaf -Join ""
+            $DebugOptions.TempPath = $TempPath
+            $DirObj = $null
+            $DirObj = New-Item -Path $Root -Name $Leaf -ItemType "directory"
+            if ($null -eq $DirObj -and $WriteFilesToTemp ) {
+                Write-Host "Unable to create directory: ", $TempPath, " Switching WriteFilesToTemp as false"
+                Start-Sleep 1
+                $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+                if ( $Continue -ne "Yes") { Exit 0 }
+            }
+        }
     }
     if ( $DebugOptions.DeleteTempFilesAtStart -eq $true ) {
         $Files = Get-ChildItem $DebugOptions.TempPath -Recurse
@@ -114,4 +132,48 @@ if (1 -eq 2 ) {
         $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
         if ( $Continue -ne "Yes") { Exit 0 }
     }
+}
+
+if (1 -eq 2) {
+    $FilesInfoYaml = Get-Content -LiteralPath "C:\Users\Bill\OneDrive\Bill\Documents\My GitLab\Covid-19-Power-BI\Working Files\CSSEGISandData-COVID-19-Derived-FileInfo.yaml" 
+    $FilesInfoYamlArray = $FilesInfoYaml | ConvertFrom-Yaml
+    $FilesInfo = @()
+    $FilesEmptyPSObject = [PSCustomObject]@{
+        CsvFileName         = ""
+        DateLastModifiedUTC = ""
+        PeriodEnding        = ""
+        NeedsUpdating       = ""
+        CSVRawURL           = ""
+        CSVPageURL          = ""
+        FileNumber          = ""
+    }
+
+    for ( $YR = 0; $YR -lt $FilesInfoYamlArray.Count; $YR++) {
+        $AV = $FilesInfoYamlArray[ $YR ]
+        if (  "" -eq $AV.Values ) {
+            Write-Host "Processing : $($AV.Keys[0])"
+            if ( $YR -gt 0 ) {
+                Write-Host "Completed processing for: ", $FileObj.CsvFileName
+                $FileObj
+                <#            Start-Sleep 1
+            $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+            if ( $Continue -ne "Yes") { Exit 0 }
+#>
+                $FilesInfo += $FileObj
+                $FileObj = $FilesEmptyPSObject.PSObject.copy()
+            }
+            else {
+                $FileObj = $FilesEmptyPSObject.PSObject.copy()
+            }
+        }
+        else {
+            if ( "" -ne $AV.Keys -and "" -ne $AV.Values ) {
+                $FileObj.($AV.Keys) = [String]$AV.Values
+            }
+            else { 
+                Write-Host "There is a blank item in FilesInfoYamlArray for item: ", $YR
+            }
+        }
+    }
+    $FilesInfo
 }
