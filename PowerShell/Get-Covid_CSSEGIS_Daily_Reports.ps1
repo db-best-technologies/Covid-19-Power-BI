@@ -1,5 +1,4 @@
 Import-Module powershell-yaml
-
 <#
 Title:       Get-Covid_CSSEGIS_Daily_Reports.ps1
 Description: Create an CSV file based on daily reports from in the https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports folder.
@@ -7,6 +6,10 @@ Author:      Bill Ramos, DB Best Technologies
 MoreInfo:    https://github.com/db-best-technologies/Covid-19-Power-BI/blob/master/PowerShell/Get-Covid_CSSEGIS_Daily_Reports.yaml
 #>
 
+$DebugOptions = Set-DebugOptions -WriteFilesToTemp $true -TempPath "C:\Temp\Working Files" -DeleteTempFilesAtStart $true -UpdateLocalFiles $true -AppendDebugData $false -Workaround $true
+Write-Host @DebugOptions 
+
+$Errorlog = @()
 $GitLocalRoot = Get-Location
 $LeafDataFile = "CSSEGISandData-COVID-19-Derived"
 $DataDir = "Data-Files"
@@ -26,8 +29,15 @@ $URLs = @{
     GitHubRoot              = "https://github"
     GitRawDataFilesMetadata = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", "Daily-Files-Metadata.csv" -join ""
 }
-
+$WR = $null
 $WR = Invoke-WebRequest -Uri $URLs.URLReports
+if ( $null -eq $WR.Content ) {
+    $Errorlog += $WR.Headers
+    $WR.Headers | ft
+    Start-Sleep -Seconds 1
+    $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+    if ( $Continue -ne "Yes") { Exit 0 }
+}
 $URLs.Add( "SourceDataURI", $WR.BaseResponse.RequestMessage.RequestUri.AbsoluteUri )
 $URLs.Add( "SourceAuthority", $WR.BaseResponse.RequestMessage.RequestUri.Authority )
 $URLs.Add( "RetrievedOnUTC", $WR.BaseResponse.Headers.Date.UtcDateTime )
@@ -98,8 +108,6 @@ $StateReplacements = [PSCustomObject]@{
 # $file, $RowNumber = @( 63, 3230 )   # Recovered USA
 # $file, $RowNumber = @( 63, 3230 ) 
 
-$ErrorLog = @()
-
 $StatesCsv = Import-Csv -Path ($GitLocalRoot, $DataDir, "USPSTwoLetterStateAbbreviations.csv" -join "\")
 $StateHash = @{ }
 for ($s = 0; $s -lt $StatesCsv.Length; $s++ ) {
@@ -107,12 +115,19 @@ for ($s = 0; $s -lt $StatesCsv.Length; $s++ ) {
 }
 $StateLook = [PSCustomObject]$StateHash
 
-$FilesLookupHash = @{}
+$FilesLookupHash = [ordered]@{ }
 #Check to see files have changes since the last download
 $LocalDataFilesMetadata = $GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join ""
 #$TempDataFilesMetadata = $GitLocalRoot, "\", $TempDataLocation, "Daily-Files-Metadata.csv" -join ""
 $WebRequest = $null
 $WebRequest = Invoke-WebRequest -Uri $URLs.GitRawDataFilesMetadata
+if ( $null -eq $WebRequest.Content ) {
+    $Errorlog += $WebRequest.Headers
+    $WebRequest.Headers | ft
+    Start-Sleep -Seconds 1
+    $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+    if ( $Continue -ne "Yes") { Exit 0 }
+}
 if ( $null -ne $WebRequest -and $null -ne $WebRequest.Content) {
     #Download the Metadata file from our GitHub project
     $WebRequest.Content | Out-File -FilePath $LocalDataFilesMetadata
@@ -128,16 +143,12 @@ if ( $null -ne $WebRequest -and $null -ne $WebRequest.Content) {
         }
         $FileNumber = 0
         foreach ($FileRef in $FilesInfo) {
-            if ( $FileRef.FileNumber -eq -1) {
-                $FileRef.FileNumber = $FileNumber
-            }
+            $FileRef.FileNumber = $FileNumber
             $FilesLookupHash.Add($FileRef.CsvFileName, $FileRef)
             $FileNumber ++
+            
         }
-
-        $NewestFile = $FilesInfo | Sort-Object FileNumber -Bottom 1
-        $NextFileNumber = $NewestFile.FileNumber + 1
-        # $FilesLookupHash.'03-27-2020.csv'.DateLastModifiedUTC
+        $NextFileNumber = $FileNumber
     }
     else {
         $RowError = @{
@@ -167,22 +178,34 @@ else {
     $NextFileNumber = 0
   
 }
-$GroupedFileRows = @{ }
 
+if ( $DebugOptions.WriteFilesToTemp) {
+    $FilesLookupHash | ConvertTo-Yaml | Out-File ($DebugOptions.TempPath, "\FileLookupHash.yaml" -join "")
+}
+
+$GroupedFileRows = @{ }
 # Load in the local or web version of the last data file if it exists
 $PriorDataRows = @()
 $WebRequest = $null
 $WebRequest = Invoke-WebRequest -Uri $URLs.DBBestDerivedData
+if ( $null -eq $WebRequest.Content ) {
+    $Errorlog += $WebRequest.Headers
+    $WebRequest.Headers | ft
+    Start-Sleep -Seconds 1
+    $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+    if ( $Continue -ne "Yes") { Exit 0 }
+}
 if ( $null -ne $WebRequest.Content ) {
-    $WebRequest.Content | Out-File -FilePath "$($GitLocalRoot)\Working Files\CheckedInDerivedFiles.csv"
-    $PriorDataRows = Import-Csv -Path $LocalDataFile 
+    $WebRequest.Content | Out-File -FilePath ( $DebugOptions.TempPath, "\CSSEGISandData-COVID-19-Derived.csv" -join "")
+    $PriorDataRows = Import-Csv -Path ( $DebugOptions.TempPath, "\CSSEGISandData-COVID-19-Derived.csv" -join "")
     if ($null -eq $PriorDataRows[0].psobject.properties.Match( 'Date Reported') ) {
         $PriorDataRows | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value ""
     }
 
-
     $MissingLatLong = @()
     $ZeroForLatLong = @()
+    $DaysInDerived = @()
+
     # Recreate the hash table of file and their data
     $timer = [Diagnostics.Stopwatch]::StartNew()
     $GroupedFileRows = @{ }
@@ -192,7 +215,7 @@ if ( $null -ne $WebRequest.Content ) {
         $FileRows = @()
         $CurrentFile = $PriorDataRows[0].'CSV File Name'
         for ( $Element = 0; $Element -lt $PriorDataRows.Count; $Element ++ ) {
-            
+            # First time clean up when Date Reported wasn't there. 
             if ( $PriorDataRows[$Element].'Csv File Name' -eq $CurrentFile) {
                 $DateReported = $CurrentFile.Split('.csv')[0]
                 $PriorDataRows[$Element].'Date Reported' = $DateReported
@@ -201,14 +224,20 @@ if ( $null -ne $WebRequest.Content ) {
             else {
                 Write-Host ("Capturing FileNumber = ", $FileNumber, "Current file name = ", $CurrentFile, " Elapsed time so for = ", $timer.Elapsed.TotalSeconds -join "") 
                 $GroupedFileRows.Add( $CurrentFile, $FileRows)
+                if ($DebugOptions.WriteFilesToTemp ) {
+                    $FileRows | Export-Csv -Path ($DebugOptions.TempPath, "\From-Git-CurrentFile-", $CurrentFile -join "") -NoTypeInformation -UseQuotes AsNeeded
+                }
+
                 $FileRows = @()
                 $CurrentFile = $PriorDataRows[$Element].'CSV File Name'
                 $DateReported = $CurrentFile.Split('.csv')[0]
                 $PriorDataRows[$Element].'Date Reported' = $DateReported
+                $PriorDataRows[$Element].'Row Number' = ($PriorDataRows[$Element].'Row Number')
+
+
                 $FileRows += $PriorDataRows[$Element]
             }
         }
-
 
         Write-Host $timer.Elapsed.TotalSeconds
         $timer = $null
@@ -218,17 +247,31 @@ if ( $null -ne $WebRequest.Content ) {
     else {
         $RowError = @{
             Severity   = "Derived data file not found"
-            Process    = "Retrieving CSV web page URL [$($URLs.GitRawDataFilesMetadata)]"
-            Message    = "File not found"
+            Process    = "Retrieving CSV web page URL [$($URLs.DBBestDerivedData)]"
+            Message    = "Need missing data look for the "
             Correction = "Download all files"
         }
         $ErrorLog += $RowError
         $RowError
     }
 }
+
 $ChangeInGitHubFiles = $False
 $arrayNewCSVData = @()
 
+if ($GroupedFileRows.Count -ne $FilesLookupHash.Count ) {
+    # Values should be the same unless there was a data loading issue
+    $RowError = @{
+        Severity              = "Missing data in derived table"
+        Process               = "Processing data from  [$($CSVPageURL)]"
+        Message               = "Count mismatch where GroupedFileRows.Count -ne FilesLookupHash.Count ", $GroupedFileRows.Count, " -ne " , $FilesLookupHash.Count -join ""
+        Correction            = "Tagging missing data as needing download in FilesLookupHash"
+        FilesLookupHashSource = $URLs.GitRawDataFilesMetadata
+    }
+    $ErrorLog += $RowError
+    $RowError
+    Start-Sleep -Seconds 5
+}
 
 foreach ( $Link in $WR.Links) {
     if ( $Link.href -like "*2020.csv" ) {
@@ -238,7 +281,15 @@ foreach ( $Link in $WR.Links) {
         $CSVPageURL = $URLs.URLReports, $CSVFileName -join "/"
 
         # Retrieve the GitHub page for the CSV file to pull out the date for the last check-in
+        $WR_Page = $null
         $WR_Page = Invoke-WebRequest -Uri $CSVPageURL
+        if ( $null -eq $WR_Page.Content ) {
+            $Errorlog += $WR_Page.Headers
+            $WR_Page.Headers | ft
+            Start-Sleep -Seconds 1
+            $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+            if ( $Continue -ne "Yes") { Exit 0 }
+        }
         Write-Host "Processing file $CSVFileName"
         if ( $null -eq ($WR_Page.Content.split("<relative-time datetime=")[1]) ) {
             $RowError = @{
@@ -271,7 +322,7 @@ foreach ( $Link in $WR.Links) {
         
 
         # If the file was loaded before, check to see if the current modified date is > than the one processed
-        if ($null -ne $FilesLookupHash.$CsvFileName ) {
+        if ($null -ne $FilesLookupHash.$CsvFileName -and $null -ne $GroupedFileRows.$CSVFileName) {
             #File was previously loaded
             if ( $DateLastModifiedUTC -gt $FilesLookupHash.$CsvFileName.DateLastModifiedUTC ) {
                 # Data was changed since the last download
@@ -291,19 +342,36 @@ foreach ( $Link in $WR.Links) {
                 $RowError
 
                 # Get the updated daily CSV file using the $CSVRawURL
+                $WR_CSV = $null
                 $WR_CSV = Invoke-WebRequest -Uri $CSVRawURL
+                if ( $null -eq $WR_CSV.Content ) {
+                    $Errorlog += $WR_CSV.Headers
+                    $WR_CSV.Headers | ft
+                    Start-Sleep -Seconds 1
+                    $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+                    if ( $Continue -ne "Yes") { Exit 0 }
+                }
                 $WR_CSV.Content | Out-File -FilePath ($TempDataLocation, $CSVFileName -join "")
                 # Write back out the CSV files to Temp location for debugging
                 $CSVData = Import-Csv -Path ($TempDataLocation, $CSVFileName -join "")
                 $PeriodEnding = $CSVFileName.Split('.csv')[0]
                 $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
                 $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
-                $CSVData | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+                if ( $DebugOptions.WriteFilesToTemp) {
+                    $OutputPath = ($DebugOptions.TempPath, "\", $CSVFileName -join "")
+                    $CSVData | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+                }
+                if ( $DebugOptions.UpdateLocalFiles ) {
+                    $OutputPath = ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") 
+                    $CSVData | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+                }
                 $FileMetadata = $FilesLookupHash.$CSVFileName
                 
                 $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
                 $arrayNewCSVData += $FileMetadata
             }
+
         }
         else {
             $RowError = @{
@@ -321,7 +389,15 @@ foreach ( $Link in $WR.Links) {
             # New file  - The end result is each record is added as a PSCustomObject to the $CSVData array.
             # To load the CSV correctly into memory, we need to write it out to a file and read it back in. 
             # Get the daily CSV file using the $CSVRawURL
+            $WR_CSV = $null
             $WR_CSV = Invoke-WebRequest -Uri $CSVRawURL
+            if ( $null -eq $WR_CSV.Content ) {
+                $Errorlog += $WR_CSV.Headers
+                $WR_CSV.Headers | ft
+                Start-Sleep -Seconds 1
+                $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+                if ( $Continue -ne "Yes") { Exit 0 }
+            }
             $WR_CSV.Content | Out-File -FilePath ($TempDataLocation, $CSVFileName -join "")
             # Write back out the CSV files to Temp location for debugging
             $CSVData = Import-Csv -Path ($TempDataLocation, $CSVFileName -join "")
@@ -331,7 +407,15 @@ foreach ( $Link in $WR.Links) {
             $PeriodEnding = $CSVFileName.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
             $CSVData | Add-Member -MemberType NoteProperty -Name 'CSV File Name' -Value $CSVFileName
             $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
-            $CSVData | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") -NoTypeInformation -UseQuotes AsNeeded
+
+            if ( $DebugOptions.WriteFilesToTemp) {
+                $OutputPath = ($DebugOptions.TempPath, "\", $CSVFileName -join "")
+                $CSVData | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+            }
+            if ( $DebugOptions.UpdateLocalFiles ) {
+                $OutputPath = ($GitLocalRoot, "\Working Files\", "$CSVFileName" -join "") 
+                $CSVData | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+            }
             $FileMetadata = [PSCustomObject]@{
                 CsvFileName         = $CSVFileName
                 PeriodEnding        = $PeriodEnding
@@ -366,14 +450,6 @@ else {
 
     # Work the data in the $CSVLinks array by the CsvTodayKey (report date)
     $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
-
-    #Check to make sure the array is sorted
-    $SortedCSVs[0].CsvData[0]
-    $SortedCSVs[1].CsvData[0]
-
-
-    #Clear out the old array to release memory
-    Remove-Variable 'arrayNewCSVData'
 
     # Start the process of reading each of the file records and the rows within them
     $UnpivotedRows = @()
@@ -457,7 +533,7 @@ else {
                 # First look for replacement in $StateReplacements
                 if ( $null -ne $StateReplacements.($Mapping.'Province or State')) {
                     $Value = $StateReplacements.($Mapping.'Province or State')
-                    $Mapping.'Province or State' = $Value.Ttim()
+                    $Mapping.'Province or State' = $Value.Trim()
                 }
                 if ( $Mapping.'Province or State' -like "*, *" ) {
                     # Looking at older file format. New format as the full state name
@@ -604,7 +680,8 @@ else {
         }
     
     }
-    # Write out the updated CSSEGISandData-COVID-19-Derived.csv
+
+    # Write out the updated CSSEGISandData-COVID-19-Derived.csv as needed
     $FirstTime = $True
     $OrderedKeys = $GroupedFileRows.Keys | Sort-Object
     $SelectColumnList = @(
@@ -613,15 +690,8 @@ else {
         , 'Attribute'
         , 'Cumulative Value'
         , 'Change Since Prior Day'
-#        , 'Latitude'
-#        , 'Longitude'
-#        , 'Country or Region'
-#        , 'Province or State'
         , 'CSV File Name'
-#        , 'USA State County'
-#        , 'FIPS USA State County code'
         , 'Last Updated UTC'
-        , 'File Number'
         , 'Row Number'
     )
     $SortList = @(
@@ -631,68 +701,95 @@ else {
     )
 
     foreach ( $KeyValue in $OrderedKeys) {
-        
+        # $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+        # if ( $Continue -ne "Yes") { Exit 0 }
         Write-Host $KeyValue
   
-        if ( $FirstTime -eq $true) {
+        if ( $FirstTime -eq $true -and $DebugOptions.UpdateLocalFiles) {
             $GroupedFileRows.$KeyValue | Select-Object -Property $SelectColumnList | Sort-Object -Property $SortList | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
             $FirstTime = $false
         }
         else {
             $GroupedFileRows.$KeyValue | Select-Object -Property $SelectColumnList | Sort-Object -Property $SortList | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "CSSEGISandData-COVID-19-Derived.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
         }
+        if ( $DebugOptions.WriteFilesToTemp ) {
+            $GroupedFileRows.$KeyValue | Select-Object -Property $SelectColumnList | Sort-Object -Property $SortList | Export-Csv -Path ( $DebugOptions.TempPath , "\", "CSSEGISandData-COVID-19-Derived-", $KeyValue -join "") -NoTypeInformation -UseQuotes AsNeeded
+        }
     }
 
     # Write out the new or updated Daily-Files-Metadata.csv
-    $FilesLookupHash.Values | Sort-Object -Property CsvFileName | Export-Csv -Path ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "") -NoTypeInformation
+    if ( $DebugOptions.WriteFilesToTemp) {
+        $OutputPath = ($DebugOptions.TempPath, "\", "Daily-Files-Metadata.yaml" -join "")
+        $FilesLookupHash | ConvertTo-Yaml | Out-File -Path $OutputPath
+    }
+    if ( $DebugOptions.UpdateLocalFiles ) {
+        $OutputPath = ($GitLocalRoot, "\", $DataDir, "\", "Daily-Files-Metadata.csv" -join "")
+        if ( "Hashtable" -eq ($FilesLookupHash.Values | Sort-Object -top 1 ).GetType().Name ) {
+            $FilesLookupHash.Values | ConvertTo-PsCustomObjectFromHashtable | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+        }
+        else {
+            $FilesLookupHash.Values | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+        }
+    }
+
 }
 
-$MissingLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "" -or $_.Longitude -eq "" )} | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
-Write-Host "Number of records with Missing Lat/Long: ", $MissingLatLong.Count
-$MissingLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
+$Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+if ( $Continue -ne "Yes") { Exit 0 }
 
-$ZeroForLatLong = $PriorDataRows | Where-Object {( $_.Latitude -eq "0" -and $_.Longitude -eq "0" )} |  Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude, 'CSV File Name', 'Row Number'
+if ($DebugOptions.WriteFilesToTemp ) {
+    $OutputPath = $DebugOptions.TempPath, "\", "Missing-Lat-Long-Records.csv" -join "" 
+    $MissingLatLong = $PriorDataRows | Where-Object { ( $_.Latitude -eq "" -or $_.Longitude -eq "" ) } | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'CSV File Name', 'Row Number'
+    Write-Host "Number of records with Missing Lat/Long: ", $MissingLatLong.Count
+    $MissingLatLong | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+}
+if ($DebugOptions.UpdateLocalFiles) {
+    $OutputPath = $GitLocalRoot, "\Working Files\", "Missing-Lat-Long-Records.csv" -join ""
+    Write-Host "Number of records with Missing Lat/Long: ", $MissingLatLong.Count
+    $MissingLatLong | Export-Csv -Path $OutputPath -NoTypeInformation -UseQuotes AsNeeded
+}
+$ZeroForLatLong = $PriorDataRows | Where-Object { ( $_.Latitude -eq "0" -and $_.Longitude -eq "0" ) } | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'CSV File Name', 'Row Number'
 Write-Host "Number of records with 0 values for Lat and Long: ", $MissingLatLong.Count
 $ZeroForLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Zeros-For-Lat-Long-Records.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object {( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" )} | Sort-Object -Property @{Expression = 'Location Name Key'} -Unique 
+$UnknownOrUnassignedCounties = $PriorDataRows | Where-Object { ( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" ) } | Sort-Object -Property @{Expression = 'Location Name Key' } -Unique 
 Write-Host "County values where values are Unknown or Unassigned: ", $UnknownOrUnassignedCounties.Count
 $UnknownOrUnassignedCounties | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unassigned-or-Unknown-Counties.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique  | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
+$UniqueLocationKeys = $PriorDataRows | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
 $UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$SpacesInCountyValue = $PriorDataRows | Where-Object {( $_.'Location Name Key' -eq " Norfolk, MA, USA" -or $_.'Location Name Key' -eq " Montreal, QC, Canada" )}
+$SpacesInCountyValue = $PriorDataRows | Where-Object { ( $_.'Location Name Key' -eq " Norfolk, MA, USA" -or $_.'Location Name Key' -eq " Montreal, QC, Canada" ) }
 Write-Host "Count of SpacesInCountyValue: ", $SpacesInCountyValue.Count
 $SpacesInCountyValue | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Spaces-In-County-Value.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object {( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
+$UniqueLocationKeysWithLatLong = $PriorDataRows | Where-Object { ( $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" ) } | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for 'Location Name Key' with Lat and Long: ", $UniqueLocationKeysWithLatLong.Count
 $UniqueLocationKeysWithLatLong | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-With-Lat-and-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
-$OddStateValues = $PriorDataRows | Where-Object {( $_.'Province or State' -eq "None" -or $_.'Province or State' -eq "US" -or $_.'Province or State' -eq "Recovered" )} |  Sort-Object -Property 'Location Name Key'# -Unique
+$OddStateValues = $PriorDataRows | Where-Object { ( $_.'Province or State' -eq "None" -or $_.'Province or State' -eq "US" -or $_.'Province or State' -eq "Recovered" ) } | Sort-Object -Property 'Location Name Key'# -Unique
 Write-Host "Count of unique values for OddStateValues: ", $OddStateValues.Count
 $OddStateValues | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Odd-State-Values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$FirstConfirmedReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Confirmed" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+$FirstConfirmedReports = $PriorDataRows | Where-Object { ( $_.'Attribute' -eq "Confirmed" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  ) } | Sort-Object -Property @{Expression = 'Location Name Key' }, @{Expression = 'CSV File Name' } -Unique
 Write-Host "Count of unique values for FirstConfirmedReports: ", $FirstConfirmedReports.Count
 $FirstConfirmedReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Confirmed-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$FirstDeathReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Deaths" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+$FirstDeathReports = $PriorDataRows | Where-Object { ( $_.'Attribute' -eq "Deaths" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  ) } | Sort-Object -Property @{Expression = 'Location Name Key' }, @{Expression = 'CSV File Name' } -Unique
 Write-Host "Count of unique values for FirstDeathReports: ", $FirstDeathReports.Count
 $FirstDeathReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Deaths-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$FirstRecoveredReports =  $PriorDataRows | Where-Object {( $_.'Attribute' -eq "Recovered" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  )} | Sort-Object -Property @{Expression = 'Location Name Key'}, @{Expression = 'CSV File Name'} -Unique
+$FirstRecoveredReports = $PriorDataRows | Where-Object { ( $_.'Attribute' -eq "Recovered" -and $_.'Cumulative Value' -ne "0" -and $_.'Cumulative Value' -ne ""  ) } | Sort-Object -Property @{Expression = 'Location Name Key' }, @{Expression = 'CSV File Name' } -Unique
 Write-Host "Count of unique values for FirstRecoveredReports: ", $FirstRecoveredReports.Count
 $FirstRecoveredReports | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "First-Recovered-Reports.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
 
-$USStateLatLongData = $PriorDataRows | Where-Object {( $_.'Country or Region' -eq "USA" -and  $_.'Province or State' -ne "" -and $_.'USA State County' -eq "" -and $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" )} | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'
+$USStateLatLongData = $PriorDataRows | Where-Object { ( $_.'Country or Region' -eq "USA" -and $_.'Province or State' -ne "" -and $_.'USA State County' -eq "" -and $_.Latitude -ne "0" -and $_.Latitude -ne "" -and $_.Longitude -ne "0" -and $_.Longitude -ne "" ) } | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code'
 Write-Host "Count of unique values for USStateLatLongData: ", $USStateLatLongData.Count
 $USStateLatLongData | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "US-State-Lat-Long-Data.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 
@@ -705,12 +802,13 @@ $ZeroForLatLong.Count
 $ArrayMissing = @()
 $ArrayFound = @()
 foreach ( $Location in $UniqueLocationKeys ) {
-    if ( ( $Location.Latitude -eq "0" -and $Location.Longitude - "0" ) -or ($Location.Latitude -eq ""  -or $Location.Longitude -eq "") ) {
-        $LatLong = $UniqueLocationKeysWithLatLong | Where-Object { ( $_.'Location Name Key' -eq $Location.'Location Name Key' )}
+    if ( ( $Location.Latitude -eq "0" -and $Location.Longitude - "0" ) -or ($Location.Latitude -eq "" -or $Location.Longitude -eq "") ) {
+        $LatLong = $UniqueLocationKeysWithLatLong | Where-Object { ( $_.'Location Name Key' -eq $Location.'Location Name Key' ) }
         if ( $null -eq $LatLong ) {
 
             $ArrayMissing += $Location
-        } else {
+        }
+        else {
             $Location.Latitude = $LatLong[0].Latitude
             $Location.Longitude = $LatLong[0].Longitude
             $ArrayFound += $Location
@@ -723,26 +821,26 @@ foreach ( $Location in $UniqueLocationKeys ) {
 $ArrayMissing | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unresolved-Locations-Lat-Long.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded
 $ArrayFound.Count
 $UniqueLocationKeys.Count
-$ArrayFound | Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code'| Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
+$ArrayFound | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code' | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded 
 #Used https://www.latlong.net/
 $ManualResolution = @(
-      [PSCustomObject]@{'Location Name Key'="Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940"; 'Country or Region' = "USA"; 'Province or State' = "NE"; 'USA State County' = "Ashland";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Australia"; Latitude = "-25.274399"; Longitude = "133.775131"; 'Country or Region' = "Australia"; 'Province or State' = ""; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="Bavaria, Germany"; Latitude = "48.917431"; Longitude = "11.407980" ; 'Country or Region' = "Germany"; 'Province or State' = "Bavaria"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="Cruise Ship, Others"; Latitude = "25.695980"; Longitude = "32.645649" ; 'Country or Region' = "Others"; 'Province or State' = "Cruise Ship"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="External territories, Australia"; Latitude = "-10.484470"; Longitude = "105.637100" ; 'Country or Region' = "Australia"; 'Province or State' = "NE"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="From Diamond Princess, Israel"; Latitude = "32.089556"; Longitude = "34.797614" ; 'Country or Region' = "Israel"; 'Province or State' = "From Diamond Princess"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="Ivory Coast"; Latitude = "-22.497511"; Longitude = "17.015369" ; 'Country or Region' = "Ivory Coast"; 'Province or State' = ""; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="Jervis Bay Territory, Australia"; Latitude = "-35.140020"; Longitude = "150.728240" ; 'Country or Region' = "Australia"; 'Province or State' = "Jervis Bay Territory"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="Nashua, NH, USA"; Latitude = "42.757870"; Longitude = "-71.463951" ; 'Country or Region' = "USA"; 'Province or State' = "NH"; 'USA State County' = "Nashua";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="None, Austria"; Latitude = "47.516232"; Longitude = "14.550072" ; 'Country or Region' = "Austria"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = ""}
-    , [PSCustomObject]@{'Location Name Key'="None, Iraq"; Latitude = "33.223190"; Longitude = "43.679291" ; 'Country or Region' = "Iraq"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="None, Lebanon"; Latitude = "33.854721"; Longitude = "35.862286" ; 'Country or Region' = "Lebanon"; 'Province or State' = "None"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="North Ireland"; Latitude = "54.597271"; Longitude = "-5.930110" ; 'Country or Region' = "Ireland"; 'Province or State' = "Belfast"; 'USA State County' = "";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Out-of-state, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Out-of-state";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Plymonth, MA, USA"; Latitude = "41.955750"; Longitude = "-70.664390" ; 'Country or Region' = "USA"; 'Province or State' = "MA"; 'USA State County' = "Plymonth";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Sterling, AK, USA"; Latitude = "60.537470"; Longitude = "-150.765050" ; 'Country or Region' = "USA"; 'Province or State' = "AK"; 'USA State County' = "Sterling";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" ; 'Country or Region' = "USA"; 'Province or State' = "CA"; 'USA State County' = "Travis";'FIPS USA State County code' = "99999"}
-    , [PSCustomObject]@{'Location Name Key'="Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Unknown";'FIPS USA State County code' = "99999"}
+    [PSCustomObject]@{'Location Name Key' = "Ashland, NE, USA"; Latitude = "41.036140"; Longitude = "-96.360940"; 'Country or Region' = "USA"; 'Province or State' = "NE"; 'USA State County' = "Ashland"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Australia"; Latitude = "-25.274399"; Longitude = "133.775131"; 'Country or Region' = "Australia"; 'Province or State' = ""; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "Bavaria, Germany"; Latitude = "48.917431"; Longitude = "11.407980" ; 'Country or Region' = "Germany"; 'Province or State' = "Bavaria"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "Cruise Ship, Others"; Latitude = "25.695980"; Longitude = "32.645649" ; 'Country or Region' = "Others"; 'Province or State' = "Cruise Ship"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "External territories, Australia"; Latitude = "-10.484470"; Longitude = "105.637100" ; 'Country or Region' = "Australia"; 'Province or State' = "NE"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "From Diamond Princess, Israel"; Latitude = "32.089556"; Longitude = "34.797614" ; 'Country or Region' = "Israel"; 'Province or State' = "From Diamond Princess"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "Ivory Coast"; Latitude = "-22.497511"; Longitude = "17.015369" ; 'Country or Region' = "Ivory Coast"; 'Province or State' = ""; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "Jervis Bay Territory, Australia"; Latitude = "-35.140020"; Longitude = "150.728240" ; 'Country or Region' = "Australia"; 'Province or State' = "Jervis Bay Territory"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "Nashua, NH, USA"; Latitude = "42.757870"; Longitude = "-71.463951" ; 'Country or Region' = "USA"; 'Province or State' = "NH"; 'USA State County' = "Nashua"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "None, Austria"; Latitude = "47.516232"; Longitude = "14.550072" ; 'Country or Region' = "Austria"; 'Province or State' = "None"; 'USA State County' = ""; 'FIPS USA State County code' = "" }
+    , [PSCustomObject]@{'Location Name Key' = "None, Iraq"; Latitude = "33.223190"; Longitude = "43.679291" ; 'Country or Region' = "Iraq"; 'Province or State' = "None"; 'USA State County' = ""; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "None, Lebanon"; Latitude = "33.854721"; Longitude = "35.862286" ; 'Country or Region' = "Lebanon"; 'Province or State' = "None"; 'USA State County' = ""; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "North Ireland"; Latitude = "54.597271"; Longitude = "-5.930110" ; 'Country or Region' = "Ireland"; 'Province or State' = "Belfast"; 'USA State County' = ""; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Out-of-state, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Out-of-state"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Plymonth, MA, USA"; Latitude = "41.955750"; Longitude = "-70.664390" ; 'Country or Region' = "USA"; 'Province or State' = "MA"; 'USA State County' = "Plymonth"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Sterling, AK, USA"; Latitude = "60.537470"; Longitude = "-150.765050" ; 'Country or Region' = "USA"; 'Province or State' = "AK"; 'USA State County' = "Sterling"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Travis, CA, USA"; Latitude = "38.291790"; Longitude = "-121.921097" ; 'Country or Region' = "USA"; 'Province or State' = "CA"; 'USA State County' = "Travis"; 'FIPS USA State County code' = "99999" }
+    , [PSCustomObject]@{'Location Name Key' = "Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Unknown"; 'FIPS USA State County code' = "99999" }
 )
-$ManualResolution |Select-Object 'Location Name Key',Latitude,Longitude,'Country or Region','Province or State', 'USA State County', 'FIPS USA State County code' | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
+$ManualResolution | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code' | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
