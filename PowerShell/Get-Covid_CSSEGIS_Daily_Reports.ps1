@@ -737,6 +737,10 @@ else {
 $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
 if ( $Continue -ne "Yes") { Exit 0 }
 
+
+if ( 1 -eq 1 ) {
+
+
 if ($DebugOptions.WriteFilesToTemp ) {
     $OutputPath = $DebugOptions.TempPath, "\", "Missing-Lat-Long-Records.csv" -join "" 
     $MissingLatLong = $PriorDataRows | Where-Object { ( $_.Latitude -eq "" -or $_.Longitude -eq "" ) } | Sort-Object -Property 'Location Name Key' -Unique | Select-Object 'Location Name Key', Latitude, Longitude, 'CSV File Name', 'Row Number'
@@ -844,3 +848,4 @@ $ManualResolution = @(
     , [PSCustomObject]@{'Location Name Key' = "Unknown, TN, USA"; Latitude = "36.162663"; Longitude = "-86.781601" ; 'Country or Region' = "USA"; 'Province or State' = "TM"; 'USA State County' = "Unknown"; 'FIPS USA State County code' = "99999" }
 )
 $ManualResolution | Select-Object 'Location Name Key', Latitude, Longitude, 'Country or Region', 'Province or State', 'USA State County', 'FIPS USA State County code' | Export-Csv -Path ($GitLocalRoot, "\Data-Files\", "Unique-Location-Name-Key-values.csv" -join "") -NoTypeInformation -UseQuotes AsNeeded -Append
+}
