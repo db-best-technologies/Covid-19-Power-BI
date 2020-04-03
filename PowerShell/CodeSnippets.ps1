@@ -177,3 +177,84 @@ if (1 -eq 2) {
     }
     $FilesInfo
 }
+
+
+$a = @()
+foreach ( $H in $ColumnHeaders.Values ) {
+    foreach ( $e in $H ) {
+        $a += $e
+    }
+
+}
+$More = @(
+"FIPS USA State County code",
+"USA State County",
+"Province or State",
+"Country or Region",
+"Last Updated UTC",
+"Last Updated UTC",
+"Latitude",
+"Longitude",
+"Confirmed",
+"Deaths",
+"Recovered",
+"Active",
+"Location Name Key",
+"Province or State",
+"Country or Region",
+"Latitude",
+"Longitude",
+'CSV File Name'
+)
+foreach ($M in $More) {
+    $a += $M
+}
+$s = $a | sort -Unique
+$AllCols = @()
+$AllCols += '$AllColumns = [PSCustomObject]@{' -join ""
+foreach ( $p in $s ) {
+    $AllCols += ("'", $p, "'", ' = $null' -join "" )
+}
+$AllCols += "}"
+$AllCols | Set-Clipboard
+
+
+$NH = $AllColumns.PSObject.copy()
+$NH.FIPS = 99
+$NH
+
+
+$a = @()
+foreach ( $H in $Mapping.Keys ) {
+    foreach ( $e in $H ) {
+        $a += $e
+    }
+
+}
+
+$s = $a | sort -Unique
+$AllCols = @()
+$AllCols += '$AllColumns = [PSCustomObject]@{' -join ""
+foreach ( $p in $s ) {
+    $AllCols += ("'", $p, "'", ' = $null' -join "" )
+}
+$AllCols += "}"
+$AllCols | Set-Clipboard
+
+$FullDataRow = @()
+$AllColumns.PSObject.Properties
+
+
+Compare-Object -ReferenceObject $AllColumnsPSO.PSObject.Properties.Name -DifferenceObject $MappingPSO.PSObject.Properties.Name | Sort-Object -Property InputObject
+
+Compare-Object -ReferenceObject $AllColumns.PSObject.Properties.Name -DifferenceObject $Mapping.PSObject.Properties.Name
+
+Compare-Object -ReferenceObject $AllColumns.PSObject.Properties -DifferenceObject $Mapping.PSObject.Properties | ft
+$'Days Since First Value'     = $null
+$'Days Since First Death'     = $null
+$'Days Since First Confirmed' = $null
+$'Days Since First Active'    = $null
+$'Days Since First Recovered' = $null
+
+$TextInfo = (Get-Culture).TextInfo
+$TextInfo.ToTitleCase(( "BOLD, BD, SOWHAT" ).ToLower() )
