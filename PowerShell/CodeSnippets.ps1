@@ -257,4 +257,4 @@ $'Days Since First Active'    = $null
 $'Days Since First Recovered' = $null
 
 $TextInfo = (Get-Culture).TextInfo
-$TextInfo.ToTitleCase(( "BOLD, BD, SOWHAT" ).ToLower() )
+$TextInfo.ToTitleCase(( "BOLD, BD, FoobR" ) )
