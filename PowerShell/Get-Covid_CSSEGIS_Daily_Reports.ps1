@@ -5,7 +5,7 @@ Author:      Bill Ramos, DB Best Technologies
 MoreInfo:    https://github.com/db-best-technologies/Covid-19-Power-BI/blob/master/PowerShell/Get-Covid_CSSEGIS_Daily_Reports.yaml
 #>
 
-$DebugOptions = Set-DebugOptions -WriteFilesToTemp $true -TempPath "C:\Temp\Covid-Temp-Files" -DeleteTempFilesAtStart $false -UpdateLocalFiles $true -AppendDebugData $false -Workaround $true -ForceDownload $true
+$DebugOptions = Set-DebugOptions -WriteFilesToTemp $true -TempPath "C:\Temp\Covid-Temp-Files" -DeleteTempFilesAtStart $false -UpdateLocalFiles $true -AppendDebugData $false -Workaround $false -ForceDownload $true
 Write-Host @DebugOptions 
 
 $Errorlog = @()
@@ -74,10 +74,12 @@ $NewColumnsMapping = [PSCustomObject]@{
 
 $LocationKeyClass = @{  # Create an Index for the Location Name Key values
     'Location Name Key'    = ""
-    'Number of Rows'       = 0
-    'CSV Rows PSObj Array' = @()
+    'Number of Rows'       = 0        # Should always be count of 'CSV Rows PSObj Array'
+    'CSV Rows PSObj Array' = @()      # Array of $AllColumnPSO class items
+    'DayZeroItems'         = $null    # As a PSCustomObject using $DayZeroItemsClass
 }
-$LocationNameKeyIndex = @{ # Index of values by 'Location Name Key'
+$LocationNameKeyIndex = @{ 
+    # Index of values by 'Location Name Key'
     # Value for Location Name  =  Hash Table of Type $LocationKeyClass
 }
 
@@ -103,7 +105,7 @@ $AllColumnsPSO = [PSCustomObject]@{
     'Latitude'                   = $null
     'Location Name Key'          = $null
     'Long_'                      = $null
-    'Longitude'                  = $null
+    'Longitude'                  = $n
     'Province or State'          = $null
     'Province/State'             = $null
     'Province_State'             = $null
@@ -120,8 +122,41 @@ $AllColumnsPSO = [PSCustomObject]@{
     'Attribute'                  = $null
     'Cumulative Value'           = $null
     'Row Number'                 = $null
+    'Confirmed Delta Value'      = $null
+    'Deaths Delta Value'         = $null
+    'Recovered Delta Value'      = $null
+    'Active Delta Value'         = $null
 }
 $RowFmt = "0000"
+
+$DayZeroItemsClass = [PSCustomObject]@{
+    'Location Name Key'                 = $null
+    'Event First CSV File Name'         = $null
+    'Event First Location Name Key'     = $null
+    'Event First Date'                  = $null
+    'Event First Value'                 = $null
+
+    'Confirmed First CSV File Name'     = $null
+    'Confirmed First Location Name Key' = $null
+    'Confirmed First Date'              = $null
+    'Confirmed First Value'             = $null
+
+    'Deaths First CSV File Name'        = $null
+    'Deaths First Location Name Key'    = $null
+    'Deaths First Date'                 = $null
+    'Deaths First Value'                = $null
+
+    'Recovered First CSV File Name'     = $null
+    'Recovered First Location Name Key' = $null
+    'Recovered First Date'              = $null
+    'Recovered First Value'             = $null
+
+    'Active First CSV File Name'        = $null
+    'Active First Location Name Key'    = $null
+    'Active First Date'                 = $null
+    'Active First Value'                = $null
+}
+
 
 $MappingPSO = [PSCustomObject]@{
     'Attribute'                  = $null
@@ -535,107 +570,116 @@ if ($null -eq $arrayNewCSVData )  <# Check to see if any data new needs processi
     $ErrorLog += $RowError
     $RowError 
     $ErrorLog | ConvertTo-Json | Out-File -FilePath  ($TempDataLocation, "Error-Log.json" -join "")
+    exit 1 
 }
-else  <# Process the new rows: $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName #> {
+
+<# Process the new rows: $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName #>
      
-    $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
+$SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
 
-    # Start the process of reading each of the file records and the rows within them
-    $UnpivotedRows = @()
-    $FullDataRow = @()
+if ( $false ) {
 
-    # Debeg: $File, $RowNumber = 65, 527
+    $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName | Where-Object { ( $_.CsvFileName -eq '02-21-2020.csv' -or $_.CsvFileName -eq '03-22-2020.csv' -or $_.CsvFileName -eq '03-23-2020.csv' -or $_.CsvFileName -eq '03-24-2020.csv' ) }
+}
+
+# Start the process of reading each of the file records and the rows within them
+$UnpivotedRows = @()
+$FullDataRow = @()
+
    
-    for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
-        # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
-        if ( $false ) <# Resent the previous hash tables #> {
-            $FilesLookupHash = @{ }
-            $GroupedFileRows = @{ }
-            $LocationNameKeyIndex = @{ }
-            $UnpivotedRows = @()
-            $FullDataRow = @()
-            $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
-            $LocationKeyClass = @{  # Create an Index for the Location Name Key values
-                'Location Name Key'    = ""
-                'Number of Rows'       = 0
-                'CSV Rows PSObj Array' = @()
-            }
-            $LocationNameKeyIndex = @{ # Index of values by 'Location Name Key'
-                # Value for Location Name  =  Hash Table of Type $LocationKeyClass
-            }
-            $SortedCSVs.Count
-            $FullDataRow.Length
-            $GroupedFileRows
-            $UnpivotedRows.Length
-            $file = 0
+for ( $file = 0; $file -lt $SortedCSVs.count; $file++) {
+        
+    # Go through array of $SortedCSVs fix up and flatten the data for Confirmed,Deaths,Recovered,Active
+        
+    if ( $false ) <# Resent the previous hash tables #> {
+        $FilesLookupHash = @{ }
+        $GroupedFileRows = @{ }
+        $LocationNameKeyIndex = @{ }
+        $UnpivotedRows = @()
+        $FullDataRow = @()
+        $SortedCSVs = $arrayNewCSVData | Sort-Object -Property CsvFileName 
+
+        $LocationNameKeyIndex = @{ # Index of values by 'Location Name Key'
+            # Value for Location Name  =  Hash Table of Type $LocationKeyClass
         }
-        if ( $true  ) <# Process the rows in each file} #> { 
-            $Csv = $SortedCSVs[$file]
-            $FileNumber = $Csv.FileNumber
-            $CurrentFile = $Csv.CsvFileName
-            $DateReported = $CurrentFile.Split('.csv')[0]
-            Write-Host ("File # = ", $file, " mapped to ", $FileNumber, " of ", $SortedCSVs.count, " CsvFileName= ", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
-            $Columns = $null
-            $PriorDayColumns = $null
-            if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
-                $Columns = $ColumnHeaders.'01-22-2020'
-                if (  $Csv.PeriodEnding -ne '01-22-2020' ) {
-                    $PriorDayColumns = $Columns
-                }
+        $SortedCSVs.Count
+        $FullDataRow.Length
+        $GroupedFileRows
+        $UnpivotedRows.Length
+        $file = 0
+        $Continue = "Rip"
+    }
+        
+    if ( $true  ) <# Process the rows in each file} #> { 
+        $Csv = $SortedCSVs[$file]
+        $FileNumber = $Csv.FileNumber
+        $CurrentFile = $Csv.CsvFileName
+        $DateReported = $CurrentFile.Split('.csv')[0]
+        $dReported = Get-Date -Date $DateReported
+        Write-Host ("File # = ", $file, " mapped to ", $FileNumber, " of ", $SortedCSVs.count, " CsvFileName= ", $Csv.CsvFileName , " and ModifiedDate= ", (Get-Date -date $Csv.DateLastModifiedUTC).ToUniversalTime() -join "")
+        $Columns = $null
+        $PriorDayColumns = $null
+        if ( [datetime]$Csv.PeriodEnding -le [datetime]'03-10-2020' ) {
+            $Columns = $ColumnHeaders.'01-22-2020'
+            if (  $Csv.PeriodEnding -ne '01-22-2020' ) {
+                $PriorDayColumns = $Columns
             }
-            elseif ( [datetime]$Csv.PeriodEnding -gt [datetime]'03-10-2020' -and [datetime]$Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
-                $Columns = $ColumnHeaders.'03-11-2020'
-                if ( $Csv.PeriodEnding -eq '03-11-2020' ) {
-                    $PriorDayColumns = $ColumnHeaders.'01-22-2020'
-                }
-                else {
-                    $PriorDayColumns = $Columns
-                }
+        }
+        elseif ( [datetime]$Csv.PeriodEnding -gt [datetime]'03-10-2020' -and [datetime]$Csv.PeriodEnding -le [datetime]'03-21-2020' ) {
+            $Columns = $ColumnHeaders.'03-11-2020'
+            if ( $Csv.PeriodEnding -eq '03-11-2020' ) {
+                $PriorDayColumns = $ColumnHeaders.'01-22-2020'
             }
             else {
-                $Columns = $ColumnHeaders.'03-22-2020'
-                if ($Csv.PeriodEnding -eq '03-22-2020') {
-                    $PriorDayColumns = $ColumnHeaders.'03-11-2020'
+                $PriorDayColumns = $Columns
+            }
+        }
+        else {
+            $Columns = $ColumnHeaders.'03-22-2020'
+            if ($Csv.PeriodEnding -eq '03-22-2020') {
+                $PriorDayColumns = $ColumnHeaders.'03-11-2020'
+            }
+            else {
+                $PriorDayColumns = $ColumnHeaders.'03-22-2020'
+            }
+        }
+        $ActualColumns = @()
+        $ActualColumns = $CSV.CSVData[0].psobject.properties.name
+        if ( $null -eq $ActualColumns ) {
+            Write-Host '$null -eq $ActualColumns for file:', $file
+            exit 
+        }
+        for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ )  <# Expand out the rows #> {
+
+            $Row = $Csv.CSVData[$RowNumber]
+
+            $Mapping = $MappingPSO.PSObject.copy()
+            $AllColumns = $AllColumnsPSO.PSObject.copy()
+
+            #Map the base columns to the new column names for the row
+            for ($i = 0; $i -lt $ActualColumns.Count; $i++ ) {
+
+                $Key = $NewColumnsMapping.($ActualColumns[$i])
+                $AllColumns.($ActualColumns[$i]) = $Row.($ActualColumns[$i]) 
+
+                if ( "Confirmed,Deaths,Recovered,Active" -like "*$($Key)*" ) {
+                    #Skip these for now
+                    continue
+                }
+                if ( $Key -eq "Last Updated UTC") {
+                    $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ssZ"
                 }
                 else {
-                    $PriorDayColumns = $ColumnHeaders.'03-22-2020'
-                }
+                    $Value = $Row.($ActualColumns[$i])
+                }            
+                $Mapping.$Key = $Value 
             }
-            $ActualColumns = @()
-            $ActualColumns = $CSV.CSVData[0].psobject.properties.name
-            if ( $null -eq $ActualColumns ) {
-                Write-Host '$null -eq $ActualColumns for file:', $file
-                exit 
-            }
-            for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ ) {
-                $Row = $Csv.CSVData[$RowNumber]
-                $Mapping = $MappingPSO.PSObject.copy()
-                $AllColumns = $AllColumnsPSO.PSObject.copy()
+            Write-Host ("File # = ", $FileNumber, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
 
-                #Map the base columns to the new column names for the row
-                for ($i = 0; $i -lt $ActualColumns.Count; $i++ ) {
-
-                    $Key = $NewColumnsMapping.($ActualColumns[$i])
-                    $AllColumns.($ActualColumns[$i]) = $Row.($ActualColumns[$i]) 
-
-                    if ( "Confirmed,Deaths,Recovered,Active" -like "*$($Key)*" ) {
-                        #Skip these for now
-                        continue
-                    }
-                    if ( $Key -eq "Last Updated UTC") {
-                        $Value = Get-Date -Date $Row.($ActualColumns[$i]) -Format "yyyy-MM-ddTHH:mm:ssZ"
-                    }
-                    else {
-                        $Value = $Row.($ActualColumns[$i])
-                    }            
-                    $Mapping.$Key = $Value 
-                }
-                Write-Host ("File # = ", $FileNumber, " Processing Row# ", $RowNumber, " out of ", $Csv.CSVData.Length, " Country = ", $Mapping.'Country or Region' -Join "")
-
-                $Mapping.'Date Reported' = $DateReported 
+            $Mapping.'Date Reported' = $DateReported 
 
 
-                # Create the Location Key Name
+            if ( $true ) <# Create the Location Key Name #> {
                 $Values = @()
                 if ( $null -ne $Mapping.'USA State County' -and ($Mapping.'USA State County').Length -gt 0 ) { 
                     if ( $null -ne $CountyReplacements.($Mapping.'USA State County') ) {
@@ -726,90 +770,242 @@ else  <# Process the new rows: $SortedCSVs = $arrayNewCSVData | Sort-Object -Pro
                     $TI = (Get-Culture).TextInfo
                     $Mapping.'USA County State Key' = $TI.ToTitleCase($Value.Split(', USA')[0])
                 }
+            } # Endif  Create the Location Key Name
 
+            $Mapping.'File Number' = $FileNumber
+            $Mapping.'Row Number' = ([int]$RowNumber).ToString($RowFmt)
 
-                $Mapping.'File Number' = $FileNumber
-                $Mapping.'Row Number' = ([int]$RowNumber).ToString($RowFmt)
-
-                $Active = 0
-
+            <#
                 $Mapping.Attribute = "Confirmed"
                 $Mapping.'Cumulative Value' = [int]($Row.Confirmed) 
                 $UnpivotedRows += [PSCustomObject]$Mapping
 
-                $AllColumns.'Days Since First Value' = [int]($Row.Confirmed)
-                $AllColumns.'Days Since First Confirmed' = [int]($Row.Confirmed)
         
                 $Mapping.Attribute = "Deaths"
                 $Mapping.'Cumulative Value' = [int]($Row.Deaths)
                 $UnpivotedRows += [PSCustomObject]$Mapping
-                $AllColumns.'Days Since First Death' = [int]($Row.Deaths)
+            
         
                 $Mapping.Attribute = "Recovered"
                 $Mapping.'Cumulative Value' = [int]($Row.Recovered)
                 $UnpivotedRows += [PSCustomObject]$Mapping
-                $AllColumns.'Days Since First Recovered' = [int]($Row.Recovered)
 
                 $Mapping.Attribute = "Active"
-                $Mapping.'Cumulative Value' = [int]($Row.Active)
-                if ( $Mapping.'Cumulative Value' -eq 0 ) {
-                    $Mapping.'Cumulative Value' = $AllColumns.'Days Since First Confirmed' - $AllColumns.'Days Since First Death' - $AllColumns.'Days Since First Recovered'
+                $Mapping.'Cumulative Value' = 
+                if ( [int]$Row.Active) -gt  0 ) {
+                    $Mapping.'Cumulative Value' = $AllColumns.Confirmed - $AllColumns.Deaths - $AllColumns.Recovered
                 }
                 if ( [int]($Row.Active) -ne $Mapping.'Cumulative Value' ) {
                     $AllColumns.'Active Original' = [int]($AllColumns.Active)
                 }
                 $AllColumns.Active = $Mapping.'Cumulative Value'
-                $AllColumns.'Days Since First Active' = $Mapping.'Cumulative Value'
+                
+            
                 $UnpivotedRows += [PSCustomObject]$Mapping    
+            #>
+            if ( [int]$Row.Active -gt 0 -or $Rows.Active -eq "0" ) {
+                $AllColumns.'Active Original' = $Row.Active
+            }
+            $AllColumns.Active = $AllColumns.Confirmed - $AllColumns.Deaths - $AllColumns.Recovered
             
-                foreach ( $MK in $Mapping.PSObject.Properties.Name) {
-                    if ( $null -eq $AllColumns.$MK -and $null -ne $Mapping.$MK ) {
-                        $AllColumns.$MK = $Mapping.$MK
-                    }
+            foreach ( $MK in $Mapping.PSObject.Properties.Name) {
+                if ( $null -eq $AllColumns.$MK -and $null -ne $Mapping.$MK ) {
+                    $AllColumns.$MK = $Mapping.$MK
                 }
-
-                $FullDataRow += $AllColumns
+            }
             
-                if ( $true )  <#  If Build the index on the fly #> {
-                    $LocKey = $AllColumns.'Location Name Key'
-                    $LocationKeyPSObj = $LocationKeyClass.Clone()
-                    if ( $null -eq $LocationNameKeyIndex.$LocKey ) {
-                        # Need to create a new index key if missing
-                        $LocationNameKeyIndex.Add( $LocKey, $LocationKeyPSObj )
-                    }
-                    $AllColumns.'Location Index' ++
+            if ( $true )  <#  If Build the index on the fly #> {
+                $LocKey = $AllColumns.'Location Name Key'
+                    
+                if ( $null -eq $LocationNameKeyIndex.$LocKey ) {
+                    # Need to create a new index key if missing
+                    $LocationNameKeyIndex.Add( $LocKey, $LocationKeyClass.Clone() )
+                    $LocationNameKeyIndex.$LocKey.DayZeroItems = $DayZeroItemsClass.PSObject.Copy()
                     $LocationNameKeyIndex.$LocKey.'Location Name Key' = $LocKey
-                    $LocationNameKeyIndex.$LocKey.'Number of Rows' ++
-                    $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array' += $AllColumns
-                }  # End If Build the index on the fly
-
-            } # end for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ )
-            
-            if ( $null -ne $GroupedFileRows.$CurrentFile ) <#  #Add files unpivoted items to $GroupedFileRows  #> {
-                # This is a file that was modified
-                $GroupedFileRows.$CurrentFile = $UnpivotedRows
-                Write-Host ("Updated Current file: ", $CurrentFile, " a total of ", $GroupedFileRows.$CurrentFile.Count, " Rows" -join "")
-                if ( $null -ne $FilesLookupHash.$CurrentFile.CSVData) { 
-                    $FilesLookupHash.$CurrentFile.psobject.Properties.remove('CSVData')
-                    $FilesLookupHash.$CurrentFile.NeedsUpdating = $False
                 }
-            }
-            else {
-                Write-Host ("Add to Current file: ", $CurrentFile, " a total of ", $UnpivotedRows.Count, " Rows" -join "")
-                $GroupedFileRows.Add( $CurrentFile, $UnpivotedRows)
-                $SortedCSVs[$file].NeedsUpdating = $false
+                $AllColumns.'Location Index' = $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'.count
+                $PriorRowIndex = $AllColumns.'Location Index' - 1
+                $LocationNameKeyIndex.$LocKey.'Number of Rows' ++
+
+                if ( $true ) <# Since we are going thru locations in file name order, let's check for first values #> {
+                        
+                    if ( $AllColumns.Active -gt 0) <# This is the first row for $LocKey #> {
+                        if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Location Name Key' ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Location Name Key' = $LocKey
+                        }
+
+                        if ( $AllColumns.Active -gt 0) {
+                            if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Location Name Key' ) {
+                                  
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First CSV File Name' = $AllColumns.'CSV File Name'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Location Name Key' = $AllColumns.'Location Name Key'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Date' = $AllColumns.'Date Reported'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Value' = $AllColumns.Active
+                                $AllColumns.'Active Delta Value' = $AllColumns.Active
+                                $AllColumns.'Days Since First Active' = 0
+
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First CSV File Name' = $AllColumns.'CSV File Name'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Location Name Key' = $AllColumns.'Location Name Key'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Date' = $AllColumns.'Date Reported'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Value' = $AllColumns.Active
+                                $AllColumns.'Days Since First Value' = 0
+                            }
+                            else {
+                                $DateFirstActive = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Date'
+                                $AllColumns.'Days Since First Active' = $dReported.Subtract($DateFirstActive).Days
+                                $AllColumns.'Active Delta Value' = $AllColumns.Active - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Active
+
+                                $DateFirstEvent = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Date'
+                                $AllColumns.'Days Since First Value' = $dReported.Subtract($DateFirstEvent).Days
+                            }
+                        }
+                        if ( $AllColumns.Deaths -gt 0 ) {
+                            if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Location Name Key' ) {
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First CSV File Name' = $AllColumns.'CSV File Name'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Location Name Key' = $AllColumns.'Location Name Key'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Date' = $AllColumns.'Date Reported'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Value' = $AllColumns.Deaths
+                                $AllColumns.'Deaths Delta Value' = $AllColumns.Deaths
+                                $AllColumns.'Days Since First Death' = 0
+                            }
+                            else {
+                                $DateFirstDeath = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Date'
+                                $AllColumns.'Days Since First Death' = $dReported.Subtract($DateFirstDeath).Days
+                                $AllColumns.'Deaths Delta Value' = $AllColumns.Deaths - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Deaths
+                            }
+                        }
+
+                        if ( $AllColumns.Recovered -gt 0 ) {
+                            if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Location Name Key' ) {
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First CSV File Name' = $AllColumns.'CSV File Name'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Location Name Key' = $AllColumns.'Location Name Key'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Date' = $AllColumns.'Date Reported'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Value' = $AllColumns.Recovered
+                                $AllColumns.'Recovered Delta Value' = $AllColumns.Recovered
+                                $AllColumns.'Days Since First Recovered' = 0
+                            }
+                            else {
+                                $DateFirstRecovered = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Date'
+                                $AllColumns.'Days Since First Recovered' = $dReported.Subtract($DateFirstRecovered).Days
+                                $AllColumns.'Recovered Delta Value' = $AllColumns.Recovered - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Recovered
+                            }
+                        }
+                        if ( $AllColumns.Confirmed -gt 0 ) {
+                            if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Location Name Key' ) {
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First CSV File Name' = $AllColumns.'CSV File Name'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Location Name Key' = $AllColumns.'Location Name Key'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Date' = $AllColumns.'Date Reported'
+                                $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Value' = $AllColumns.Confirmed
+                                $AllColumns.'Confirmed Delta Value' = $AllColumns.Confirmed
+                                $AllColumns.'Days Since First Confirmed' = 0
+                            }
+                            else {
+                                $DateFirstConfirmed = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Date'
+                                $AllColumns.'Days Since First Confirmed' = $dReported.Subtract($DateFirstConfirmed).Days
+                                $AllColumns.'Confirmed Delta Value' = $AllColumns.Confirmed - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Confirmed
+                            }
+                        }
+
+                    }
+
+                }
+                else  <# No active cases reported for the data since CDC reports all counties now regardless of reports #> { 
+                    Write-Host "Location Name Key: ", $LocKey , " reported no COVID 19 events on: ", $AllColumns.'Date Reported'
+                }
+
+            
+                # Add the location data to the index
+                $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array' += $AllColumns
+
+            }  # End If Build the index on the fly
+            $FullDataRow += $AllColumns
+
+        } # end for ( $RowNumber = 0; $RowNumber -lt $Csv.CSVData.Length; $RowNumber++ )
+            
+        if ( $null -ne $GroupedFileRows.$CurrentFile ) <#  #Add files unpivoted items to $GroupedFileRows  #> {
+            # This is a file that was modified
+            $GroupedFileRows.$CurrentFile = $UnpivotedRows
+            Write-Host ("Updated Current file: ", $CurrentFile, " a total of ", $GroupedFileRows.$CurrentFile.Count, " Rows" -join "")
+            $FilesLookupHash.$CurrentFile.NeedsUpdating = $False
+                }
+        else {
+            Write-Host ("Add to Current file: ", $CurrentFile, " a total of ", $UnpivotedRows.Count, " Rows" -join "")
+            $GroupedFileRows.Add( $CurrentFile, $UnpivotedRows)
+            $SortedCSVs[$file].NeedsUpdating = $false
        
-                $FilesLookupHash.Add( $CurrentFile, $SortedCSVs[$file]  )
-                $FilesLookupHash.$CurrentFile.psobject.Properties.remove('CSVData')
+            $FilesLookupHash.Add( $CurrentFile, $SortedCSVs[$file]  )
+            $FilesLookupHash.$CurrentFile.psobject.Properties.remove('CSVData')
 
-            }
+        }
+            
 
-        } 
+    } 
         
-    } #end for loop each set of CSV files
+} #end for loop each set of CSV files
 
-    $LocationNameKeyIndex
 
+
+if ( $DebugOptions.WriteFilesToTemp ) {
+    $FullDataRow | Sort-Object -Property $SortList | Export-Csv -Path ( $DebugOptions.TempPath , "\", "CSSEGISandData-COVID-19-Derived-FullList.csv" -join "") -NoTypeInformation
+}
+
+$LocationNameKeyIndex.Count
+
+if ( $true )  <# Write the LocationNameKeyIndex to JSON and CSV  #> {
+    $FirstTime = $true
+    foreach ( $LocKey in $LocationNameKeyIndex.Keys) {
+        if ( $FirstTime ) {
+            $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'| Export-Csv -Path ( $LocalDataGitPath , "CSSEGISandData-COVID-19-Derived-Flat-Daily-Values.csv" -join "") -NoTypeInformation
+            $FirstTime = $false
+        }
+        else{
+            $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'| Export-Csv -Path ( $LocalDataGitPath , "CSSEGISandData-COVID-19-Derived-Flat-Daily-Values.csv" -join "") -NoTypeInformation -Append
+        }
+        foreach ( $DailyCSV in $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array' ) {
+            break
+        }
+    }
+    
+    $JsonHeader = @{
+        FileName                  = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
+        FileGitRawDataFilesFull   = $URLs.GitRawDataFilesFull, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
+        FileDescription           = @"
+    Data was derived by DB Best Technologies, LLC from the daily reports located at:
+    $GitRawRoot
+    
+    List of 'Location Name Key' values for the revised format for reporting with Power BI and other BI tools.
+    
+    Data includes the number of events for each day since the first report from the Daily Files. 
+    It also includes cumulative values since the first reported date for comparing trends based on a starting value.
+    
+    Due to column header changes during the project and irregularities in early reporting, there are several changes made as 
+    documented in this structure. In addition, Latitude and Longitude values matched to the latest reports.
+    
+    See the following structures in this document:
+    - ColumnsMappingChanges
+    - ColumnHeaderChanges
+    - CountryRegionReplacements
+    - ProvinceStateReplacements
+    - CountyAdmin2Replacements
+"@
+        FileGeneratedOn           = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
+        ColumnsMappingChanges     = $NewColumnsMapping
+        ColumnHeaderChanges       = $ColumnHeaders
+        CountryRegionReplacements = $CountryReplacements
+        CountyAdmin2Replacements  = $CountyReplacements
+        ProvinceStateReplacements = $StateReplacements
+        Results                   = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
+    }
+    $JsonHeader | ConvertTo-Json -Depth 100 | Out-File -Path ( $LocalDataGitPath, $JsonHeader.FileName -join "")
+    
+    $copyLocationNameKeyIndex = $LocationNameKeyIndex.Clone()
+    
+    
+}   <# Endif Write the LocationNameKeyIndex to JSON #>
+    
+
+if ( $false ) <# There is something odd about the way this is written out, debug later if needed - data in looks good #> {
+    $Continue = $null
     if ( $DebugOptions.UpdateLocalFiles) <# Write out the updated CSSEGISandData-COVID-19-Derived.csv as needed #> { 
         $FirstTime = $True
         $OrderedKeys = $GroupedFileRows.Keys | Sort-Object
@@ -836,10 +1032,12 @@ else  <# Process the new rows: $SortedCSVs = $arrayNewCSVData | Sort-Object -Pro
             , @{Expression = "Province or State"; Descending = $False }
             , @{Expression = "USA State County"; Descending = $False }
         )
-
+        
         foreach ( $KeyValue in $OrderedKeys) {
-            # $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
-            # if ( $Continue -ne "Yes") { Exit 0 }
+            if ( $Continue -ne "Rip") { 
+                $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
+                if ( $Continue -eq "No") { Exit 0 }
+            }
             Write-Host $KeyValue
   
             if ( $FirstTime -eq $true -and $DebugOptions.UpdateLocalFiles) {
@@ -857,30 +1055,36 @@ else  <# Process the new rows: $SortedCSVs = $arrayNewCSVData | Sort-Object -Pro
         # Write out the new or updated Daily-Files-Metadata.csv
         $LocalDataFilesMetadata | Split-Path -LeafBase
         if ( $DebugOptions.WriteFilesToTemp) {
-            $OutputPath = ($DebugOptions.TempPath, "\", ($LocalDataFilesMetadata | Split-Path -LeafBase), ".yaml" -join "")
-            $FilesInfo | ConvertTo-Yaml | Out-File -Path $OutputPath
+
+            $OutputPath = ($DebugOptions.TempPath, "\", ($LocalDataFilesMetadata | Split-Path -LeafBase), ".json" -join "")
+            $FilesInfo | ConvertTo-Json | Out-File -Path $OutputPath
         }
         if ( $DebugOptions.UpdateLocalFiles ) {
             $OutputPath = $LocalDataFilesMetadata
             $FilesInfo | Export-Csv -Path $OutputPath -NoTypeInformation 
         }
     } # end  if ( $DebugOptions.UpdateLocalFiles) 
+} <# if false - There is something odd about the way this is written out, debug later if needed - data in looks good #> 
     
-    if ( $DebugOptions.WriteFilesToTemp ) {
-        $FullDataRow | Sort-Object -Property $SortList | Export-Csv -Path ( $DebugOptions.TempPath , "\", "CSSEGISandData-COVID-19-Derived-FullList.csv" -join "") -NoTypeInformation
-    }
+if ( $DebugOptions.WriteFilesToTemp ) {
+    $FullDataRow | Sort-Object -Property $SortList | Export-Csv -Path ( $DebugOptions.TempPath , "\", "CSSEGISandData-COVID-19-Derived-FullList.csv" -join "") -NoTypeInformation
+}
 
-} # end if ($null -eq $arrayNewCSVData )
+$FilesLookupHash
 
 
-if ( $true ) <# Write the location files for match ups #> {
+
+
+if ( $false ) <# Write the location files for match ups #> {
 
     $UniqueLocationKeys = $FullDataRow | Sort-Object -Property 'Location Name Key' -Unique 
     Write-Host "Count of unique values for 'Location Name Key': ", $UniqueLocationKeys.Count
     $UniqueLocationKeys | Export-Csv -Path ($GitLocalRoot, "\Working Files\", "Unique-Location-Name-Key-Values.csv" -join "") -NoTypeInformation
 
-    $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
-    if ( $Continue -ne "Yes") { Exit 0 }
+    if ( $Continue -ne "Rip") { 
+        $Continue = Read-Host "`nFinished writing data for UniqueLocation Keys. `nDo you want to continue? 'Yes' or 'No'"
+        if ( $Continue -eq "No") { $Continue = $null; Write-Host "Exiting"; Exit 0 }
+    }
 
     # Need to join this with the US-State-Lat-Long-Data.csv to fill in the blanks
     $UnknownOrUnassignedCounties = $FullDataRow | Where-Object { ( $_.'USA State County' -eq "Unknown" -or $_.'USA State County' -eq "Unassigned" ) } | Sort-Object -Property @{Expression = 'Location Name Key' } -Unique 
@@ -899,6 +1103,46 @@ if ( $true ) <# Write the location files for match ups #> {
 
 } # Write the location files for match ups
 
+
+if ( $false )  <# Write the LocationNameKeyIndex to JSON #> { 
+    $JsonHeader = @{
+        FileName                  = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
+        FileGitRawDataFilesFull   = $URLs.GitRawDataFilesFull, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
+        FileDescription           = @"
+Data was derived by DB Best Technologies, LLC from the daily reports located at:
+$GitRawRoot
+
+List of 'Location Name Key' values for the revised format for reporting with Power BI and other BI tools.
+
+Data includes the number of events for each day since the first report from the Daily Files. 
+It also includes cumulative values since the first reported date for comparing trends based on a starting value.
+
+Due to column header changes during the project and irregularities in early reporting, there are several changes made as 
+documented in this structure. In addition, Latitude and Longitude values matched to the latest reports.
+
+See the following structures in this document:
+- ColumnsMappingChanges
+- ColumnHeaderChanges
+- CountryRegionReplacements
+- ProvinceStateReplacements
+- CountyAdmin2Replacements
+"@
+        FileGeneratedOn           = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
+        ColumnsMappingChanges     = $NewColumnsMapping
+        ColumnHeaderChanges       = $ColumnHeaders
+        CountryRegionReplacements = $CountryReplacements
+        CountyAdmin2Replacements  = $CountyReplacements
+        ProvinceStateReplacements = $StateReplacements
+        Results                   = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
+    }
+    $JsonHeader | ConvertTo-Json -Depth 100 | Out-File -Path ( $LocalDataGitPath, $JsonHeader.FileName -join "")
+
+    $copyLocationNameKeyIndex = $LocationNameKeyIndex.Clone()
+
+
+} <# Endif Write the LocationNameKeyIndex to JSON #>
+
+
 if ($false) <# Old build Unique key process #> {
 
     [int]$UniqueLocationKeysCount = $UniqueLocationKeys.Count - 1
@@ -915,9 +1159,6 @@ if ($false) <# Old build Unique key process #> {
     $RowsScaned = 0
     $LocationRows = @()
     foreach ($Row in $SortedByKeyRows ) {
-        if ( $Row.'Location Name Key' -ne $Zimbabwe ) {
-            Continue 
-        }
         Write-Host $Row.'Location Name Key' , " in ", $Row.'CSV File Name', " Location row count: ", $LocationRows.Count, " Location rows processed: " , $LRC, " Total rows scanned so far: ", $RowsScaned, " Keys processed fo far: ", $KeyCounter
         if ( $Continue -ne "Rip" ) {
             $Continue = Read-Host "Do you want to continue? 'Yes' or 'No' or 'Rip'"
@@ -956,112 +1197,9 @@ if ($false) <# Old build Unique key process #> {
             $KeyCounter ++
         }
     } 
-    $LocationNameKeyIndex.$Zimbabwe
-    $RowsScaned
-    $SortedByKeyRows.count
+
+    Write-host "Indexing complete, rows scanned = ", $RowsScaned, " which should match the count of SortedByKeyRows = ", $SortedByKeyRows.count, " which was: ", ( $RowsScaned -eq $SortedByKeyRows.count )
 }
-
-
-if ($true) <# Process the data rows using the new $LocationNameIndex #> {
-    
-    # Process the data rows using the new $LocationNameIndex
-    $FirstDayWithAnyValue = @()
-    $DayZeroItemsClass = [PSCustomObject]@{
-        'Location Name Key'                 = $null
-        'Event First CSV File Name'         = $null
-        'Event First Location Name Key'     = $null
-        'Event First Date'                  = $null
-        'Event First Value'                 = $null
-
-        'Confirmed First CSV File Name'     = $null
-        'Confirmed First Location Name Key' = $null
-        'Confirmed First Date'              = $null
-        'Confirmed First Value'             = $null
-
-        'Deaths First CSV File Name'        = $null
-        'Deaths First Location Name Key'    = $null
-        'Deaths First Date'                 = $null
-        'Deaths First Value'                = $null
-
-        'Recovered First CSV File Name'     = $null
-        'Recovered First Location Name Key' = $null
-        'Recovered First Date'              = $null
-        'Recovered First Value'             = $null
-
-        'Active First CSV File Name'        = $null
-        'Active First Location Name Key'    = $null
-        'Active First Date'                 = $null
-        'Active First Value'                = $null
-    }
-
-    foreach ($Key in $LocationNameKeyIndex.Keys ) {
-        
-        $KeyPSObjArray = $LocationNameKeyIndex.$Key.'CSV Rows PSObj Array'
-        $DayZeroItems = $DayZeroItemsClass.PSObject.Copy()
-        $DayZeroItems.'Location Name Key' = $Key
-        $LineValue = $KeyPSObjArray | Where-Object { (  $_.'Days Since First Value' -gt 0 ) } | Sort-Object -Property @{Expression = 'Days Since First Value' } -Top 1 
-
-        $DayZeroItems.'Event First CSV File Name' = $LineValue.'CSV File Name'
-        $DayZeroItems.'Event First Location Name Key' = $LineValue.'Location Name Key'
-        $DayZeroItems.'Event First Date' = $LineValue.'Date Reported'
-        $DayZeroItems.'Event First Value' = $LineValue.'Days Since First Value'
-
-        $LineValue = $KeyPSObjArray | Where-Object { ( $_.'Days Since First Confirmed' -gt 0 ) } | Sort-Object -Property @{Expression = 'Days Since First Value' } -Top 1 
-        $DayZeroItems.'Confirmed First CSV File Name' = $LineValue.'CSV File Name'
-        $DayZeroItems.'Confirmed First Location Name Key' = $LineValue.'Location Name Key'
-        $DayZeroItems.'Confirmed First Date' = $LineValue.'Date Reported'
-        $DayZeroItems.'Confirmed First Value' = $LineValue.'Days Since First Confirmed'
-
-        $LineValue = $KeyPSObjArray | Where-Object { ( $_.'Days Since First Death' -gt 0 ) } | Sort-Object -Property @{Expression = 'Days Since First Value' } -Top 1 
-        $DayZeroItems.'Deaths First CSV File Name' = $LineValue.'CSV File Name'
-        $DayZeroItems.'Deaths First Location Name Key' = $LineValue.'Location Name Key'
-        $DayZeroItems.'Deaths First Date' = $LineValue.'Date Reported'
-        $DayZeroItems.'Deaths First Value' = $LineValue.'Days Since First Death'
-
-        $LineValue = $KeyPSObjArray | Where-Object { ( $_.'Days Since First Recovered' -gt 0 ) } | Sort-Object -Property @{Expression = 'Days Since First Value' } -Top 1 
-        $DayZeroItems.'Recovered First CSV File Name' = $LineValue.'CSV File Name'
-        $DayZeroItems.'Recovered First Location Name Key' = $LineValue.'Location Name Key'
-        $DayZeroItems.'Recovered First Date' = $LineValue.'Date Reported'
-        $DayZeroItems.'Recovered First Value' = $LineValue.'Days Since First Recovered'
-
-        $LineValue = $KeyPSObjArray | Where-Object { ( $_.'Days Since First Active' -gt 0 ) } | Sort-Object -Property @{Expression = 'Days Since First Value' } -Top 1 
-        $DayZeroItems.'Active First CSV File Name' = $LineValue.'CSV File Name'
-        $DayZeroItems.'Active First Location Name Key' = $LineValue.'Location Name Key'
-        $DayZeroItems.'Active First Date' = $LineValue.'Date Reported'
-        $DayZeroItems.'Active First Value' = $LineValue.'Days Since First Active'
-
-        $FirstDayWithAnyValue += $DayZeroItems
-        $DayZeroItems | ft
-    }
-    $FirstDayWithAnyValue | Sort-Object -Property 'Location Name Key' | Export-Csv -Path ( $LocalDataGitPath, "CSSEGISandData-COVID-19-First-Reports.csv" -join "") -NoTypeInformation
-    $JsonHeader = @{
-        FileName = "CSSEGISandData-COVID-19-First-Reports.json"
-        FileGitRawDataFilesFull = $URLs.GitRawDataFilesFull, "CSSEGISandData-COVID-19-First-Reports.json" -join ""
-        FileDescription = @"
-Data was derived by DB Best Technologies, LLC from the daily reports lococated at:
-$GitRawRoot
-List of 'Location Name Key' values for the first events recorded for Confirmed, Deaths, Recovered, and Active -gt 0 values.
-This file is a JSON version of CSSEGISandData-COVID-19-First-Reports.csv located in the same folder.
-Due to column header changes during the project and irgularities in early reporting, there are several changes made as 
-documented in this structure. In addition, Latitude and Longitude values matched to the latest reports.
-See the following structures in this document:
-- ColumnsMappingChanges
-- ColumnHeaderChanges
-- CountryRegionReplacements
-- ProvinceStateReplacements
-- CountyAdmin2Replacements
-"@
-        FileGeneratedOn = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
-        ColumnsMappingChanges = $NewColumnsMapping
-        ColumnHeaderChanges = $ColumnHeaders
-        CountryRegionReplacements = $CountryReplacements
-        CountyAdmin2Replacements = $CountyReplacements
-        ProvinceStateReplacements = $StateReplacements
-        Results = $FirstDayWithAnyValue | Sort-Object -Property 'Location Name Key' 
-    }
-    $JsonHeader | ConvertTo-Json | Out-File -Path ( $LocalDataGitPath, $JsonHeader.FileName -join "") 
-
-} # end if  Process the data rows using the new $LocationNameIndex
 
 if ( $false ) <# Other housekeeping items #> {
     
