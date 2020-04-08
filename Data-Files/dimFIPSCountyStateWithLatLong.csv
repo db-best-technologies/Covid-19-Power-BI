@@ -243,7 +243,6 @@ FIPS,Name,State,StateName,FIPSKey,Location Name Key,Latitude,Longitude
 53075,Whitman,WA,Washington,Whitman|WA,"Whitman, WA, US",46.90022523,-117.5241763
 53073,Whatcom,WA,Washington,Whatcom|WA,"Whatcom, WA, US",48.82227976,-121.7490018
 53071,Walla Walla,WA,Washington,Walla Walla|WA,"Walla Walla, WA, US",46.23040051,-118.4775539
-53071,Walla Walla,WA,Washington,Walla Walla|WA,"Walla Walla, WA, US",46.23040051,-118.4775539
 53069,Wahkiakum,WA,Washington,Wahkiakum|WA,"Wahkiakum, WA, US",46.2918004,-123.4250831
 53067,Thurston,WA,Washington,Thurston|WA,"Thurston, WA, US",46.9291895,-122.8290656
 53065,Stevens,WA,Washington,Stevens|WA,"Stevens, WA, US",48.40035475,-117.8542701
@@ -268,7 +267,6 @@ FIPS,Name,State,StateName,FIPSKey,Location Name Key,Latitude,Longitude
 53027,Grays Harbor,WA,Washington,Grays Harbor|WA,"Grays Harbor, WA, US",47.14003705,-123.7820567
 53025,Grant,WA,Washington,Grant|WA,"Grant, WA, US",47.20753737,-119.4500749
 53023,Garfield,WA,Washington,Garfield|WA,"Garfield, WA, US",46.45197502,-117.5454032
-53023,Garfield,WA,Washington,Garfield|WA,"Garfield, WA, US",46.43197502,-117.5454032
 53021,Franklin,WA,Washington,Franklin|WA,"Franklin, WA, US",46.53351425,-118.9018212
 53019,Ferry,WA,Washington,Ferry|WA,"Ferry, WA, US",48.4711431,-118.5154041
 53017,Douglas,WA,Washington,Douglas|WA,"Douglas, WA, US",47.7361335,-119.692937
@@ -433,7 +431,6 @@ FIPS,Name,State,StateName,FIPSKey,Location Name Key,Latitude,Longitude
 49057,Weber,UT,Utah,Weber|UT,"Weber, UT, US",41.27116049,-111.9145117
 49055,Wayne,UT,Utah,Wayne|UT,"Wayne, UT, US",38.32335822,-110.9096801
 49053,Washington,UT,Utah,Washington|UT,"Washington, UT, US",37.3225,-113.4776
-49053,Washington,UT,Utah,Washington|UT,"Washington, UT, US",37.28003525,-113.504698
 49051,Wasatch,UT,Utah,Wasatch|UT,"Wasatch, UT, US",40.33110236,-111.1691419
 49049,Utah,UT,Utah,Utah|UT,"Utah, UT, US",40.1166722,-111.6657662
 49047,Uintah,UT,Utah,Uintah|UT,"Uintah, UT, US",40.12491499,-109.5174415
@@ -1435,7 +1432,6 @@ FIPS,Name,State,StateName,FIPSKey,Location Name Key,Latitude,Longitude
 35017,Grant,NM,New Mexico,Grant|NM,"Grant, NM, US",32.73911281,-108.3827845
 35015,Eddy,NM,New Mexico,Eddy|NM,"Eddy, NM, US",32.47167456,-104.3053527
 35013,Dona Ana,NM,New Mexico,Dona Ana|NM,"Dona Ana, NM, US",32.35275771,-106.8329387
-35013,Dona Ana,NM,New Mexico,Dona Ana|NM,"Dona Ana, NM, US",32.35275771,-106.8329387
 35011,De Baca,NM,New Mexico,De Baca|NM,"De Baca, NM, US",34.34274529,-104.4117842
 35009,Curry,NM,New Mexico,Curry|NM,"Curry, NM, US",34.57421077,-103.3468876
 35007,Colfax,NM,New Mexico,Colfax|NM,"Colfax, NM, US",36.60569702,-104.6472674
@@ -1487,7 +1483,6 @@ FIPS,Name,State,StateName,FIPSKey,Location Name Key,Latitude,Longitude
 32013,Humboldt,NV,Nevada,Humboldt|NV,"Humboldt, NV, US",41.40692186,-118.1109427
 32011,Eureka,NV,Nevada,Eureka|NV,"Eureka, NV, US",39.98100864,-116.2683204
 32009,Esmeralda,NV,Nevada,Esmeralda|NV,"Esmeralda, NV, US",37.78436681,-117.6319999
-32007,Elko,NV,Nevada,Elko|NV,"Elko, NV, US",41.14531606,-115.3577619
 32007,Elko,NV,Nevada,Elko|NV,"Elko, NV, US",41.14531606,-115.3577619
 32005,Douglas,NV,Nevada,Douglas|NV,"Douglas, NV, US",38.912862,-119.6171333
 32003,Clark,NV,Nevada,Clark|NV,"Clark, NV, US",36.21458855,-115.0130241
