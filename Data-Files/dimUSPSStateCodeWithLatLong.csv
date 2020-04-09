@@ -1,0 +1,61 @@
+US State Name,Province or State,Location Key Name,Latitude,Longitude
+Alabama,AL,"AL, US",32.3182,-86.9023
+Alaska,AK,"AK, US",61.3707,-152.4044
+Arkansas,AR,"AR, US",34.9697,-92.3731
+American Samoa,AS,"AS, US",-14.271,-170.132
+Arizona,AZ,"AZ, US",33.7298,-111.4312
+California,CA,"CA, US",36.1162,-119.6816
+Colorado,CO,"CO, US",39.0598,-105.3111
+Connecticut,CT,"CT, US",41.5978,-72.7554
+District of Columbia,DC,"DC, US",38.8974,-77.0268
+Delaware,DE,"DE, US",39.3185,-75.5071
+Florida,FL,"FL, US",27.7663,-81.6868
+Georgia,GA,"GA, US",33.0406,-83.6431
+Guam,GU,"GU, US",13.4443,144.7937
+Hawaii,HI,"HI, US",21.0943,-157.4983
+Iowa,IA,"IA, US",42.0115,-93.2105
+Idaho,ID,"ID, US",44.2405,-114.4788
+Illinois,IL,"IL, US",40.3495,-88.9861
+Indiana,IN,"IN, US",39.8494,-86.2583
+Kansas,KS,"KS, US",38.5266,-96.7265
+Kentucky,KY,"KY, US",37.6681,-84.6701
+Louisiana,LA,"LA, US",31.1695,-91.8678
+Massachusetts,MA,"MA, US",42.2302,-71.5301
+Maryland,MD,"MD, US",39.0639,-76.8021
+Maine,ME,"ME, US",44.6939,-69.3819
+Michigan,MI,"MI, US",43.3266,-84.5361
+Minnesota,MN,"MN, US",45.6945,-93.9002
+Missouri,MO,"MO, US",38.4561,-92.2884
+Northern Mariana Islands,MP,"MP, US",15.0979,145.6739
+Mississippi,MS,"MS, US",32.7416,-89.6787
+Montana,MT,"MT, US",46.9219,-110.4544
+North Carolina,NC,"NC, US",35.6301,-79.8064
+North Dakota,ND,"ND, US",47.5289,-99.784
+Nebraska,NE,"NE, US",41.1254,-98.2681
+New Hampshire,NH,"NH, US",43.4525,-71.5639
+New Jersey,NJ,"NJ, US",40.298904,-74.521011
+New Mexico,NM,"NM, US",34.8405,-106.2485
+Nevada,NV,"NV, US",38.3135,-117.0554
+New York,NY,"NY, US",42.1657,-74.9481
+Ohio,OH,"OH, US",40.3888,-82.7649
+Oklahoma,OK,"OK, US",35.5653,-96.9289
+Oregon,OR,"OR, US",44.572,-122.0709
+Pennsylvania,PA,"PA, US",40.590752,-77.209755
+Puerto Rico,PR,"PR, US",18.2208,-66.5901
+Rhode Island,RI,"RI, US",41.6809,-71.5118
+South Carolina,SC,"SC, US",33.8569,-80.945
+South Dakota,SD,"SD, US",44.2998,-99.4388
+Tennessee,TN,"TN, US",35.7478,-86.6923
+Texas,TX,"TX, US",31.0545,-97.5635
+Utah,UT,"UT, US",40.15,-111.8624
+Virginia,VA,"VA, US",37.7693,-78.17
+Virgin Islands,VI,"VI, US",18.3358,-64.8963
+Vermont,VT,"VT, US",44.0459,-72.7107
+Washington,WA,"WA, US",47.4009,-121.4905
+Wisconsin,WI,"WI, US",44.2685,-89.6165
+West Virginia,WV,"WV, US",38.4912,-80.9545
+Wyoming,WY,"WY, US",42.756,-107.3025
+Federated States of Micronesia,FM,"FM, US",6.916667,158.25
+Marshall Islands,MH,"MH, US",9,168
+Palau,PW,"PW, US",7.5,134.5
+United States,US,"US, US",40,-100
