@@ -8,6 +8,9 @@ function Set-DebugOptions {
         , [bool]$UpdateLocalFiles = $true
         , [bool]$AppendDebugData = $false
         , [bool]$Workaround = $false
+        , [bool]$ForceDownload = $false
+        , [bool]$LoadFromWorkingFiles = $false
+        , [bool]$LoadNewUSFiles = $false
     )
     
     $DebugOptions = @{
@@ -18,7 +21,10 @@ function Set-DebugOptions {
         LastRun                = Get-Date
         AppendDebugData        = $AppendDebugData
         Workaround             = $Workaround
+        ForceDownload          = $ForceDownload
+        LoadFromWorkingFiles   = $LoadFromWorkingFiles
     }
+    $COVID_19_Project_Path = "C:\Users\Bill\OneDrive\Bill\Documents\My GitLab\Covid-19-Power-BI" 
     # Check to see if the temp folder exists and created it if it doesn't exist
     if (-not (Test-Path -Path $TempPath ) ) {
         $Root = ( Split-Path -Path $TempPath ), "\" -join ""
@@ -37,6 +43,11 @@ function Set-DebugOptions {
             }
         }
     }
+    if ( $DebugOptions.ForceDownload) {
+        $files = Get-ChildItem -Path ($COVID_19_Project_Path, "Working Files" -join "\")
+        $Files | Remove-Item
+        # $DebugOptions.DeleteTempFilesAtStart = $true
+    }
     if ( $DebugOptions.DeleteTempFilesAtStart -eq $true ) {
         $Files = Get-ChildItem $DebugOptions.TempPath -Recurse
         $Files | Remove-Item
@@ -54,6 +65,11 @@ function Set-DebugOptions {
         }
     }
     return $DebugOptions
+}
+
+function Get-WeekNumber([datetime]$DateTime = (Get-Date)) {
+    $cultureInfo = [System.Globalization.CultureInfo]::CurrentCulture
+    $cultureInfo.Calendar.GetWeekOfYear($DateTime,$cultureInfo.DateTimeFormat.CalendarWeekRule,$cultureInfo.DateTimeFormat.FirstDayOfWeek)
 }
 
 function ConvertTo-PsCustomObjectFromHashtable {
