@@ -1,4 +1,4 @@
-![](./media/dbbest-logo-small.png)
+![](./dbbest-logo-small.png)
 # Covid-19-Power-BI - Educational content - How to analyze data from CSSEGISandData/COVID-19 repository
 
 This repository supports the blog articles from DB Best Technologies that uses data from the 2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE (JHU).
