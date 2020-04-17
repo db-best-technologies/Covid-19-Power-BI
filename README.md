@@ -19,7 +19,8 @@ Website: https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals<br>
 Data file: https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D<br>
 <br>
 <b>Contact Us: </b><br>
-Email:  mailto:info@dbbest.com?subject=COVID-19-GitHub<br>
+* Email: info@dbbest.com?subject=COVID-19-GitHub
+<br>
 <br>
 <b>Terms of Use:</b><br>
 DB Best Technologies (DBT) derived the Covid-18 data from copywrited data on 2020 by Johns Hopkins University (JHU). JHU provides their data to the public strictly for educational and academic research purposes. Other data used for blog posts by DBT uses data from other publicly available data from multiple sources, that do not always agree. <br>
