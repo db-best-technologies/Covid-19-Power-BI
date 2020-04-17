@@ -12,6 +12,7 @@ https://www.dbbest.com/blog/<br>
 Used to resolve location information for other sources that use different country, state, and county information that doesn't align to JHU coding of their Combined_Key value. <br>
 Web site: https://docs.gaslamp.media/download-zip-code-latitude-longitude-city-state-county-csv/<br>
 Data file: https://docs.gaslamp.media/wp-content/uploads/2013/08/zip_codes_states.csv<br>
+<br>
 * <b>Homeland Infrastructure Foundation-Level Data (HIFLD) - Hospitals:</b><br>
 This feature class/shapefile contains locations of Hospitals for 50 US states, Washington D.C., US territories of Puerto Rico, Guam, American Samoa, Northern Mariana Islands, Palau, and Virgin Islands. The dataset only includes hospital facilities based on data acquired from various state departments or federal sources which has been referenced in the SOURCE field. Hospital facilities which do not occur in these sources will be not present in the database. <br>
 Website: https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals<br>
