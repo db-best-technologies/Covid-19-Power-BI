@@ -6,6 +6,8 @@ https://www.dbbest.com/blog/<br>
 <br>
 <b>JSU CSSE GitHub Data Repository:</b> https://github.com/CSSEGISandData/COVID-19<br>
 <b>JSU CSSE Covid-19 Dashboard:</b> https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6<br>
+<br>npr.org Meet The Team Behind The Coronavirus Tracker Watched By Millions:</b> https://www.npr.org/2020/04/13/833073670/mapping-covid-19-millions-rely-on-online-tracker-of-cases-worldwide<br>
+<b> JSU COVID-19 Map FAQs:</b> https://systems.jhu.edu/research/public-health/2019-ncov-map-faqs/<br>
 <br>
 <b>Other Data Sources:</b><br>
 <b>docs.gaslamp.media</b> Download - Zip Code Latitude Longitude City State County CSV: <br>
