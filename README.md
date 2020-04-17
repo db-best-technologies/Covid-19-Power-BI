@@ -1,7 +1,8 @@
 ![](./dbbest-logo-small.png)
 # Covid-19-Power-BI - Educational content - How to analyze data from CSSEGISandData/COVID-19 repository
-
-This repository supports the blog articles from DB Best Technologies that uses data from the 2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE (JHU).
+<br>
+This repository supports the blog articles from DB Best Technologies that uses data from the 2019 Novel Coronavirus COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE (JHU). You can find the related blog posts at:<br>
+https://www.dbbest.com/blog/<br>
 <br>
 <b>JSU CSSE GitHub Data Repository:</b> https://github.com/CSSEGISandData/COVID-19<br>
 <b>JSU CSSE Covid-19 Dashboard:</b> https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6<br>
@@ -15,7 +16,9 @@ This feature class/shapefile contains locations of Hospitals for 50 US states, W
 Website: https://hifld-geoplatform.opendata.arcgis.com/datasets/hospitals<br>
 Data file: https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D<br>
 <br>
-<br>
+<b>Contact Us: </b><br>
+* Email: info@dbbest.com
+<br><br>
 <b>Terms of Use:</b><br>
 DB Best Technologies (DBT) derived the Covid-18 data from copywrited data on 2020 by Johns Hopkins University (JHU). JHU provides their data to the public strictly for educational and academic research purposes. Other data used for blog posts by DBT uses data from other publicly available data from multiple sources, that do not always agree. <br>
 <br>
