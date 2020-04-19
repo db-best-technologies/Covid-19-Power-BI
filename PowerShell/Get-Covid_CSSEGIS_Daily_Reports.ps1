@@ -62,26 +62,26 @@ if ( $true ) <# Setup execution environment #> {
     }
     
     $URLs = [ordered]@{
-        UID_ISO_FIPS_LookUp_Table              = $Paths.JSU_COVID_19_master_Branch_data_RAW, "UID_ISO_FIPS_LookUp_Table.csv" -join ""
-        dimUS_zip_codes_states                 = $Paths.DBB_GitHub_Data_Files_RAW, "dimUS_zip_codes_states.csv" -join ""
-        web_data_override                       = $Paths.JSU_web_data_branch_Override_RAW, "override.csv" -join ""
+        UID_ISO_FIPS_LookUp_Table                = $Paths.JSU_COVID_19_master_Branch_data_RAW, "UID_ISO_FIPS_LookUp_Table.csv" -join ""
+        dimUS_zip_codes_states                   = $Paths.DBB_GitHub_Data_Files_RAW, "dimUS_zip_codes_states.csv" -join ""
+        web_data_override                        = $Paths.JSU_web_data_branch_Override_RAW, "override.csv" -join ""
 
-        JSU_csse_covid_19_daily_reports_PAGE   = $Paths.JSU_csse_covid_19_daily_reports_PAGE
-        JSU_csse_covid_19_daily_reports_RAW    = $Paths.JSU_csse_covid_19_daily_reports_RAW
+        JSU_csse_covid_19_daily_reports_PAGE     = $Paths.JSU_csse_covid_19_daily_reports_PAGE
+        JSU_csse_covid_19_daily_reports_RAW      = $Paths.JSU_csse_covid_19_daily_reports_RAW
 
-        DBT_Daily_Reports_Files_Loaded         = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/DBT_Daily_Reports_Files_Loaded.csv"
-        csse_covid_19_daily_reports_raw        = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports"
-        CSSEGISandData_web_data_override_page  = "https://github.com/CSSEGISandData/COVID-19/tree/web-data/override"
+        DBT_Daily_Reports_Files_Loaded           = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/DBT_Daily_Reports_Files_Loaded.csv"
+        csse_covid_19_daily_reports_raw          = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports"
+        CSSEGISandData_web_data_override_page    = "https://github.com/CSSEGISandData/COVID-19/tree/web-data/override"
         
-        CSSEGISandData__daily_reports_page     = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
-        CSSEGISandData_Readme_md               = "https://github.com/CSSEGISandData/COVID-19/blob/master/README.md"
-        DBBestDerivedData                      = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
-        DBBestDerivedMetadata                  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
-        DBT_JHU_Files_Processed_For_Current_Data  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFile, "-SourceFiles.csv" -join ""
-        DBT_JHU_Unpivoted_Data           = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFlie, ".csv" -join ""
-        csse_covid_19_daily_reports_us         = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports_us"
-        DBB_Last_Upload_AllColumns             = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Working%20Files/DBT_FullDataRow_Daily_Reports.csv"
-        DBT_FullDataRow_Daily_Reports          = "$($DBB_GitHub_Working_Files)DBT_FullDataRow_Daily_Reports.csv"
+        CSSEGISandData__daily_reports_page       = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
+        CSSEGISandData_Readme_md                 = "https://github.com/CSSEGISandData/COVID-19/blob/master/README.md"
+        DBBestDerivedData                        = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
+        DBBestDerivedMetadata                    = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
+        DBT_JHU_Files_Processed_For_Current_Data = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFile, "-SourceFiles.csv" -join ""
+        DBT_JHU_Unpivoted_Data                   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFlie, ".csv" -join ""
+        csse_covid_19_daily_reports_us           = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports_us"
+        DBB_Last_Upload_AllColumns               = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Working%20Files/DBT_FullDataRow_Daily_Reports.csv"
+        DBT_FullDataRow_Daily_Reports            = "$($DBB_GitHub_Working_Files)DBT_FullDataRow_Daily_Reports.csv"
         
     }
 
@@ -161,6 +161,7 @@ if ( $true ) <# Setup execution environment #> {
         State_Code            = $null
         'Location Name Key'   = $null
         'US State County Key' = $null
+        Row_No_Source_File    = $null
     }
     $AllColumnsPSO = [PSCustomObject]@{
         'Location Index'             = -1
@@ -270,7 +271,7 @@ if ( $true ) <# Setup execution environment #> {
         'State_Code'                 = $null
     }
     $CountryReplacements = [PSCustomObject]@{
-    <#    'Mainland China' = "China"
+        <#    'Mainland China' = "China"
         'South Korea'    = "Korea, South"
         'Taiwan'         = 'Taiwan*'
         'Macau'          = "China"
@@ -316,13 +317,13 @@ if ( $true ) <# Setup execution environment #> {
         foreach ( $State  in $USStateCSV ) {
             $StateCode = $State.State_Code
             $StateName = $State.Province_State
-            if ( $State.Combined_Key.Length -eq 0 ){
+            if ( $State.Combined_Key.Length -eq 0 ) {
                 $State.Combined_Key = Get-BuildCombinedKey $StateName, "US"
             }
             $StateCodeFromName.Add( $StateName, $StateCode)
             $StateNameFromCode.Add( $StateCode, $StateName )
         } 
-        $USStateCSV | Export-Csv -Path ($DebugOptions.TempPath ,  "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
+        $USStateCSV | Export-Csv -Path ($DebugOptions.TempPath , "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
     }<# END: Using dimUSPSStateCodeWithLatLong.csv to create  $StateCodeFromName and $StateNameFromCode #>
 
     if ( $DebugOptions.LoadKeyFiles ) <# Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #> {
@@ -374,12 +375,14 @@ if ( $true ) <# Setup execution environment #> {
                 if ( "US" -eq $UID.Country_Region ) {
                     if ( ($StateCodeFromName.($UID.Province_State).State_Code).Length -gt 0 ) {
                         $UID.State_Code = $StateCodeFromName.($UID.Province_State).State_Code 
-                    } else {
-                         $UID.State_Code = $UID.Province_State 
+                    }
+                    else {
+                        $UID.State_Code = $UID.Province_State 
                     }
                     $UID.'Location Name Key' = Get-BuildCombinedKey $UID.Admin2, $UID.State_Code, $UID.Country_Region        
-                } else { 
-                    $UID.'Location Name Key' =  Get-BuildCombinedKey $UID.Admin2, $UID.Province_State, $UID.Country_Region   
+                }
+                else { 
+                    $UID.'Location Name Key' = Get-BuildCombinedKey $UID.Admin2, $UID.Province_State, $UID.Country_Region   
                 }
                 
                 # Make corrections based on $UID.UID
@@ -442,11 +445,13 @@ if ( $true ) <# Setup execution environment #> {
                             "MP" { $Combined_Key.'Northern Mariana Islands, US'.Combined_Key }
                             Default { $Zip.Combined_Key = "Unassigned, US" }
                         }
-                    } else {
+                    }
+                    else {
                         $PossibleKey = Get-BuildCombinedKey $Zip.county, $StateNameFromCode.($Zip.state).Province_State, "US"  
                         if ( $null -ne $Combined_Key.($PossibleKey) ) {
                             
-                        } else {
+                        }
+                        else {
                             $Zip.Combined_Key = $Combined_Key.($Zip.county, $StateNameFromCode.($Zip.state).Province_State, "US" -join ", ").Combined_Key
                         }
                     }
@@ -457,23 +462,23 @@ if ( $true ) <# Setup execution environment #> {
                 if ( $Zip.city.Length -eq 0 ) { continue }
                 if ( $Zip.state.Length -eq 0 ) { continue }
     
-                $KeyValue = $Zip.city, $StateNameFromCode.($Zip.state).Province_State -join ", "
+                $KeyValue = $Zip.city, $StateNameFromCode.($Zip.state) -join ", "
                 if ( $null -eq $CountyNameFromCity.$KeyValue ) {
                     $Zip.City_State_Key = $KeyValue
                     $CountyNameFromCity.Add( $KeyValue, $Zip  )
                 }
                 if ($CurrentState -ne $Zip.state) {
                     $CurrentState = $Zip.state
-                    Write-host "Indexing : ", $StateNameFromCode.($Zip.state).Province_State
+                    Write-host "Indexing : ", $StateNameFromCode.($Zip.state)
                 }
             
             }
-            ($DebugOptions.TempPath ,  "" -join "\")
+            
             $CITY_CSV | Export-Csv -path ($DebugOptions.TempPath , $FileName -join "\") -NoTypeInformation
         }
     } <# END: Using dimUS_zip_codes_states.csv to create $CountyNameFromZip and $CountyNameFromCity #>
     
-    if ( $DebugOptions.LoadKeyFiles ) Process overrides to match Combined_Key in dimUID_ISO_FIPS_LookUp_Table.csv #> { 
+    if ( $DebugOptions.LoadKeyFiles ) <# Process overrides to match Combined_Key in dimUID_ISO_FIPS_LookUp_Table.csv #> { 
         $Combined_Key_Replacements = [PSCustomObject]@{
             'District of Columbia, US'                          = "District of Columbia, District of Columbia ,US"
             'Bahamas, The'                                      = 'Bahamas'
@@ -610,6 +615,7 @@ if ( $true ) <# Setup execution environment #> {
             $RowNum ++    
         }
         $CSV_Override | Export-Csv -Path $LocalFiles.JHU_web_data_override_location_mapping
+        $CSV_Override | Where-Object { ( $_.In_DBT_Exceptions.Length -gt 0) } | Export-Csv -Path ( $DebugOptions.TempPath, "override_no_matches.csv" -join "\" ) -NoTypeInformation
 
     } <# END: Process replacements to match Combined_Key in dimUID_ISO_FIPS_LookUp_Table.csv #>
 
@@ -634,11 +640,11 @@ if ( $true ) <# Setup execution environment #> {
             $ChangeInGitHubFiles = $true
             $WR_CSV = $null
             $WR_CSV = Invoke-WebRequest -Uri ( $URLs.JSU_csse_covid_19_daily_reports_RAW, $Link.title -join "" )
-            $WR_CSV.Content | Out-File -FilePath ($LocalFiles.LocalWorkingGitPath, $Link.title -join "")
+            $WR_CSV.Content | Out-File -FilePath ($DebugOptions.TempPath, $Link.title -join "\")
 
             # Need to replace the column names with the newest names used starting 03-22-2020
-            ((Get-Content -path ($LocalFiles.LocalWorkingGitPath, $Link.title -join "")  -Raw) -replace 'Province/State,Country/Region,Last Update,', 'Province_State,Country_Region,Last_Update,') | Set-Content -Path ($LocalFiles.LocalWorkingGitPath, $Link.title -join "")            
-            $CSVData = Import-Csv -Path  ($LocalFiles.LocalWorkingGitPath, $Link.title -join "")
+            ((Get-Content -path ($DebugOptions.TempPath, $Link.title -join "\")  -Raw) -replace 'Province/State,Country/Region,Last Update,', 'Province_State,Country_Region,Last_Update,') | Set-Content -Path ($DebugOptions.TempPath, $Link.title -join "\")            
+            $CSVData = Import-Csv -Path  ($DebugOptions.TempPath, $Link.title -join "\")
 
             $PeriodEnding = $Link.title.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
             $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
@@ -656,9 +662,10 @@ if ( $true ) <# Setup execution environment #> {
                     $County = $County.Trim()
                     $StateCode = $StateCode.Trim()
                     if ( $Line.Country_Region -eq "US" ) {
-                        if ( $null -ne $StateNameFromCode.($StateCode)  ){
-                            $Line.Province_State = $StateNameFromCode.($StateCode).Province_State
-                        } else {
+                        if ( $StateNameFromCode.($StateCode).Length -gt 0  ) {
+                            $Line.Province_State = $StateNameFromCode.($StateCode)
+                        }
+                        else {
                             $Line.Province_State = $StateCode
                         }
                         if ($County -like "* County") { 
@@ -669,22 +676,43 @@ if ( $true ) <# Setup execution environment #> {
                         }
                         $Line.Combined_Key = Get-BuildCombinedKey $County, $Line.Province_State, $Line.Country_Region
                         if ( $null -eq $Combined_Key.($Line.Combined_Key) ) {
-                            if ( $null -ne $CountyNameFromCity.($County, $StateCode, $Line.Country_Region -join ", " ) )
+                            if ( $null -eq $CountyNameFromCity.($County, $Line.Province_State -join ", " ) ) {
+                                $Unresolved_Combined_Keys += $Line 
+                                $Line 
+                                continue
+                            }    
+                        }
+                        else {
+                            $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
+                            if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
+                                $Unresolved_Combined_Keys += $Line 
+                                $Line 
+                                continue
+                            }
                         }
                     } else {
                         $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
-                    }    
-
+                        if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
+                            $Unresolved_Combined_Keys += $Line 
+                            $Line 
+                            continue
+                        }
                     }
-                    $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
+                } else {
+                    $Line.Combined_Key = Get-BuildCombinedKey $Line.Province_State, $Line.Country_Region
                     if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
-                        
+                        $Unresolved_Combined_Keys += $Line 
+                        $Line 
+                        continue
                     }
                 }
-                $Line.Combined_Key = Get-BuildCombinedKey $Line.Province_State, $Line.Country_Region
+
             } <# END: foreach ( $Line in $CSVData ) #>
 
-
+            $CSVData | Export-Csv -Path  ($DebugOptions.TempPath, $Link.title -join "\") -NoTypeInformation
+            if ( $Unresolved_Combined_Keys.count -gt 0 ) {
+                $Unresolved_Combined_Keys | Export-Csv -Path  ($DebugOptions.TempPath, "\Unresolved-", $Link.title -join "") -NoTypeInformation
+            }
 
             $CSVData | Export-Csv -Path ($LocalFiles.LocalWorkingGitPath, $Link.title -join "") -NoTypeInformation
 
@@ -1792,7 +1820,7 @@ if ( $true ) <#  Write results to files for GitHub #> {
             $FilesInfo[ $i ].FileNumber = $i
             $FilesInfo[ $i ].NeedsUpdating = $false
         }
-        $FilesInfo | Select-Object -Property $OutColumns | Where-Object -Property 'PeriodEnding' -lt '04-11-2020' |Export-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded -NoTypeInformation
+        $FilesInfo | Select-Object -Property $OutColumns | Where-Object -Property 'PeriodEnding' -lt '04-11-2020' | Export-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded -NoTypeInformation
     } <# END: Write out the file list of processed files #>
 
     if ( $false ) <# Clean out First Event data from our existing data #> {
@@ -1803,14 +1831,14 @@ if ( $true ) <#  Write results to files for GitHub #> {
         $FullDataRow = Import-Csv -Path $LocalFiles.'DBT_FullDataRow_Daily_Reports' 
 
         # Clean out data needing refresh
-        $UnpivotedRows | Where-Object {( $_.'Date Reported' -le $LastFileLoaded )} | Sort-Object  'Date Reported', 'Location Name Key'  |  Export-Csv -Path $LocalFiles.'DBT_JHU_Unpivoted_Data' -NoTypeInformation
+        $UnpivotedRows | Where-Object { ( $_.'Date Reported' -le $LastFileLoaded ) } | Sort-Object  'Date Reported', 'Location Name Key' | Export-Csv -Path $LocalFiles.'DBT_JHU_Unpivoted_Data' -NoTypeInformation
         $UnpivotedRows = Import-Csv -Path $LocalFiles.'DBT_JHU_Unpivoted_Data'
         
-        $FullDataRow | Where-Object {( $_.'Date Reported' -le $LastFileLoaded )} | Sort-Object  'Date Reported', 'Location Name Key'  |  Export-Csv -Path $LocalFiles.DBT_FullDataRow_Daily_Reports -NoTypeInformation
-        $FullDataRow= Import-Csv -Path $LocalFiles.'DBT_FullDataRow_Daily_Reports' 
+        $FullDataRow | Where-Object { ( $_.'Date Reported' -le $LastFileLoaded ) } | Sort-Object  'Date Reported', 'Location Name Key' | Export-Csv -Path $LocalFiles.DBT_FullDataRow_Daily_Reports -NoTypeInformation
+        $FullDataRow = Import-Csv -Path $LocalFiles.'DBT_FullDataRow_Daily_Reports' 
         
-        $FilesInfo | Select-Object -Property $OutColumns | Where-Object -Property 'PeriodEnding' -lt '04-11-2020' |Export-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded -NoTypeInformation
-        $FilesInfo =  Import-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded
+        $FilesInfo | Select-Object -Property $OutColumns | Where-Object -Property 'PeriodEnding' -lt '04-11-2020' | Export-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded -NoTypeInformation
+        $FilesInfo = Import-Csv -Path $LocalFiles.DBT_Daily_Reports_Files_Loaded
 
     }
 
@@ -1889,9 +1917,9 @@ if ($false)    <# TODO - Finish writing data to other files #> {
         }
     
         $JsonHeader = @{
-            FileName                  = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
-            FileDBT_JHU_Unpivoted_Data   = $URLs.DBT_JHU_Unpivoted_Data, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
-            FileDescription           = @"
+            FileName                   = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
+            FileDBT_JHU_Unpivoted_Data = $URLs.DBT_JHU_Unpivoted_Data, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
+            FileDescription            = @"
     Data was derived by DB Best Technologies, LLC from the daily reports located at:
     $GitRawRoot
     
@@ -1910,13 +1938,13 @@ if ($false)    <# TODO - Finish writing data to other files #> {
     - ProvinceStateReplacements
     - CountyAdmin2Replacements
 "@
-            FileGeneratedOn           = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
-            ColumnsMappingChanges     = $NewColumnsMapping
-            ColumnHeaderChanges       = $ColumnHeaders
-            CountryRegionReplacements = $CountryReplacements
-            CountyAdmin2Replacements  = $CountyReplacements
-            ProvinceStateReplacements = $StateReplacements
-            Results                   = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
+            FileGeneratedOn            = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
+            ColumnsMappingChanges      = $NewColumnsMapping
+            ColumnHeaderChanges        = $ColumnHeaders
+            CountryRegionReplacements  = $CountryReplacements
+            CountyAdmin2Replacements   = $CountyReplacements
+            ProvinceStateReplacements  = $StateReplacements
+            Results                    = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
         }
         $JsonHeader | ConvertTo-Json -Depth 100 | Out-File -Path ( $LocalDataGitPath, $JsonHeader.FileName -join "")
     
@@ -2025,9 +2053,9 @@ if ($false)    <# TODO - Finish writing data to other files #> {
 
     if ( $false )  <# Write the LocationNameKeyIndex to JSON #> { 
         $JsonHeader = @{
-            FileName                  = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
-            FileDBT_JHU_Unpivoted_Data   = $URLs.DBT_JHU_Unpivoted_Data, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
-            FileDescription           = @"
+            FileName                   = "CSSEGISandData-COVID-19-LocationNameKeyIndex.json"
+            FileDBT_JHU_Unpivoted_Data = $URLs.DBT_JHU_Unpivoted_Data, "CSSEGISandData-COVID-19-LocationNameKeyIndex.json" -join ""
+            FileDescription            = @"
 Data was derived by DB Best Technologies, LLC from the daily reports located at:
 $GitRawRoot
 
@@ -2046,13 +2074,13 @@ See the following structures in this document:
 - ProvinceStateReplacements
 - CountyAdmin2Replacements
 "@
-            FileGeneratedOn           = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
-            ColumnsMappingChanges     = $NewColumnsMapping
-            ColumnHeaderChanges       = $ColumnHeaders
-            CountryRegionReplacements = $CountryReplacements
-            CountyAdmin2Replacements  = $CountyReplacements
-            ProvinceStateReplacements = $StateReplacements
-            Results                   = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
+            FileGeneratedOn            = Get-Date -Date ((Get-Date).ToUniversalTime()) -Format "yyyy-MM-ddTHH:mm:ssZ"
+            ColumnsMappingChanges      = $NewColumnsMapping
+            ColumnHeaderChanges        = $ColumnHeaders
+            CountryRegionReplacements  = $CountryReplacements
+            CountyAdmin2Replacements   = $CountyReplacements
+            ProvinceStateReplacements  = $StateReplacements
+            Results                    = $LocationNameKeyIndex | Sort-Object -Property 'Location Name Key' 
         }
         $JsonHeader | ConvertTo-Json -Depth 100 | Out-File -Path ( $LocalDataGitPath, $JsonHeader.FileName -join "")
 

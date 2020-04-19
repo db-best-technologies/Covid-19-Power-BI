@@ -1,9 +1,26 @@
 # Support files for processing Covid-19 data
+$GLOBAL:PROMPT_COUNT = 0
+$GLOBAL:TIMER = [Diagnostics.Stopwatch]::StartNew()
+$GLOBAL:TIMER_LAST_SEC = $GLOBAL:TIMER.Elapsed.Seconds
+ 
+function prompt {
+    ${GLOBAL:PROMPT_COUNT}++
+    $GLOBAL:TIMER_LAST_SEC = $GLOBAL:TIMER.Elapsed.Seconds
+    $RootDir = Get-location | Split-Path -Leaf
+    Write-Host ( "$($RootDir) (" + $("000000000${GLOBAL:PROMPT_COUNT}>").tostring().substring($("000000000${GLOBAL:PROMPT_COUNT}").length-4 , 4) + " $($GLOBAL:TIMER_LAST_SEC)s) > ") -foregroundcolor white -nonewline
+return " "
+}
+
+
+$COVID_19_Project_Path = "C:\Users\Bill\OneDrive\Bill\Documents\My GitLab\Covid-19-Power-BI"
+Set-Location $COVID_19_Project_Path
+$RootDir = Split-Path $COVID_19_Project_Path -Leaf
+
 function Set-DebugOptions {
     param(
         [bool]$WriteFilesToTemp = $true
         , [string]$TempPath = "C:\Temp\Covid-Temp-Files"
-        , [bool]$DeleteTempFilesAtStart = $false
+        , [bool]$DeleteTempFilesAtStart = $true
         , [bool]$UpdateLocalFiles = $true
         , [bool]$AppendDebugData = $false
         , [bool]$Workaround = $false
@@ -49,7 +66,7 @@ function Set-DebugOptions {
     if ( $DebugOptions.ForceDownload) {
         $files = Get-ChildItem -Path ($COVID_19_Project_Path, "Working Files" -join "\")
     }
-    if ( $DebugOptions.DeleteTempFilesAtStart -eq $true ) {
+    if ( $DebugOptions.DeleteTempFilesAtStart ) {
         $Files = Get-ChildItem $DebugOptions.TempPath -Recurse
         $Files | Remove-Item
         if ($DebugOptions.WriteFilesToTemp) {
@@ -59,8 +76,8 @@ function Set-DebugOptions {
                 Append      = $DebugOptions.AppendDebugData
             }
             $Files | ConvertTo-Json | Out-File @hashParams
-            $hashParams.LiteralPath = ($DebugOptions.TempPath, "\Last-Debug-Options.yaml" -join "")
-            $DebugOptions | ConvertTo-Yaml | Out-File @hashParams
+            $hashParams.LiteralPath = ($DebugOptions.TempPath, "\Last-Debug-Options.json" -join "")
+            $DebugOptions | ConvertTo-Json | Out-File @hashParams
         }
     }
     return $DebugOptions
