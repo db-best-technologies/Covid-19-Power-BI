@@ -1,16 +1,16 @@
-Import-Module powershell-yaml
-
+# Support files for processing Covid-19 data
 function Set-DebugOptions {
     param(
         [bool]$WriteFilesToTemp = $true
         , [string]$TempPath = "C:\Temp\Covid-Temp-Files"
-        , [bool]$DeleteTempFilesAtStart = $true
+        , [bool]$DeleteTempFilesAtStart = $false
         , [bool]$UpdateLocalFiles = $true
         , [bool]$AppendDebugData = $false
         , [bool]$Workaround = $false
-        , [bool]$ForceDownload = $false
+        , [bool]$ForceDownload = $true
         , [bool]$LoadFromWorkingFiles = $false
-        , [bool]$LoadNewUSFiles = $false
+        , [bool]$LoadNewUSFiles = $true
+        , [bool]$LoadKeyFiles = $true
     )
     
     $DebugOptions = @{
@@ -23,6 +23,8 @@ function Set-DebugOptions {
         Workaround             = $Workaround
         ForceDownload          = $ForceDownload
         LoadFromWorkingFiles   = $LoadFromWorkingFiles
+        LoadNewUSFiles         = $LoadNewUSFiles
+        LoadKeyFiles           = $LoadKeyFiles
     }
     $COVID_19_Project_Path = "C:\Users\Bill\OneDrive\Bill\Documents\My GitLab\Covid-19-Power-BI" 
     # Check to see if the temp folder exists and created it if it doesn't exist
@@ -45,8 +47,6 @@ function Set-DebugOptions {
     }
     if ( $DebugOptions.ForceDownload) {
         $files = Get-ChildItem -Path ($COVID_19_Project_Path, "Working Files" -join "\")
-        $Files | Remove-Item
-        # $DebugOptions.DeleteTempFilesAtStart = $true
     }
     if ( $DebugOptions.DeleteTempFilesAtStart -eq $true ) {
         $Files = Get-ChildItem $DebugOptions.TempPath -Recurse
@@ -60,8 +60,6 @@ function Set-DebugOptions {
             $Files | ConvertTo-Json | Out-File @hashParams
             $hashParams.LiteralPath = ($DebugOptions.TempPath, "\Last-Debug-Options.yaml" -join "")
             $DebugOptions | ConvertTo-Yaml | Out-File @hashParams
-            Remove-Variable 'Files'
-            Remove-Variable 'hashParams'
         }
     }
     return $DebugOptions
@@ -123,6 +121,28 @@ function ConvertTo-HashtableFromPsCustomObject {
             $output;
         }
     }
+}
+
+function Get-BuildCombinedKey {
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory=$false,
+        ValueFromPipeline=$true)]
+        [String[]]
+        $BuildCombinedKey
+    )
+    [string]$ReturnString = ""
+    foreach ($Value in $BuildCombinedKey) {
+        if ( $Value.Length -gt 0 ) {
+            if ( $ReturnString.Length -gt 0 ) {
+                $ReturnString = $ReturnString , ", ", $Value -join ""
+            } else {
+                $ReturnString = $Value
+            }
+        }
+    }
+    $ReturnString
+    
 }
 
 Write-Host "Profile loaded", (Get-date)
