@@ -84,17 +84,18 @@ if ( $true ) <# Setup execution environment #> {
         DBT_FullDataRow_Daily_Reports          = "$($DBB_GitHub_Working_Files)DBT_FullDataRow_Daily_Reports.csv"
         
     }
+
     $LocalFiles = [ordered]@{
         LocalWorkingGitPath                       = "$((Get-location).Path)\Working Files\"
         LocalDataGitPath                          = "$((Get-location).Path)\Data-Files\"
         DBT_Daily_Reports_Files_Loaded            = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.DBT_Daily_Reports_Files_Loaded -Leaf ) -join ""
         UID_ISO_FIPS_LookUp_Table                 = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.UID_ISO_FIPS_LookUp_Table -Leaf ) -join ""
-        dimUS_zip_codes_states                    = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.dimUS_zip_codes_states_leaf -Leaf ) -join ""
-        DBT_JHU_Unpivoted_Data             = "$((Get-location).Path)\Data-Files\", ( Split-Path  $URLs.'DBT_JHU_Unpivoted_Data' -Leaf ) -join ""
+        dimUS_zip_codes_states                    = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.dimUS_zip_codes_states -Leaf ) -join ""
+        DBT_JHU_Unpivoted_Data                    = "$((Get-location).Path)\Data-Files\", ( Split-Path  $URLs.'DBT_JHU_Unpivoted_Data' -Leaf ) -join ""
         DBB_Last_Upload_AllColumns                = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.DBB_Last_Upload_AllColumns -Leaf ) -join ""
         DBT_FullDataRow_Daily_Reports             = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.'DBT_FullDataRow_Daily_Reports' -Leaf ) -join ""
         csse_covid_19_daily_reports_us_local_path = "$((Get-location).Path)\Working Files\daily_reports_us\"
-        JHU_web_data_override_location_mapping    = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.JHU_web_data_override_location_mapping -Leaf ) -join ""
+        JHU_web_data_override_location_mapping    = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.web_data_override -Leaf ) -join ""
     }
 
     $ColumnHeaders = @{
@@ -309,22 +310,19 @@ if ( $true ) <# Setup execution environment #> {
         Write-Host "Creating indexes for dimUSPSStateCodeWithLatLong.csv"
         $StateCodeFromName = @{ }
         $StateNameFromCode = @{ }
-        $USStateCSV | Add-Member -MemberType NoteProperty -Name "Combined_Key" -Value $null
+        if ( $USStateCSV[0].psobject.Properties.Match('Combined_Key').Name.Length -eq 0 ) {
+            $USStateCSV | Add-Member -MemberType NoteProperty -Name "Combined_Key" -Value $null
+        }
         foreach ( $State  in $USStateCSV ) {
             $StateCode = $State.State_Code
             $StateName = $State.Province_State
-            $StateCodeFromName.Add( $StateName, $State)
-            if ( "US" -eq $State.'State_Code') {
-                $StateCodeFromName.$StateName.Province_State = $null
-                $StateCodeFromName.$StateName.Combined_Key = $State.'State_Code'
-                $StateCodeFromName.$StateName."Location Name Key" = $State.'State_Code'
-            }
-            else {
-                $StateCodeFromName.$StateName.Combined_Key = $StateName , ", US" -join ""
-                $StateCodeFromName.$StateName.'Location Name Key' = $State.State_Code, ", US" -join ""
-            }
-            $StateNameFromCode.Add( $StateCode, $StateCodeFromName.$StateName )
+            $State.Combined_Key = Get-BuildCombinedKey $StateName, "US"
+            
+            $StateCodeFromName.Add( $StateName, $StateCode)
+            $StateNameFromCode.Add( $StateCode, $StateName )
         } 
+        $Columns = $USStateCSV[0].psobject.Properties.Name
+        $USStateCSV | Select-Object -Property $Columns[0,1,3,4,5] | Export-Csv -Path ($GitLocalRoot, $DataDir, "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
     }<# END: Using dimUSPSStateCodeWithLatLong.csv to create  $StateCodeFromName and $StateNameFromCode #>
 
     if ( $DebugOptions.LoadKeyFiles ) <# Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #> {
