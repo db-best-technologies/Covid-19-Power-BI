@@ -344,7 +344,7 @@ if ( $true ) <# Setup execution environment #> {
             $UID_ISO_FIPS_LookupCSV = Import-Csv -Path $FIPSFilePath | Sort-Object  Country_Region, Province_State
             $UID_ISO_FIPS_LookupCSV | Add-Member -MemberType NoteProperty -Name 'State_Code' -Value $null
             $UID_ISO_FIPS_LookupCSV | Add-Member -MemberType NoteProperty -Name 'Location Name Key' -Value $null
-            $UID_ISO_FIPS_LookupCSV | Export-Csv -path $FIPSFilePath 
+            $UID_ISO_FIPS_LookupCSV | Export-Csv -path $FIPSFilePath -NoTypeInformation
 
             $Combined_Key = @{ }
             if ( $false ) {
@@ -402,6 +402,7 @@ if ( $true ) <# Setup execution environment #> {
         }
     } <# END: Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #>
 
+
     if ( $DebugOptions.LoadKeyFiles ) <# Using dimUS_zip_codes_states.csv to create $CountyNameFromZip and $CountyNameFromCity #> { 
         # Load Data-Files/dimUS_zip_codes_states.csv 
         # Usage examples: $CountyNameFromZip.'89027'.county             -> "Clark"
@@ -422,8 +423,8 @@ if ( $true ) <# Setup execution environment #> {
             $ZipFilePath = ($GitLocalRoot, $DataDir, $FileName -join "\")
             $CITY_WR.Content | Out-File -FilePath  $ZipFilePath
             $CITY_CSV = Import-Csv -Path $ZipFilePath | Sort-Object  state, city
-            $CITY_CSV | Add-Member -MemberType NoteProperty -Name 'City_State_Key' -Value $null
-            $CITY_CSV | Add-Member -MemberType NoteProperty -Name 'Combined_Key' -Value $null
+            # $CITY_CSV | Add-Member -MemberType NoteProperty -Name 'City_State_Key' -Value $null
+            # $CITY_CSV | Add-Member -MemberType NoteProperty -Name 'Combined_Key' -Value $null
             $CountyNameFromCity = @{ }
             $CountyNameFromZip = @{ }
             $CurrentState = $null
@@ -467,7 +468,8 @@ if ( $true ) <# Setup execution environment #> {
                 }
             
             }
-            $CITY_CSV | Export-Csv -path $ZipFilePath -NoTypeInformation
+            ($DebugOptions.TempPath ,  "" -join "\")
+            $CITY_CSV | Export-Csv -path ($DebugOptions.TempPath , $FileName -join "\") -NoTypeInformation
         }
     } <# END: Using dimUS_zip_codes_states.csv to create $CountyNameFromZip and $CountyNameFromCity #>
     
