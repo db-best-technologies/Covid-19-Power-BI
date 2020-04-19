@@ -316,13 +316,13 @@ if ( $true ) <# Setup execution environment #> {
         foreach ( $State  in $USStateCSV ) {
             $StateCode = $State.State_Code
             $StateName = $State.Province_State
-            $State.Combined_Key = Get-BuildCombinedKey $StateName, "US"
-            
+            if ( $State.Combined_Key.Length -eq 0 ){
+                $State.Combined_Key = Get-BuildCombinedKey $StateName, "US"
+            }
             $StateCodeFromName.Add( $StateName, $StateCode)
             $StateNameFromCode.Add( $StateCode, $StateName )
         } 
-        $Columns = $USStateCSV[0].psobject.Properties.Name
-        $USStateCSV | Select-Object -Property $Columns[0,1,3,4,5] | Export-Csv -Path ($GitLocalRoot, $DataDir, "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
+        $USStateCSV | Export-Csv -Path ($DebugOptions.TempPath ,  "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
     }<# END: Using dimUSPSStateCodeWithLatLong.csv to create  $StateCodeFromName and $StateNameFromCode #>
 
     if ( $DebugOptions.LoadKeyFiles ) <# Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #> {
