@@ -39,6 +39,7 @@ function Set-DebugOptions {
             $DirObj = New-Item -Path $Root -Name $Leaf -ItemType "directory"
             if ($null -eq $DirObj -and $WriteFilesToTemp ) {
                 Write-Host "Unable to create directory: ", $TempPath, " Switching WriteFilesToTemp as false"
+                $DebugOptions.WriteFilesToTemp = $false
                 Start-Sleep 1
                 $Continue = Read-Host "Do you want to continue? 'Yes' or 'No'"
                 if ( $Continue -ne "Yes") { Exit 0 }
