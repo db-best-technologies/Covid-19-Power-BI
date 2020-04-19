@@ -6,8 +6,10 @@ $GLOBAL:TIMER_LAST_SEC = $GLOBAL:TIMER.Elapsed.Seconds
 function prompt {
     ${GLOBAL:PROMPT_COUNT}++
     $GLOBAL:TIMER_LAST_SEC = $GLOBAL:TIMER.Elapsed.Seconds
+    $null = $GLOBAL:TIMER.Restart()
     $RootDir = Get-location | Split-Path -Leaf
     Write-Host ( "$($RootDir) (" + $("000000000${GLOBAL:PROMPT_COUNT}>").tostring().substring($("000000000${GLOBAL:PROMPT_COUNT}").length-4 , 4) + " $($GLOBAL:TIMER_LAST_SEC)s) > ") -foregroundcolor white -nonewline
+    
 return " "
 }
 
@@ -66,7 +68,7 @@ function Set-DebugOptions {
     if ( $DebugOptions.ForceDownload) {
         $files = Get-ChildItem -Path ($COVID_19_Project_Path, "Working Files" -join "\")
     }
-    if ( $DebugOptions.DeleteTempFilesAtStart ) {
+    if ( $false <# -or $DebugOptions.DeleteTempFilesAtStart #> ) {
         $Files = Get-ChildItem $DebugOptions.TempPath -Recurse
         $Files | Remove-Item
         if ($DebugOptions.WriteFilesToTemp) {
