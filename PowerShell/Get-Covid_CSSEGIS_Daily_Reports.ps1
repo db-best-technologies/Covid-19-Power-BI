@@ -55,10 +55,10 @@ if ( $true ) <# Setup execution environment #> {
         JSU_web_data_branch_Data_RAW            = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/web-data/data/"
 
 
-        DBB_Covid_19_Power_BI_PAGE              = "https://github.com/db-best-technologies/Covid-19-Power-BI"
-        DBB_Covid_19_Power_BI_data_files_PAGE   = "https://github.com/db-best-technologies/Covid-19-Power-BI/tree/master/Data-Files"
-        DBB_GitHub_Data_Files_RAW               = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/"
-        DBB_GitHub_Working_Files_RAW            = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Working Files/"
+        DBB_Covid_19_Power_BI_PAGE              = "https://github.com/db-best-technologies/Covid-19-Power-BI/tree/dev"
+        DBB_Covid_19_Power_BI_data_files_PAGE   = "https://github.com/db-best-technologies/Covid-19-Power-BI/tree/dev/Data-Files"
+        DBB_GitHub_Data_Files_RAW               = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/Data-Files/"
+        DBB_GitHub_Working_Files_RAW            = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/Working Files/"
     }
     
     $URLs = [ordered]@{
@@ -88,14 +88,16 @@ if ( $true ) <# Setup execution environment #> {
     $LocalFiles = [ordered]@{
         LocalWorkingGitPath                       = "$((Get-location).Path)\Working Files\"
         LocalDataGitPath                          = "$((Get-location).Path)\Data-Files\"
-        DBT_Daily_Reports_Files_Loaded            = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.DBT_Daily_Reports_Files_Loaded -Leaf ) -join ""
-        UID_ISO_FIPS_LookUp_Table                 = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.UID_ISO_FIPS_LookUp_Table -Leaf ) -join ""
-        dimUS_zip_codes_states                    = "$((Get-location).Path)\Data-Files\", ( Split-Path $URLs.dimUS_zip_codes_states -Leaf ) -join ""
-        DBT_JHU_Unpivoted_Data                    = "$((Get-location).Path)\Data-Files\", ( Split-Path  $URLs.'DBT_JHU_Unpivoted_Data' -Leaf ) -join ""
-        DBB_Last_Upload_AllColumns                = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.DBB_Last_Upload_AllColumns -Leaf ) -join ""
-        DBT_FullDataRow_Daily_Reports             = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.'DBT_FullDataRow_Daily_Reports' -Leaf ) -join ""
-        csse_covid_19_daily_reports_us_local_path = "$((Get-location).Path)\Working Files\daily_reports_us\"
-        JHU_web_data_override_location_mapping    = "$((Get-location).Path)\Working Files\", ( Split-Path $URLs.web_data_override -Leaf ) -join ""
+        DBT_Daily_Reports_Files_Loaded            = "$((Get-location).Path)\Data-Files\Table.Covid_19_Cases_By_County_State_Country.json"
+        UID_ISO_FIPS_LookUp_Table                 = "$((Get-location).Path)\Data-Files\Dimension.County_State_Country.csv"
+        dimUS_zip_codes_states                    = "$((Get-location).Path)\Data-Files\Dimension.ZipCode_City_State_Mapping.csv"
+        DBT_JHU_Unpivoted_Data                    = "$((Get-location).Path)\Data-Files\Fact.Covid_19_Cases_By_County_State_Country.csv"
+        DBB_Last_Upload_AllColumns                = "$((Get-location).Path)\Working Files\JHU__master_csv_csse_covid__19_daily_reports__AllColumns.csv"
+        DBT_FullDataRow_Daily_Reports             = "$((Get-location).Path)\Working Files\JHU__master_csv_csse_covid__19_daily_reports__FullDataRow.csv"
+        csse_covid_19_daily_reports_us_local_path = "$((Get-location).Path)\Working Files\JHU__master_csv_csse_covid__19_daily_reports_us__"
+        JHU_web_data_override_location_mapping    = "$((Get-location).Path)\Working Files\JHU__web-data__override__override.csv"
+        dim_USPS_State_Code                       = "$((Get-location).Path)\Working Files\USPS__pe.usps.com__28apb.csv"
+
     }
 
     $ColumnHeaders = @{
@@ -307,7 +309,7 @@ if ( $true ) <# Setup execution environment #> {
     if ( $DebugOptions.LoadKeyFiles ) <# Using dimUSPSStateCodeWithLatLong.csv to create  $StateCodeFromName and $StateNameFromCode #> {
         # Example:  $StateCodeFromName.'CA'          -> "California"
         #           $StateCodeFromName.'California'  -> "CA" 
-        $USStateCSV = Import-Csv -Path ($GitLocalRoot, $DataDir, "dimUSPSStateCodeWithLatLong.csv" -join "\")
+        $USStateCSV = Import-Csv -Path $LocalFiles.dim_USPS_State_Code
         Write-Host "Creating indexes for dimUSPSStateCodeWithLatLong.csv"
         $StateCodeFromName = @{ }
         $StateNameFromCode = @{ }
