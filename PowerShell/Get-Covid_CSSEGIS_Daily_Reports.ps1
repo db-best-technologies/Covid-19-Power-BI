@@ -63,7 +63,7 @@ if ( $true ) <# Setup execution environment #> {
     
     $URLs = [ordered]@{
         UID_ISO_FIPS_LookUp_Table                = $Paths.JSU_COVID_19_master_Branch_data_RAW, "UID_ISO_FIPS_LookUp_Table.csv" -join ""
-        dimUS_zip_codes_states                   = $Paths.DBB_GitHub_Data_Files_RAW, "dimUS_zip_codes_states.csv" -join ""
+        dimUS_zip_codes_states                   = $Paths.DBB_GitHub_Data_Files_RAW, "Dimension.ZipCode_City_State_Mapping.csv" -join ""
         web_data_override                        = $Paths.JSU_web_data_branch_Override_RAW, "override.csv" -join ""
 
         JSU_csse_covid_19_daily_reports_PAGE     = $Paths.JSU_csse_covid_19_daily_reports_PAGE
