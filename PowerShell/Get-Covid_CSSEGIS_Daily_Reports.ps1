@@ -14,7 +14,7 @@ if ( $true ) <# Setup execution environment #> {
         AppendDebugData        = $false 
         Workaround             = $false 
         ForceDownload          = $true 
-        LoadFromWorkingFiles   = $true
+        LoadFromWorkingFiles   = $false
         LoadNewUSFiles         = $true
         LoadKeyFiles           = $true
     }
@@ -75,12 +75,12 @@ if ( $true ) <# Setup execution environment #> {
         
         CSSEGISandData__daily_reports_page       = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data"
         CSSEGISandData_Readme_md                 = "https://github.com/CSSEGISandData/COVID-19/blob/master/README.md"
-        DBBestDerivedData                        = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
-        DBBestDerivedMetadata                    = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $DataDir, "/", $LeafDataFile, ".json" -join ""
-        DBT_JHU_Files_Processed_For_Current_Data = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFile, "-SourceFiles.csv" -join ""
-        DBT_JHU_Unpivoted_Data                   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/", $WorkingFiles, "/", $LeafDataFlie, ".csv" -join ""
+        DBBestDerivedData                        = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/", $DataDir, "/", $LeafDataFile, ".csv" -join ""
+        DBBestDerivedMetadata                    = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/", $DataDir, "/", $LeafDataFile, ".json" -join ""
+        DBT_JHU_Files_Processed_For_Current_Data = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/", $WorkingFiles, "/", $LeafDataFile, "-SourceFiles.csv" -join ""
+        DBT_JHU_Unpivoted_Data                   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/", $WorkingFiles, "/", $LeafDataFlie, ".csv" -join ""
         csse_covid_19_daily_reports_us           = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports_us"
-        DBB_Last_Upload_AllColumns               = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Working%20Files/DBT_FullDataRow_Daily_Reports.csv"
+        DBB_Last_Upload_AllColumns               = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/Working%20Files/DBT_FullDataRow_Daily_Reports.csv"
         DBT_FullDataRow_Daily_Reports            = "$($DBB_GitHub_Working_Files)DBT_FullDataRow_Daily_Reports.csv"
         
     }
@@ -97,7 +97,7 @@ if ( $true ) <# Setup execution environment #> {
         csse_covid_19_daily_reports_us_local_path = "$((Get-location).Path)\Working Files\JHU__master_csv_csse_covid__19_daily_reports_us__"
         JHU_web_data_override_location_mapping    = "$((Get-location).Path)\Working Files\JHU__web-data__override__override.csv"
         dim_USPS_State_Code                       = "$((Get-location).Path)\Working Files\USPS__pe.usps.com__28apb.csv"
-
+        JHU_Daily_Files                           = "$((Get-location).Path)\Working Files\JHU__master__csv_csse_covid_19_daily_reports__"
     }
 
     $ColumnHeaders = @{
@@ -310,7 +310,7 @@ if ( $true ) <# Setup execution environment #> {
         # Example:  $StateCodeFromName.'CA'          -> "California"
         #           $StateCodeFromName.'California'  -> "CA" 
         $USStateCSV = Import-Csv -Path $LocalFiles.dim_USPS_State_Code
-        Write-Host "Creating indexes for dimUSPSStateCodeWithLatLong.csv"
+        Write-Host "Creating indexes StateCodeFromName and StateNameFromCode"
         $StateCodeFromName = @{ }
         $StateNameFromCode = @{ }
         if ( $USStateCSV[0].psobject.Properties.Match('Combined_Key').Name.Length -eq 0 ) {
@@ -325,7 +325,7 @@ if ( $true ) <# Setup execution environment #> {
             $StateCodeFromName.Add( $StateName, $StateCode)
             $StateNameFromCode.Add( $StateCode, $StateName )
         } 
-        $USStateCSV | Export-Csv -Path ($DebugOptions.TempPath , "dimUSPSStateCodeWithLatLong.csv" -join "\") -NoTypeInformation
+        $USStateCSV | Export-Csv -Path "C:\Temp\Covid-Temp-Files\USPS__pe.usps.com__28apb.csv" -NoTypeInformation
     }<# END: Using dimUSPSStateCodeWithLatLong.csv to create  $StateCodeFromName and $StateNameFromCode #>
 
     if ( $DebugOptions.LoadKeyFiles ) <# Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #> {
@@ -342,12 +342,11 @@ if ( $true ) <# Setup execution environment #> {
         if ( $null -ne $FIPS_WR -and $null -ne $FIPS_WR.Content ) {
             #Download the Metadata file from our GitHub project
             Write-Host "Creating index for dimUID_ISO_FIPS_LookUp_Table.csv for Combined_Key lookup" 
-            $FIPSFilePath = ($GitLocalRoot, $DataDir, "dimUID_ISO_FIPS_LookUp_Table.csv" -join "\")
-            $FIPS_WR.Content | Out-File -FilePath  $FIPSFilePath
-            $UID_ISO_FIPS_LookupCSV = Import-Csv -Path $FIPSFilePath | Sort-Object  Country_Region, Province_State
+            $FIPS_WR.Content | Out-File -FilePath  $LocalFiles.UID_ISO_FIPS_LookUp_Table
+            $UID_ISO_FIPS_LookupCSV = Import-Csv -Path $LocalFiles.UID_ISO_FIPS_LookUp_Table | Sort-Object  Country_Region, Province_State
             $UID_ISO_FIPS_LookupCSV | Add-Member -MemberType NoteProperty -Name 'State_Code' -Value $null
             $UID_ISO_FIPS_LookupCSV | Add-Member -MemberType NoteProperty -Name 'Location Name Key' -Value $null
-            $UID_ISO_FIPS_LookupCSV | Export-Csv -path $FIPSFilePath -NoTypeInformation
+            $UID_ISO_FIPS_LookupCSV | Export-Csv -path $LocalFiles.UID_ISO_FIPS_LookUp_Table -NoTypeInformation
 
             $Combined_Key = @{ }
             if ( $false ) {
@@ -403,7 +402,7 @@ if ( $true ) <# Setup execution environment #> {
                     $ProgressValue = $ProgressValueKey
                 }
             }
-            $UID_ISO_FIPS_LookupCSV | Export-Csv -Path $FIPSFilePath -NoTypeInformation
+            $UID_ISO_FIPS_LookupCSV | Export-Csv -Path $LocalFiles.UID_ISO_FIPS_LookUp_Table -NoTypeInformation
         }
     } <# END: Load of $Combined_Key index from dimUID_ISO_FIPS_LookUp_Table.csv #>
 
@@ -424,7 +423,7 @@ if ( $true ) <# Setup execution environment #> {
         if ( $null -ne $CITY_WR -and $null -ne $CITY_WR.Content ) {
             #Download the Metadata file from our GitHub project
             Write-Host "Creating index for: ", $URLs.GetRawZipCodes
-            $FileName = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/dimUS_zip_codes_states.csv" | Split-Path -Leaf 
+            $FileName = $URLs.dimUS_zip_codes_states | Split-Path -Leaf 
             $ZipFilePath = ($GitLocalRoot, $DataDir, $FileName -join "\")
             $CITY_WR.Content | Out-File -FilePath  $ZipFilePath
             $CITY_CSV = Import-Csv -Path $ZipFilePath | Sort-Object  state, city
@@ -469,6 +468,10 @@ if ( $true ) <# Setup execution environment #> {
                     $Zip.City_State_Key = $KeyValue
                     $CountyNameFromCity.Add( $KeyValue, $Zip  )
                 }
+                else {
+                    $Zip.Combined_Key = $Combined_Key.($Zip.county, $StateNameFromCode.($Zip.state).Province_State, "US" -join ", ").Combined_Key
+                    $Zip.City_State_Key = $KeyValue
+                }
                 if ($CurrentState -ne $Zip.state) {
                     $CurrentState = $Zip.state
                     Write-host "Indexing : ", $StateNameFromCode.($Zip.state)
@@ -481,7 +484,17 @@ if ( $true ) <# Setup execution environment #> {
     } <# END: Using dimUS_zip_codes_states.csv to create $CountyNameFromZip and $CountyNameFromCity #>
     
     if ( $DebugOptions.LoadKeyFiles ) <# Process overrides to match Combined_Key in dimUID_ISO_FIPS_LookUp_Table.csv #> { 
+
         $Combined_Key_Replacements = [PSCustomObject]@{
+            'Lackland, Texas, US'                               = 'Diamond Princess'
+            'Lackland, TX (From Diamond Princess), US'          = 'Diamond Princess'
+            'London, ON, Canada'                                = 'Ontario, Canada'
+            'Montreal, QC, Canada'                              = 'Quebec, Canada'
+            'None, Iraq'                                        = 'Iraq'
+            'Omaha, NE (From Diamond Princess), US'             = 'Diamond Princess'
+            'Toronto, ON, Canada'                               = 'Ontario, Canada'
+            'Travis, California, US'                            = 'Solano, California, US'
+            'Travis, CA (From Diamond Princess), US'            = 'Diamond Princess'
             'District of Columbia, US'                          = "District of Columbia, District of Columbia ,US"
             'Bahamas, The'                                      = 'Bahamas'
             'The Bahamas'                                       = 'Bahamas'
@@ -539,10 +552,15 @@ if ( $true ) <# Setup execution environment #> {
             'ON, Canada'                                        = 'Ontario, Canada'
             'QC, Canada'                                        = 'Quebec, Canada'
             'Grand Princess Cruise Ship, US'                    = 'Grand Princess, Canada'
-            'Hong Kong, Hong Kong SAR'                          = 'Hong Kong SAR, China'
+            'Hong Kong, Hong Kong SAR'                          = 'Hong Kong, China'
+            'Hong Kong'                                         = 'Hong Kong, China'
+            'Hong Kong, Hong Kong'                              = 'Hong Kong, China'
+            'Macau, Macau'                                      = "Macau, China"
+            'Taiwan, Taiwan'                                    = 'Taiwan*'
             'Chicago, US'                                       = 'Cook, Illinois, US'
             'U.S., US'                                          = 'US'
             'US, US'                                            = 'US'
+            'Washington, D.C., US'                              = 'District of Columbia, District of Columbia ,US'
             'Guam'                                              = 'Guam, US'
             'United States Virgin Islands, US'                  = 'Virgin Islands, US'
             'Puerto Rico'                                       = 'Puerto Rico, US'
@@ -551,7 +569,22 @@ if ( $true ) <# Setup execution environment #> {
             'South Korea'                                       = "Korea, South"
             'Macau'                                             = "Macao SAR, China"
             'Mainland China'                                    = "China"
+            'Calgary, Alberta, Canada'                          = 'Alberta, Canada'
+            'Edmonton, Alberta, Canada'                         = 'Alberta, Canada'
+            'Jefferson Parish, Louisiana, US'                   = 'Jefferson Davis, Louisiana, US'
+            'New York, New York, US'                            = 'New York City, New York, US'
+            'Unassigned Location, Vermont, US'                  = 'Unassigned, Vermont, US'
+            'Unassigned Location, Washington, US'               = 'Unassigned, Washington, US'
+            'Unknown Location, Massachusetts, US'               = 'Unassigned, Massachusetts, US'
+            'Virgin Islands, U.S., US'                          = 'Virgin Islands, US'
+            'United Kingdom, United Kingdom'                    = 'United Kingdom'
+            'Netherlands, Netherlands'                          = 'Netherlands'
+            'Jervis Bay Territory, Australia'                   = 'New South Wales, Australia'
+            'France, France'                                    = 'France'
+            'External territories, Australia'                   = 'Australian Capital Territory, Australia'
+            'Denmark, Denmark'                                  = 'Denmark'
         }
+
         if ($null -ne $UID_ISO_FIPS_LookupCSV ) <# If the LookupCSV arra is still in memory , all is good #> { 
             # New records added will have UID -gt 0084099999
             $NextMaxUID = ($UID_ISO_FIPS_LookupCSV | Sort-Object -Property 'UID' -Bottom 1).UID
@@ -571,177 +604,264 @@ if ( $true ) <# Setup execution environment #> {
             exit 0
         }
         $RowNum = 0
+        
         foreach ( $row in $CSV_Override ) {
             $Row.old_combined_key = Get-BuildCombinedKey $Row.old_county, $Row.old_province_state, $Row.old_counrty_region 
             $row.combined_key = Get-BuildCombinedKey $Row.County, $Row.Province_State, $Row.Country_Region
             # Write-Host "Old: [", $Row.old_combined_key, "] maps to Combined_key: [", $row.combined_key, "]"
-            $Matched_Combined_Key = $Combined_Key.($Row.combined_key)
-            if ( $null -eq $Matched_Combined_Key ) {
-                Write-Host "New combined key had no match [", $Row.combined_key, "] creating new one with UID: [" , $NextMaxUID "]" 
-                $Row.In_DBT_Exceptions = "Old:", $Row.old_combined_key, " Combined_Key no match: ", $Row.combined_key -join ""
-                $UID = $Combined_Key.'US'.psobject.Copy()
-                foreach ( $Val in $UID.psobject.Properties.Name) {
-                    $UID.($Val) = $null
-                }
-                $UID.UID = $NextMaxUID
-                $UID.iso2 = $false
-                $UID.iso3 = $false
-                $UID.code3 = $NextMaxUID
-                $UID.FIPS = $Row.FIPS
-                $UID.Admin2 = $Row.County
-                $UID.Province_State = $Row.Province_State
-                $UID.Country_Region = $Row.Country_Region
-                $UID.Lat = $Row.Lat
-                $UID.Long_ = $Row.Long_
-                $UID.Combined_Key = $Row.Combined_Key
-                $UID.Population = $null
-                $UID.State_Code = $StateCodeFromName.$Row.Province_State
-                $UID.'Location Name Key' = $Row.Combined_Key
+            $UID = $Combined_Key.($Row.combined_key)
+            if ( $null -eq $UID ) {
+                $UID = $Combined_Key.($Combined_Key_Replacements.$Row.Combined_Key)
+                if ($null -eq $UID ) {
+                    Write-Host "New combined key had no match [", $Row.combined_key, "] creating new one with UID: [" , $NextMaxUID "]" 
+                    $Row.In_DBT_Exceptions = "Old:", $Row.old_combined_key, " Combined_Key no match: ", $Row.combined_key -join ""
+                    $UID = $Combined_Key.'US'.psobject.Copy()
+                    foreach ( $Val in $UID.psobject.Properties.Name) {
+                        $UID.($Val) = $null
+                    }
+                    $UID.UID = $NextMaxUID
+                    $UID.iso2 = $false
+                    $UID.iso3 = $false
+                    $UID.code3 = $NextMaxUID
+                    $UID.FIPS = $Row.FIPS
+                    $UID.Admin2 = $Row.County
+                    $UID.Province_State = $Row.Province_State
+                    $UID.Country_Region = $Row.Country_Region
+                    $UID.Lat = $Row.Lat
+                    $UID.Long_ = $Row.Long_
+                    $UID.Combined_Key = $Combined_Key.($Combined_Key_Replacements.$Row.Combined_Key)
+                    $UID.Population = $null
+                    $UID.State_Code = $StateCodeFromName.$Row.Province_State
+                    $UID.'Location Name Key' = $Row.Combined_Key
 
-                if ( $true) {
+                    $Row.In_DBT_Exceptions = $Combined_Key_Replacements.$Row.combined_key
                     $Combined_Key.Add( $UID.Combined_Key, $UID )
-                    if ( $null -ne $Combined_Key.($Row.combined_key)  ) {
-                        $NextMaxUID = ( [int]$NextMaxUID + 1 ).ToString("0000000000")
-                        $UID     
-                    }
-                    else {
-                        Write-Host "Failed to create new key, ", $UID.Combined_Key, "See rownum: ", $RowNum
-                    }
+                    $NextMaxUID = ( [int]$NextMaxUID + 1 ).ToString("0000000000")
+                    $UID 
                 }
-                $UID
             }
-            else {
-                $Row.UID = ([int]$Matched_Combined_Key.UID).ToString("0000000000") 
-                $Row.In_DBT_Exceptions = $Combined_Key_Replacements.$Row.old_combined_key
+            $Row.UID = ([int]$UID.UID).ToString("0000000000") 
+            if ( $Combined_Key_Replacements.($Row.old_combined_key).Length -eq 0 ) { 
+                $Combined_Key_Replacements | Add-Member -Type NoteProperty -Name $Row.old_combined_key -Value $Row.combined_key
             }
             $RowNum ++    
         }
         $CSV_Override | Export-Csv -Path $LocalFiles.JHU_web_data_override_location_mapping
         $CSV_Override | Where-Object { ( $_.In_DBT_Exceptions.Length -gt 0) } | Export-Csv -Path ( $DebugOptions.TempPath, "override_no_matches.csv" -join "\" ) -NoTypeInformation
+        $Combined_Key_Replacements | ConvertTo-Json -Depth 5 | Out-File "$($LocalFiles.LocalWorkingGitPath)DBT_web_data_override_combined_key_fixup.json"
 
     } <# END: Process replacements to match Combined_Key in dimUID_ISO_FIPS_LookUp_Table.csv #>
 
-    if ( $false ) <# Experiment against enisting Combined_Key UID value #> {
-        #It appears the mapping table supports data after 03-11-2020, lets do some mapping.
-        # Ready for data collection
-        $FilesInfo = @()
-        $ChangeInGitHubFiles = $False
-        $arrayNewCSVData = @()
-        $UnpivotedRows = @()
-        $FullDataRow = @()
-        $LocationNameKeyIndex = @{ }
-        $NextFileNumber = 0
-        $WR_daily_reports = $null
-        $WR_daily_reports = Invoke-WebRequest -Uri $URLs.JSU_csse_covid_19_daily_reports_PAGE
-        $StopAtFile = "03-10-2020.csv"
-        $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" -and $_.title -le $StopAtFile ) } | Select-Object -Property title | Sort-Object -Property title
-        $Unresolved_Combined_Keys = @()
-        foreach ( $Link in $CSVFileNamesArray ) <# Download each of the files matching the criteria #> {
-            $CSVPageURL = $URLs.JSU_csse_covid_19_daily_reports_PAGE, $Link.title -join "/"
-            $DateLastModifiedUTC = Get-Date -Date $Link.title.Split(".")[0] -Format "yyyy-MM-ddTHH:mm:ssZ"   
-            $ChangeInGitHubFiles = $true
-            $WR_CSV = $null
-            $WR_CSV = Invoke-WebRequest -Uri ( $URLs.JSU_csse_covid_19_daily_reports_RAW, $Link.title -join "" )
-            $WR_CSV.Content | Out-File -FilePath ($DebugOptions.TempPath, $Link.title -join "\")
+} <# END if ( $true ): Setup execution environment #> 
 
-            # Need to replace the column names with the newest names used starting 03-22-2020
-            ((Get-Content -path ($DebugOptions.TempPath, $Link.title -join "\")  -Raw) -replace 'Province/State,Country/Region,Last Update,', 'Province_State,Country_Region,Last_Update,') | Set-Content -Path ($DebugOptions.TempPath, $Link.title -join "\")            
-            $CSVData = Import-Csv -Path  ($DebugOptions.TempPath, $Link.title -join "\")
 
-            $PeriodEnding = $Link.title.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
-            $CSVData | Add-Member -MemberType NoteProperty -Name 'Date Reported' -Value $PeriodEnding
+if ( $true ) <# Experiment validating Combined_Key UID value #> {
+    #It appears the mapping table supports data after 03-11-2020, lets do some mapping.
+    # Ready for data collection
+    $FilesInfo = @()
+    $CSVData = [PSCustomObject]@{ }
+    $ChangeInGitHubFiles = $False
+    $arrayNewCSVData = @()
+    $UnpivotedRows = @()
+    $FullDataRow = @()
+    $LocationNameKeyIndex = @{ }
+    $NextFileNumber = 0
+    $WR_daily_reports = $null
+    $WR_daily_reports = Invoke-WebRequest -Uri $URLs.JSU_csse_covid_19_daily_reports_PAGE
+    $StopAtFile = "03-22-2020.csv"
+    $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" <# -and $_.title -le $StopAtFile #>) } | Select-Object -Property title | Sort-Object -Property title
+    $Unresolved_Combined_Keys = @()
+    foreach ( $Link in $CSVFileNamesArray ) <# Download each of the files matching the criteria #> {
+        $CSVPageURL = $URLs.JSU_csse_covid_19_daily_reports_PAGE, $Link.title -join "/"
+        $DateLastModifiedUTC = Get-Date -Date $Link.title.Split(".")[0] -Format "yyyy-MM-ddTHH:mm:ssZ"   
+        $ChangeInGitHubFiles = $true
+        $WR_CSV = $null
+        $WR_CSV = Invoke-WebRequest -Uri ( $URLs.JSU_csse_covid_19_daily_reports_RAW, $Link.title -join "" )
+        $WR_CSV.Content | Out-File -FilePath ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")
+
+        # Need to replace the column names with the newest names used starting 03-22-2020
+        if ( $Link.Title -ge "03-22-2020.csv") {
+            ((Get-Content -path ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")  -Raw) -replace 'FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths,Recovered,Active,Combined_Key', 'FIPS,Admin2,Province_State,Country_Region,Last_Update,Latitude,Longitude,Confirmed,Deaths,Recovered,Active,Combined_Key') | Set-Content -Path ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")     
+        }
+        else {
+            ((Get-Content -path ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")  -Raw) -replace 'Province/State,Country/Region,Last Update,', 'Province_State,Country_Region,Last_Update,') | Set-Content -Path ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")
+        }       
+        $CSVData = Import-Csv -Path  ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")
+        $PeriodEnding = $Link.title.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
+        if ( $CSVData[0].psobject.Properties.Match('Latitude').Name.Length -eq 0 ) {
+            # Data comes from the matching valid Combined_Key after a match
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'Latitude' -Value $null
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'Longitude' -Value $null     
+        }
+        if ( $CSVData[0].psobject.Properties.Match('FIPS').Name.Length -eq 0 ) {
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'FIPS' -Value $null
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'Admin2' -Value $null
             $CSVData | Add-Member -MemberType NoteProperty -Name 'Combined_Key' -Value $null
-        
-            foreach ( $Line in $CSVData ) <# Need to look for exceptions in the data and fix them up #> {
-                if ( $Line.Province_State -eq $Line.Country_Region ) {
-                    $Line.Province_State = $null
+            $CSVData | Add-Member -MemberType NoteProperty -Name 'Active' -Value $null
+        }
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Date_Reported' -Value $PeriodEnding
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'State_Code' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Is_Valid_Combined_Key' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'What_Changed' -Value ""
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'RowNumber' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'FileNumber' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'File_Name_Source' -Value "daily"
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'UID' -Value $null
+        $RowNumber = 0
+        foreach ( $Line in $CSVData ) <# Need to look for exceptions in the data and fix them up #> {
+            # Do the obvious check first
+            if ( $Line.Country_Region -eq "Mainland China" ) {
+                $Line.Country_Region = "China"
+                $Line.What_Changed = $Line.What_Changed, ': Replace [Mainland China] with [China]' -join " "
+            }
+            $Line.Combined_Key = Get-BuildCombinedKey $Line.Admin2, $Line.Province_State, $Line.Country_Region
+            $UID = $Combined_Key.($Line.Combined_Key)
+            if ( $null -eq $UID ) {
+                # Check for known replacements
+                if ( $Combined_Key_Replacements.($Line.Combined_Key).Length -gt 0 ) {
+                    $Line.Combined_Key = $Combined_Key_Replacements.($Line.Combined_Key)
+                    $UID = $Combined_Key.($Line.Combined_Key)
+                    $Line.What_Changed = $Line.What_Changed, ': Replaced', $Line.Combined_Key, "with", $UID.Combined_Key -join " "
+                    $Line.Combined_Key = $UID.Combined_Key
                 }
-                if ( $Line.Country_Region -eq "Mainland China" ) {
-                    $Line.Country_Region = "China"
-                }
-                if ( $Line.Province_State.Length -gt 0 -and $Line.Province_State.Split(', ').Count -eq 2 ) {
-                    $County, $StateCode = $Line.Province_State.Split(', ')
-                    $County = $County.Trim()
-                    $StateCode = $StateCode.Trim()
-                    if ( $Line.Country_Region -eq "US" ) {
-                        if ( $StateNameFromCode.($StateCode).Length -gt 0  ) {
-                            $Line.Province_State = $StateNameFromCode.($StateCode)
+                else { 
+                    <#
+                        if ( $Line.Province_State -eq $Line.Country_Region ) {
+                            $Line.Province_State = $null
+                            $Line.What_Changed = $Line.What_Changed, ': Duplicate Province_State = $null' -join " "
                         }
-                        else {
-                            $Line.Province_State = $StateCode
-                        }
-                        if ($County -like "* County") { 
-                            $County = $County.Split(" County")[0].Trim()
-                        }
-                        else { 
-                            $County = $County 
-                        }
-                        $Line.Combined_Key = Get-BuildCombinedKey $County, $Line.Province_State, $Line.Country_Region
-                        if ( $null -eq $Combined_Key.($Line.Combined_Key) ) {
-                            if ( $null -eq $CountyNameFromCity.($County, $Line.Province_State -join ", " ) ) {
-                                $Unresolved_Combined_Keys += $Line 
-                                $Line 
-                                continue
-                            }    
-                        }
-                        else {
-                            $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
-                            if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
-                                $Unresolved_Combined_Keys += $Line 
-                                $Line 
-                                continue
+                        #>
+                    if ( $Line.Province_State.Length -gt 0 -and $Line.Province_State.Split(', ').Count -eq 2 ) {
+                        $County, $StateCode = $Line.Province_State.Split(', ')
+                        $County = $County.Trim()
+                        $StateCode = $StateCode.Trim()
+                        if ( $Line.Country_Region -eq "US" ) {
+                            if ( $StateNameFromCode.($StateCode).Length -gt 0  ) {
+                                $Line.Province_State = $StateNameFromCode.($StateCode)
+                                $Line.State_Code = $StateCode
+                                $Line.What_Changed = $Line.What_Changed, ': Set Province_State using ', $StateCode -join " "    
+                            }
+                            else {
+                                $Line.State_Code = $StateCode
+                                $Line.Province_State = $StateCode
+                                $Line.What_Changed = $Line.What_Changed, ': Used ', $StateCode, 'for Province_State using ', $StateCode -join " "    
+                            }
+                            if ($County -like "* County") { 
+                                $County = $County.Split(" County")[0].Trim()
+                                $Line.Admin2 = $County
+                                $Line.What_Changed = $Line.What_Changed, ': Removed " County"' -join " "    
+                            }
+                            else { 
+                                $Line.Admin2 = $County
+                                $Line.What_Changed = $Line.What_Changed, ': Set Admin2 to', $County -join " "    
+                            }
+                            $Line.Combined_Key = Get-BuildCombinedKey $Line.Admin2, $Line.Province_State, $Line.Country_Region
+                            $UID = $Combined_Key.($Line.Combined_Key)
+                            if ( $null -eq $UID ) {
+                                if ( $null -eq $CountyNameFromCity.($County, $Line.Province_State -join ", " ) ) {
+                                    $Line.Is_Valid_Combined_Key = 'N'
+                                }
+                                else {
+                                    $Line.Admin2 = $CountyNameFromCity.($County, $Line.Province_State -join ", " ).county
+                                    $Line.Combined_Key = Get-BuildCombinedKey $Line.Admin2, $Line.Province_State, $Line.Country_Region
+                                    $Line.What_Changed = $Line.What_Changed, ': Set Admin2 to', $Line.Admin2 , 'using city ', $County -join " "
+                                    $UID = $Combined_Key.($Line.Combined_Key) 
+                                }   
                             }
                         }
-                    } else {
-                        $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
-                        if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
-                            $Unresolved_Combined_Keys += $Line 
-                            $Line 
-                            continue
+                        else <# Not a US, but there was a comma for a Province or something #> {
+                            $Line.Admin2 = $County
+                            $Line.Province_State = $StateCode
+                            $Line.Combined_Key = Get-BuildCombinedKey $County, $StateCode, $Line.Country_Region
+                            $UID = $Combined_Key.($Line.Combined_Key)
+                            if ( $null -eq $UID ) {
+                                $Line.Is_Valid_Combined_Key = 'N'
+                            }
                         }
                     }
-                } else {
-                    $Line.Combined_Key = Get-BuildCombinedKey $Line.Province_State, $Line.Country_Region
-                    if ( $null -eq $Combined_Key.($Line.Combined_Key)   ) {
-                        $Unresolved_Combined_Keys += $Line 
-                        $Line 
-                        continue
+                    elseif ( $Line.Province_State.Length -gt 0 ) {
+                        $Line.Combined_Key = Get-BuildCombinedKey $Line.Province_State, $Line.Country_Region
+                        $UID = $Combined_Key.($Line.Combined_Key)
+                        if ( $null -eq $UID ) {
+                            $Line.Is_Valid_Combined_Key = 'N'
+                        }
+                    }
+                    else {
+                        $Line.Combined_Key = Get-BuildCombinedKey $Line.Country_Region
+                        $UID = $Combined_Key.($Line.Combined_Key)
+                        if ( $null -eq $UID ) {
+                            $Line.Is_Valid_Combined_Key = 'N'
+                        }
                     }
                 }
-
-            } <# END: foreach ( $Line in $CSVData ) #>
-
-            $CSVData | Export-Csv -Path  ($DebugOptions.TempPath, $Link.title -join "\") -NoTypeInformation
-            if ( $Unresolved_Combined_Keys.count -gt 0 ) {
-                $Unresolved_Combined_Keys | Export-Csv -Path  ($DebugOptions.TempPath, "\Unresolved-", $Link.title -join "") -NoTypeInformation
             }
+            if ( $null -ne $UID ) {
+                $Line.Is_Valid_Combined_Key = 'Y'
+            }
+            else {
+                if ( $Combined_Key_Replacements.($Line.Combined_Key).Length -gt 0 ) {
+                    $Line.What_Changed = $Line.What_Changed, ': Replaced', $Line.Combined_Key, "with", $UID.Combined_Key -join " "
+                    $Line.Combined_Key = $Combined_Key_Replacements.($Line.Combined_Key)
+                    $UID = $Combined_Key.($Line.Combined_Key)
+                }
+            }
+            if ( $null -ne $UID ) {
+                $Line.Is_Valid_Combined_Key = 'Y'
+                $Line.Combined_Key = $UID.Combined_Key
+                $Line.UID = ([int]$UID.UID).ToString("0000000000")
+                $Line.Admin2 = $UID.Admin2
+                $Line.FIPS = ([int]$UID.FIPS).ToString("00000")
+                $Line.Province_State = $UID.Province_State
+                $Line.Country_Region = $UID.Country_Region
+                $Line.Latitude = $UID.Lat
+                $Line.Longitude = $UID.Long_
+                if ( $Line.Active.Length -eq 0 -and [int]$Line.Confirmed -ne 0 ) {
+                    $Line.Active = [int]$Line.Confirmed - [int]$Line.Deaths - [int]$Line.Recovered
+                    $Line.What_Changed = $Line.What_Changed, ': Computed Active as Confirmed', $Line.Confirmed, '- Deaths', $Line.Deaths, '- Recovered ', $Line.Recovered -join " "
+                }
+            }
+            else {
+                $Line.Is_Valid_Combined_Key = 'N'
+                $Unresolved_Combined_Keys += $Line
+                $Line.What_Changed = "[$($Line.What_Changed)]", ': NO Combined_Key match with', "[$($Line.Combined_Key)]" -join " "
+            }
+            $Line.RowNumber = ([int]$RowNumber).ToString("0000")
+            $Line.FileNumber = ([int]$NextFileNumber).ToString("000")
+                
+            Write-Host "Processed: ", $Link.title, ([int]$Line.RowNumber).ToString("0000") , $Line.Combined_Key, $Line.Valid_Combined_Key, $Line.Is_Valid_Combined_Key
+            $RowNumber ++
+        } <# END: foreach ( $Line in $CSVData ) #>
 
-            $CSVData | Export-Csv -Path ($LocalFiles.LocalWorkingGitPath, $Link.title -join "") -NoTypeInformation
+        $Columns = 'UID', 'FIPS', 'Admin2', 'Province_State', 'Country_Region', 'Last_Update', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'Combined_Key', 'Date_Reported', 'File_Name_Source', 'State_Code', 'Is_Valid_Combined_Key', 'What_Changed' , 'RowNumber' , 'FileNumber'
 
-            $FileMetadata = [PSCustomObject]@{
-                CsvFileName         = $Link.Title
-                PeriodEnding        = $PeriodEnding
-                CSVRawURL           = $CSVRawURL
-                CSVPageURL          = $CSVPageURL
-                DateLastModifiedUTC = $DateLastModifiedUTC
-                FileNumber          = $NextFileNumber
-                NeedsUpdating       = $true
-            } 
-            $FilesInfo += $FileMetadata
-            $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
-            $arrayNewCSVData += $FileMetadata
-            $FileMetadata
-            $NextFileNumber ++
+        $CSVData | Select-Object -Property $Columns | Export-Csv -Path  ( $LocalFiles.JHU_Daily_Files, $Link.title -join "") -NoTypeInformation
+    
+        $FileMetadata = [PSCustomObject]@{
+            CsvFileName         = $Link.Title
+            PeriodEnding        = $PeriodEnding
+            CSVRawURL           = ( $URLs.JSU_csse_covid_19_daily_reports_RAW, $Link.title -join "" )
+            CSVPageURL          = $CSVPageURL
+            DateLastModifiedUTC = $DateLastModifiedUTC
+            FileNumber          = $NextFileNumber
+            NeedsUpdating       = $true
         } 
+        $FilesInfo += $FileMetadata
+        $FileMetadata | Add-Member -MemberType NoteProperty -Name 'CSVData' -Value $CSVData
+        $arrayNewCSVData += $FileMetadata
+    
+        $NextFileNumber ++          
+            
+    } <# END: foreach ( $Line in $CSVData ) #>
 
-    } <# END if ( $false ): Experiment against enisting Combined_Key UID value #>
+    if ( $Unresolved_Combined_Keys.count -gt 0 ) {
+        $Unresolved_Combined_Keys | Sort-Object 'Combined_Key' -Unique | Export-Csv -Path  ( $LocalFiles.JHU_Daily_Files, "Unresolved_Combined_Keys.csv", $Link.title -join "") -NoTypeInformation
+    }
 
-    $FilesInfo = @()
-    $arrayNewCSVData = @()
-    $GroupedFileRows = @{ }
-    $NextFileNumber = 0
+} <# END if ( $false ): Experiment against enisting Combined_Key UID value #>
 
-} <# END if ( $true ): Setup execution environment #> 
+  
+
+
 
 if ( $true ) <# Execution of the loading of data #> { 
     if ( $DebugOptions.LoadFromWorkingFiles ) {
