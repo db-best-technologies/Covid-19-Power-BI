@@ -23,6 +23,26 @@ One such example happened around March 25, 2020 when the team decided to change 
 that was reported for the United States [Time series summary data](https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_time_series/README.md). Several popular dashboards
 missed the deprecated warning.  
 
+## Known Data Limitations
+### Numerous issues are [on the data source Github](https://github.com/CSSEGISandData/COVID-19/issues?q=is%3Aopen+is%3Aissue+-label%3A"user+creation"++). A few issues of note:
+
+#### Time-series datasets in disagreement with summarized datasets
+Official datasets aren't succesfully keeping the daily data provided in sync with the summarized datasets. There could be various reasons for this, but what would be ideal is if the providers were transparent about what corrections they are applying in the summaries and for what reason.
+
+#### Presumptive classification of Ncov-19 deaths
+
+* Officials are revisiting past death certificates that were marked with other causes and adding them to the Covid-19 fatalities. However they aren't necessarily back-updating the time series data that has been provided earlier, and it may in fact prove impractical to do so.   
+
+https://www.usnews.com/news/best-states/california/articles/2020-04-22/california-governor-to-update-plans-for-lifting-virus-orders
+
+* Pneumonia deaths to be classified as Ncov-19 without testing  
+NCov-19 fatality data may be less reliable than confirmed cases because testing may not be performed.
+
+https://www.southernminn.com/owatonna_peoples_press/news/article_b1710f94-ac0e-59b2-adea-770dca8691fd.html
+
+## What's Not Working
+* Active Cases tooltips values are incorrect
+
 ## Documenting the data model for the CSSE COVID-19 Dataset
 
 The team now has a description of the files that they generate around 4pm PST each day that you can find at
@@ -57,11 +77,11 @@ This feature class/shapefile contains locations of Hospitals for 50 US states, W
   - LinkedIn: [/in/denishamalone/](https://www.linkedin.com/in/denishamalone/)
   - Twitter: [@thepowerbiqueen](https://twitter.com/thepowerbiqueen)
 
-- **Prashant Mishra** - DB Best Technologies - Senior Solutions Consultant - Data Wranggler
+- **Prashant Mishra** - DB Best Technologies - Senior Solutions Consultant - Data Wrangler
   - Email: [prashant@dbbest.com](mailto:prashant@dbbest.com)
   - LinkedIn: [/in/prashant-kumar-mishra/](https://www.linkedin.com/in/prashant-kumar-mishra/)
 
-- **Keith McMannon** - DB Best Technologies - Sr. Technical Program Manager - Emphasis on Technical
+- **Keith McCammon** - DB Best Technologies - Sr. Technical Program Manager - Emphasis on Technical
   - Email: [keithmc@dbbest.com](mailto:keithmc@dbbest.com)
   - LinkedIn: [https://www.linkedin.com/in/keithmcc/](https://www.linkedin.com/in/keithmcc/)
   
