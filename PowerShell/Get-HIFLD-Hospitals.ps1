@@ -410,3 +410,21 @@ $Metadata = [ordered] @{
 # Write the Metadata out as a Json file
 $Metadata | ConvertTo-Json | Out-File -FilePath $OutputPathMetadata
 
+Function Add-HospitalID {
+    #Load the existing Dimension.Hospitals.csv, add a Unique Key
+ 
+$OutputPathData = ".\Data-Files\Dimension.Hospitals.csv"
+$OutputPathMetadata = ".\Data-Files\Dimension.Hospitals.json"
+$HIFLDHospitalsURL = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.csv?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
+
+
+$HospitalsCSV = Import-Csv -Path $OutputPathData 
+# $HospitalsCSV | Add-Member -MemberType NoteProperty -Name 'Hospital_Key' -Value $null
+for ( $Hospital = 0; $Hospital -lt $HospitalsCSV.Count; $Hospital++  ) {
+    $HospitalsCSV[ $Hospital ].Hospital_Key = "ID-", ([int]$HospitalsCsv[ $Hospital ].Id).ToString("0000000000") -join ""
+}
+$HospitalsCSV | Sort-Object Combined_Key,Hospital_Key| Export-Csv -Path $OutputPathData -NoTypeInformation
+
+$HospitalJSON = Get-Content -Raw -Path $OutputPathMetadata | ConvertFrom-Json
+
+}
