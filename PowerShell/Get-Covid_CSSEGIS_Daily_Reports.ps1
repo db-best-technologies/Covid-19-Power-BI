@@ -662,15 +662,19 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
     $CSVData = [PSCustomObject]@{ }
     $ChangeInGitHubFiles = $False
     $arrayNewCSVData = @()
-    $UnpivotedRows = @()
-    $FullDataRow = @()
-    $LocationNameKeyIndex = @{ }
     $NextFileNumber = 0
     $WR_daily_reports = $null
+
+    $UnpivotedRows = @()
+    $LocationNameKeyIndex = @{ }
+    $FullDataRow = @()
+
+
     $WR_daily_reports = Invoke-WebRequest -Uri $URLs.JSU_csse_covid_19_daily_reports_PAGE
-    $StopAtFile = "03-22-2020.csv"
-    $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" <# -and $_.title -le $StopAtFile #>) } | Select-Object -Property title | Sort-Object -Property title
+    $StopAtFile = "03-10-2020.csv"
+    $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" -and $_.title -le $StopAtFile ) } | Select-Object -Property title | Sort-Object -Property title
     $Unresolved_Combined_Keys = @()
+
     foreach ( $Link in $CSVFileNamesArray ) <# Download each of the files matching the criteria #> {
         $CSVPageURL = $URLs.JSU_csse_covid_19_daily_reports_PAGE, $Link.title -join "/"
         $DateLastModifiedUTC = Get-Date -Date $Link.title.Split(".")[0] -Format "yyyy-MM-ddTHH:mm:ssZ"   
@@ -688,6 +692,8 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
         }       
         $CSVData = Import-Csv -Path  ( $LocalFiles.JHU_Daily_Files, $Link.title -join "")
         $PeriodEnding = $Link.title.Split(".")[0]   # This takes 02-01-2020.CSV and removes the .CSV
+        $dReported = Get-Date -Date $PeriodEnding
+        
         if ( $CSVData[0].psobject.Properties.Match('Latitude').Name.Length -eq 0 ) {
             # Data comes from the matching valid Combined_Key after a match
             $CSVData | Add-Member -MemberType NoteProperty -Name 'Latitude' -Value $null
@@ -707,6 +713,17 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
         $CSVData | Add-Member -MemberType NoteProperty -Name 'FileNumber' -Value $null
         $CSVData | Add-Member -MemberType NoteProperty -Name 'File_Name_Source' -Value "daily"
         $CSVData | Add-Member -MemberType NoteProperty -Name 'UID' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Location_Index' -Value -1 # Array index for the $Combined_Key in $LocationNameKeyIndex
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Days Since First Value' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Days Since First Death'     -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Days Since First Confirmed' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Days Since First Active'    -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Days Since First Recovered' -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Confirmed Delta Value'      -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Deaths Delta Value'         -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Recovered Delta Value'      -Value $null
+        $CSVData | Add-Member -MemberType NoteProperty -Name 'Active Delta Value'         -Value $null
+
         $RowNumber = 0
         foreach ( $Line in $CSVData ) <# Need to look for exceptions in the data and fix them up #> {
             # Do the obvious check first
@@ -822,19 +839,198 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
             }
             else {
                 $Line.Is_Valid_Combined_Key = 'N'
+                $Line.Combined_Key = "Unassigned, ", $Line.Combined_Key -join ""
                 $Unresolved_Combined_Keys += $Line
                 $Line.What_Changed = "[$($Line.What_Changed)]", ': NO Combined_Key match with', "[$($Line.Combined_Key)]" -join " "
+                # Add the new key to $Combined_Key which requires generation of updated dimension.county_state_country.csv file.
+                $NextMaxUID = ($UID_ISO_FIPS_LookupCSV | Sort-Object -Property 'UID' -Bottom 1).UID
+                $NextMaxUID = ( [int]$NextMaxUID + 1 ).ToString("0000000000")
+                $UID = $Combined_Key.'US'.psobject.Copy()
+                foreach ( $Val in $UID.psobject.Properties.Name) {
+                    $UID.($Val) = $null
+                }
+                $UID.UID = $NextMaxUID
+                $UID.iso2 = $false
+                $UID.iso3 = $false
+                $UID.code3 = $NextMaxUID
+                $UID.FIPS = $Line.FIPS
+                $UID.Admin2 = $Line.Admin2
+                $UID.Province_State = $Line.Province_State
+                $UID.Country_Region = $Line.Country_Region
+                $UID.Lat = $Line.Latitude
+                $UID.Long_ = $Line.Long_
+                $UID.Combined_Key = $Line.Combined_Key
+                $UID.Population = $null
+                $UID.State_Code = $Line.Province_State
+                $UID.'Location Name Key' = $Line.Combined_Key
+
+                $Combined_Key.Add( $UID.Combined_Key, $UID )
+                $NextMaxUID = ( [int]$NextMaxUID + 1 ).ToString("0000000000")
+                $UID 
             }
             $Line.RowNumber = ([int]$RowNumber).ToString("0000")
             $Line.FileNumber = ([int]$NextFileNumber).ToString("000")
+
+            if ($true) <# unpivot the data and compute the Attrubute value's Change Sinve Prior Day and Days Since First Value #> {
+                # Time to unpivot the data into the shape of 
+                #"Location Name Key","Date Reported","Attribute","Cumulative Value","Change Since Prior Day","Days Since First Value"
+                # Uses $UnpivotedRows = @() array to collect the attribute rows for the locations reporting results.
+                # These rows are made up of values for the $LocationNameKeyindex 
+                # $LocationNameKeyIndex.Add( $LocKey, $LocationKeyClass.Clone() ) where
+                # LocKey is the $Line.Combined_Key value.
+                # This is used to go back to the prior reported result to compute the Changed Since Prior Day value for the attributes.
+                $LocKey = $Line.Combined_Key
+                if ( [int]$Line.Recovered -ne 0 -or [int]$Line.Confirmed -ne 0 -or [int]$Line.Deaths -ne 0   ) <#  There is data to record  #> {
+
+                    if ( $null -eq $LocationNameKeyIndex.$LocKey ) {
+                        # Need to create a new index key if missing
+                        $LocationNameKeyIndex.Add( $LocKey, $LocationKeyClass.Clone() )
+                        $LocationNameKeyIndex.$LocKey.DayZeroItems = $DayZeroItemsClass.PSObject.Copy()
+                        $LocationNameKeyIndex.$LocKey.'Location Name Key' = $Line.Combined_Key
+                        $LocationNameKeyIndex.$LocKey.Combined_Key = $Line.Combined_Key
+                        $LocationNameKeyIndex.$LocKey.'Number of Rows' = 0             # Row count for 'CSV Rows PSObj Array'
+                        $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array' = @()     # Contains the rows for the given Combined_Key reports
+                    }
+                    $Line.'Location_Index' = $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'.count  # Will be 0 for the first $Combined_Key item
+                    $PriorRowIndex = $Line.'Location Index' - 1          # This will be -1 for the first report of values for a $Combined_Key
+                    $LocationNameKeyIndex.$LocKey.'Number of Rows' ++    # This will be 1 for the first report
+                        
+                    if ( $Line.'Location_Index' -eq 0) <# This is the first row for $LocKey #> {
+                        $LocationNameKeyIndex.$LocKey.DayZeroItems.'Location Name Key' = $LocKey
+
+                        $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First CSV File Name' = $Link.Title
+                        $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Location Name Key' = $Line.Combined_Key
+                        $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Date' = $Line.'Date_Reported'
+                        if ( [int]$Line.Recovered -gt 0 -and [int]$Line.Confirmed -eq 0 ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Value' = $Line.Recovered
+                        }
+                        else { $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Value' = $Line.Confirmed }
+                 
+                        $Line.'Days Since First Value' = 0
+                    }
+                    else {
+                        $DateFirstEvent = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Event First Date'
+                        $Line.'Days Since First Value' = $dReported.Subtract($DateFirstEvent).Days
+                    }
+                    if ( $false) <# Issue-1: Remove First Event Attribute from the result set #> {
+                        $UnpivotedRows += [PSCustomObject]@{
+                            'Location Name Key'      = $LocationNameKeyIndex.$LocKey.Combined_Key
+                            'Date Reported'          = $Line.'Date_Reported'
+                            'Attribute'              = "First Event"
+                            'Cumulative Value'       = 0
+                            'Change Since Prior Day' = 0
+                            'Days Since First Value' = $Line.'Days_Since_First_Value'
+                        }
+                    } <# Issue-1: Remove First Event Attribute from the result set #>
+                    if ( [int]$Line.Active -ne 0) {
+                        if ( $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Location Name Key'.Length -eq 0 ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First CSV File Name' = $Line.'CSV File Name'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Location Name Key' = $Line.Combined_Key
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Date' = $Line.'Date_Reported'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Value' = $Line.Active
+                            $Line.'Active Delta Value' = $Line.Active
+                            $Line.'Days Since First Active' = 0   
+                        }
+                        else {
+                            $DateFirstActive = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Active First Date'
+                            $Line.'Days Since First Active' = $dReported.Subtract($DateFirstActive).Days
+                            $Line.'Active Delta Value' = $Line.Active - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Active
+                        }
+                        $UnpivotedRows += [PSCustomObject]@{
+                            'Location Name Key'      = $LocationNameKeyIndex.$LocKey.Combined_Key
+                            'Date Reported'          = $Line.'Date_Reported'
+                            'Attribute'              = "Active"
+                            'Cumulative Value'       = $Line.Active
+                            'Change Since Prior Day' = $Line.'Active Delta Value'
+                            'Days Since First Value' = $Line.'Days Since First Active'
+                        }
+                    }
+                    if ( [int]$Line.Deaths -ne 0 ) {
+                        if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Location Name Key' ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First CSV File Name' = $Line.'CSV File Name'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Location Name Key' = $Line.Combined_Key
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Date' = $Line.'Date_Reported'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Value' = $Line.Deaths
+                            $Line.'Deaths Delta Value' = $Line.Deaths
+                            $Line.'Days Since First Death' = 0
+                        }
+                        else {
+                            $DateFirstDeath = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Deaths First Date'
+                            $Line.'Days Since First Death' = $dReported.Subtract($DateFirstDeath).Days
+                            $Line.'Deaths Delta Value' = $Line.Deaths - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Deaths
+                        }
+                        $UnpivotedRows += [PSCustomObject]@{
+                            'Location Name Key'      = $Line.Combined_Key
+                            'Date Reported'          = $Line.'Date_Reported'
+                            'Attribute'              = "Deaths"
+                            'Cumulative Value'       = $Line.Deaths
+                            'Change Since Prior Day' = $Line.'Deaths Delta Value'
+                            'Days Since First Value' = $Line.'Days Since First Death'
+                        }
+                    }
+                    if ( [int]$Line.Recovered -ne 0 ) {
+                        if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Location Name Key' ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First CSV File Name' = $Line.'CSV File Name'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Location Name Key' = $Line.Combined_Key
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Date' = $Line.'Date_Reported'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Value' = $Line.Recovered
+                            $Line.'Recovered Delta Value' = $Line.Recovered
+                            $Line.'Days Since First Recovered' = 0
+                        }
+                        else {
+                            $DateFirstRecovered = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Recovered First Date'
+                            $Line.'Days Since First Recovered' = $dReported.Subtract($DateFirstRecovered).Days
+                            $Line.'Recovered Delta Value' = $Line.Recovered - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Recovered
+                        }
+                        $UnpivotedRows += [PSCustomObject]@{
+                            'Location Name Key'      = $Line.Combined_Key
+                            'Date Reported'          = $Line.'Date_Reported'
+                            'Attribute'              = "Recovered"
+                            'Cumulative Value'       = $Line.Recovered
+                            'Change Since Prior Day' = $Line.'Recovered Delta Value'
+                            'Days Since First Value' = $Line.'Days Since First Recovered'
+                        }
+
+                    }
+                    if ( $Line.Confirmed -ne 0 ) {
+                        if ( $null -eq $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Location Name Key' ) {
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First CSV File Name' = $Line.'CSV File Name'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Location Name Key' = $Line.Combined_Key
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Date' = $Line.'Date_Reported'
+                            $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Value' = $Line.Confirmed
+                            $Line.'Confirmed Delta Value' = $Line.Confirmed
+                            $Line.'Days Since First Confirmed' = 0
+                        }
+                        else {
+                            $DateFirstConfirmed = Get-Date -Date $LocationNameKeyIndex.$LocKey.DayZeroItems.'Confirmed First Date'
+                            $Line.'Days Since First Confirmed' = $dReported.Subtract($DateFirstConfirmed).Days
+                            $Line.'Confirmed Delta Value' = $Line.Confirmed - $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array'[$PriorRowIndex].Confirmed
+                        }
+                        $UnpivotedRows += [PSCustomObject]@{
+                            'Location Name Key'      = $Line.Combined_Key
+                            'Date Reported'          = $Line.'Date_Reported'
+                            'Attribute'              = "Confirmed"
+                            'Cumulative Value'       = $Line.Confirmed
+                            'Change Since Prior Day' = $Line.'Confirmed Delta Value'
+                            'Days Since First Value' = $Line.'Days Since First Confirmed'
+                        }
+
+                    }
+                    # Add the location data to the index
+                    $LocationNameKeyIndex.$LocKey.'CSV Rows PSObj Array' += $Line
+                    #############################   STOP     $AllColumns    REPLACE      ##############################
+                } <# No active cases reported for the data since CDC reports all counties now regardless of reports #>         
+            } <# END: unpivot the data and compute the Attrubute value's Change Sinve Prior Day and Days Since First Value #>
                 
             Write-Host "Processed: ", $Link.title, ([int]$Line.RowNumber).ToString("0000") , $Line.Combined_Key, $Line.Valid_Combined_Key, $Line.Is_Valid_Combined_Key
             $RowNumber ++
         } <# END: foreach ( $Line in $CSVData ) #>
 
-        $Columns = 'UID', 'FIPS', 'Admin2', 'Province_State', 'Country_Region', 'Last_Update', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'Combined_Key', 'Date_Reported', 'File_Name_Source', 'State_Code', 'Is_Valid_Combined_Key', 'What_Changed' , 'RowNumber' , 'FileNumber'
+        $Columns = 'UID', 'FIPS', 'Admin2', 'Province_State', 'Country_Region', 'Last_Update', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'Combined_Key', 'Date_Reported', 'File_Name_Source', 'State_Code', 'Is_Valid_Combined_Key', 'What_Changed' , 'RowNumber' , 'FileNumber', 'Location_Index', 'Days Since First Value', 'Days Since First Death', 'Days Since First Confirmed', 'Days Since First Active', 'Days Since First Recovered', 'Confirmed Delta Value', 'Deaths Delta Value', 'Recovered Delta Value', 'Active Delta Value'
 
-        $CSVData | Select-Object -Property $Columns | Export-Csv -Path  ( $LocalFiles.JHU_Daily_Files, $Link.title -join "") -NoTypeInformation
+        $CSVData | Select-Object -Property $Columns | Export-Csv -Path  ( $Debugoptions.TempPath, "\" , ( Split-Path $LocalFiles.JHU_Daily_Files -leaf), $Link.title -join "") -NoTypeInformation
+
+
     
         $FileMetadata = [PSCustomObject]@{
             CsvFileName         = $Link.Title
@@ -853,9 +1049,18 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
             
     } <# END: foreach ( $Line in $CSVData ) #>
 
+    #
+    if ( $UnpivotedRows.Count -gt 0 ) {
+        $UnpivotedRows | Export-Csv -Path $LocalFiles.'DBT_JHU_Unpivoted_Data' -NoTypeInformation
+    }
+    ###################################################################################
+    # TODO: Write out the new Combined_Keys table as dimension.county_state_country.csv
+    ###################################################################################
+
     if ( $Unresolved_Combined_Keys.count -gt 0 ) {
         $Unresolved_Combined_Keys | Sort-Object 'Combined_Key' -Unique | Export-Csv -Path  ( $LocalFiles.JHU_Daily_Files, "Unresolved_Combined_Keys.csv", $Link.title -join "") -NoTypeInformation
     }
+    
 
 } <# END if ( $false ): Experiment against enisting Combined_Key UID value #>
 
