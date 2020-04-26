@@ -671,7 +671,7 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
 
 
     $WR_daily_reports = Invoke-WebRequest -Uri $URLs.JSU_csse_covid_19_daily_reports_PAGE
-    $StopAtFile = "03-10-2020.csv"
+    $StopAtFile = "04-24-2020.csv"
     $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" -and $_.title -gt $StopAtFile ) } | Select-Object -Property title | Sort-Object -Property title
     $Unresolved_Combined_Keys = @()
 
