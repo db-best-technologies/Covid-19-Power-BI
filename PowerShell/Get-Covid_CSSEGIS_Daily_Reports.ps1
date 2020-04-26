@@ -672,7 +672,7 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
 
     $WR_daily_reports = Invoke-WebRequest -Uri $URLs.JSU_csse_covid_19_daily_reports_PAGE
     $StopAtFile = "03-10-2020.csv"
-    $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" -and $_.title -le $StopAtFile ) } | Select-Object -Property title | Sort-Object -Property title
+    $CSVFileNamesArray = $WR_daily_reports.Links | Where-Object { ( $_.href -like "*-2020.csv" -and $_.title -gt $StopAtFile ) } | Select-Object -Property title | Sort-Object -Property title
     $Unresolved_Combined_Keys = @()
 
     foreach ( $Link in $CSVFileNamesArray ) <# Download each of the files matching the criteria #> {
@@ -1060,7 +1060,7 @@ if ( $true ) <# Experiment validating Combined_Key UID value #> {
     if ( $Unresolved_Combined_Keys.count -gt 0 ) {
         $Unresolved_Combined_Keys | Sort-Object 'Combined_Key' -Unique | Export-Csv -Path  ( $LocalFiles.JHU_Daily_Files, "Unresolved_Combined_Keys.csv", $Link.title -join "") -NoTypeInformation
     }
-    
+
 
 } <# END if ( $false ): Experiment against enisting Combined_Key UID value #>
 
