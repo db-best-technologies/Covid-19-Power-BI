@@ -4,8 +4,8 @@ Description: Download the state code abbreviations from USPS official site  http
 Author: Bill Ramos, DB Best Technologies
 #>
 
-$OutputPathData = ".\Data-Files\USPSTwoLetterStateAbbreviations.csv"
-$OutputPathMetadata = ".\Data-Files\USPSTwoLetterStateAbbreviationsMetadata.json"
+$OutputPathData = ".\Working Files\USPS__pe.usps.com__28apb.csv"
+$OutputPathMetadata = ".\Working Files\USPS__pe.usps.com__28apb.json"
 
 # Grab the Wikipedia page and load it into memory
 $URL = "https://pe.usps.com/text/pub28/28apb.htm"
@@ -13,8 +13,8 @@ $HTML = Invoke-WebRequest -URI $URL
 
 $Metadata = [ordered] @{
     "Data File DB Best Git Relative Path" = $OutputPathData
-    "Data File DB Best Git Raw File URL"  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USPSTwoLetterStateAbbreviations.csv"
-    "Metadata DB Best Git Raw File URL"   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USPSTwoLetterStateAbbreviationsMetadata.json"
+    "Data File DB Best Git Raw File URL"  = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/Working Files/USPS__pe.usps.com__28apb.csv"
+    "Metadata DB Best Git Raw File URL"   = "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/dev/Working Files/USPS__pe.usps.com__28apb.json"
     "Source Web Site"                     = $HTML.BaseResponse.RequestMessage.RequestUri.AbsoluteUri
     "Source Data URL"                     = $HTML.BaseResponse.RequestMessage.RequestUri.AbsoluteUri
     "Source Authority"                    = $HTML.BaseResponse.RequestMessage.RequestUri.Authority

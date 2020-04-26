@@ -1,0 +1,12 @@
+{
+  "Data File DB Best Git Relative Path": ".\\Data-Files\\USCensusPopulationData2019.csv",
+  "Data File DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USCensusPopulationData2019.csv",
+  "Metadata DB Best Git Raw File URL": "https://raw.githubusercontent.com/db-best-technologies/Covid-19-Power-BI/master/Data-Files/USCensusPopulationData2019Metadata.json",
+  "Source Web Site": "https://www.census.gov/data/tables/time-series/demo/popest/2010s-state-total.html",
+  "Source Data URL": "https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/national/totals/nst-est2019-alldata.csv?sec_ak_reference=18.c41a32b8.1584923123.7da54bf",
+  "Source Authority": "www2.census.gov",
+  "Source Summary": "State Population Totals and Components of Change: 2010-2019 - Nation, States, and Puerto Rico Population- Data files to download for analysis in spreadsheet, statistical, or geographic information systems software.",
+  "Source Metadata Info": "https://www2.census.gov/programs-surveys/popest/technical-documentation/file-layouts/2010-2019/nst-est2019-popchg2010-2019.pdf",
+  "Retrieved On UTC": "2020-03-23T00:25:24Z",
+  "Retrieved On PST": "2020-03-22T17:25:24-07:00"
+}
